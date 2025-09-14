@@ -658,6 +658,7 @@
       },
       "tags": {
         "add": "Add Tag",
+        "add_first": "Add Tag",
         "available": "Available Tags",
         "manage": {
           "title": "Tag Management"

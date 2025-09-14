@@ -659,6 +659,7 @@
       },
       "tags": {
         "add": "新建标签",
+        "add_first": "添加标签",
         "available": "可用标签",
         "manage": {
           "title": "标签管理"

@@ -48,7 +48,9 @@ import {
   Sparkles,
   TagIcon,
   UploadIcon,
-  XIcon
+  XIcon,
+  Check,
+  Plus
 } from 'lucide-react'
 import { FC, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -193,6 +195,48 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
     [setActiveTopic]
   )
 
+  const onTagToggle = useCallback(
+    (topic: Topic, tag: string) => {
+      const currentTags = topic.tags || []
+      const newTags = currentTags.includes(tag)
+        ? currentTags.filter(t => t !== tag)
+        : [...currentTags, tag]
+      
+      const updatedTopic = { ...topic, tags: newTags }
+      updateTopic(updatedTopic)
+      window.toast.success(t('common.saved'))
+    },
+    [updateTopic, t]
+  )
+
+  const onOpenTagManager = useCallback(
+    (topic: Topic) => {
+      const modal = window.modal.info({
+        title: null,
+        content: (
+          <TagManagementPopup
+            topic={topic}
+            availableTags={allTags}
+            onConfirm={(tags) => {
+              const updatedTopic = { ...topic, tags }
+              updateTopic(updatedTopic)
+              window.toast.success(t('common.saved'))
+              modal.destroy()
+            }}
+            onCancel={() => {
+              modal.destroy()
+            }}
+          />
+        ),
+        footer: null,
+        closable: false,
+        width: 600,
+        centered: true
+      })
+    },
+    [allTags, updateTopic, t]
+  )
+
   const exportMenuOptions = useSelector((state: RootState) => state.settings.exportMenuOptions)
 
   const [_targetTopic, setTargetTopic] = useState<Topic | null>(null)
@@ -285,31 +329,50 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         label: t('chat.topics.tags.manage.title'),
         key: 'tags-manage',
         icon: <TagIcon size={14} />,
-        onClick() {
-          // 使用 window.modal 来显示标签管理弹窗
-          const modal = window.modal.info({
-            title: null,
-            content: (
-              <TagManagementPopup
-                topic={topic}
-                availableTags={allTags}
-                onConfirm={(tags) => {
-                  const updatedTopic = { ...topic, tags }
-                  updateTopic(updatedTopic)
-                  window.toast.success(t('common.saved'))
-                  modal.destroy()
-                }}
-                onCancel={() => {
-                  modal.destroy()
-                }}
-              />
+        children: (() => {
+          const items: MenuProps['items'] = []
+          
+          // 添加已有标签选项
+          if (allTags.length > 0) {
+            allTags.forEach((tag) => {
+              const isSelected = (topic.tags || []).includes(tag)
+              items.push({
+                key: `tag-${tag}`,
+                label: (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '120px' }}>
+                    <span style={{ 
+                      color: isSelected ? 'var(--color-primary)' : 'var(--color-text-1)',
+                      fontWeight: isSelected ? 500 : 400
+                    }}>
+                      {tag}
+                    </span>
+                    {isSelected && <Check size={14} />}
+                  </div>
+                ),
+                onClick: () => onTagToggle(topic, tag)
+              })
+            })
+            
+            items.push({ type: 'divider' })
+          }
+          
+          // 添加标签管理选项
+          items.push({
+            key: 'manage-tags',
+            label: (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Plus size={14} />
+                {allTags.length > 0 
+                  ? t('chat.topics.tags.add')
+                  : t('chat.topics.tags.add_first')
+                }
+              </div>
             ),
-            footer: null,
-            closable: false,
-            width: 600,
-            centered: true
+            onClick: () => onOpenTagManager(topic)
           })
-        }
+          
+          return items
+        })()
       },
       {
         label: t('notes.save'),
@@ -585,6 +648,15 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                     {topicName}
                   </TopicName>
                 )}
+                
+                {/* 标签指示器 */}
+                {topic.tags && topic.tags.length > 0 && (
+                  <TopicTagsIndicator>
+                    <TagIcon size={12} />
+                    <TopicTagsCount>{topic.tags.length}</TopicTagsCount>
+                  </TopicTagsIndicator>
+                )}
+                
                 {!topic.pinned && (
                   <Tooltip
                     placement="bottom"
@@ -862,6 +934,29 @@ const TopicTagsContainer = styled.div`
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
+`
+
+const TopicTagsIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background-color: var(--color-background-soft);
+  border: 1px solid var(--color-border);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 1;
+  }
+`
+
+const TopicTagsCount = styled.span`
+  font-size: 10px;
+  color: var(--color-text-2);
+  font-weight: 500;
+  line-height: 1;
 `
 
 const TopicTag = styled.div`
