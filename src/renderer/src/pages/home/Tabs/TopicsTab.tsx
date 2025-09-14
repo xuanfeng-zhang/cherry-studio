@@ -4,6 +4,7 @@ import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import SaveToKnowledgePopup from '@renderer/components/Popups/SaveToKnowledgePopup'
 import TagManagementPopup from '@renderer/components/Popups/TagManagementPopup'
+import TopicTagFilter from '@renderer/components/TopicTagFilter'
 import { isMac } from '@renderer/config/constant'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { useInPlaceEdit } from '@renderer/hooks/useInPlaceEdit'
@@ -577,32 +578,54 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
     onDeleteTopic
   ])
 
-  // Sort topics based on pinned status if pinTopicsToTop is enabled
+  // Get tag filter state
+  const topicTagFilter = useSelector((state: RootState) => state.assistants.topicTagFilter)
+  const isCurrentAssistant = assistant && topicTagFilter?.assistantId === assistant.id
+  const selectedTags = isCurrentAssistant ? (topicTagFilter?.selectedTags || []) : []
+
+  // Filter and sort topics based on tags and pinned status
   const sortedTopics = useMemo(() => {
+    if (!assistant) return []
+    
+    let filteredTopics = assistant.topics
+
+    // Apply tag filter if any tags are selected for current assistant
+    if (selectedTags.length > 0) {
+      filteredTopics = assistant.topics.filter(topic => 
+        selectedTags.every(tag => topic.tags?.includes(tag))
+      )
+    }
+
+    // Sort by pinned status if enabled
     if (pinTopicsToTop) {
-      return [...assistant.topics].sort((a, b) => {
+      return [...filteredTopics].sort((a, b) => {
         if (a.pinned && !b.pinned) return -1
         if (!a.pinned && b.pinned) return 1
         return 0
       })
     }
-    return assistant.topics
-  }, [assistant.topics, pinTopicsToTop])
+    
+    return filteredTopics
+  }, [assistant?.topics, pinTopicsToTop, selectedTags, assistant])
 
   const singlealone = topicPosition === 'right' && position === 'right'
 
   return (
-    <DraggableVirtualList
+    <>
+      <DraggableVirtualList
       className="topics-tab"
       list={sortedTopics}
       onUpdate={updateTopics}
       style={{ height: '100%', padding: '13px 0 10px 10px' }}
       itemContainerStyle={{ paddingBottom: '8px' }}
       header={
-        <AddTopicButton onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}>
-          <PlusIcon size={16} />
-          {t('chat.add.topic.title')}
-        </AddTopicButton>
+        <>
+          <AddTopicButton onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}>
+            <PlusIcon size={16} />
+            {t('chat.add.topic.title')}
+          </AddTopicButton>
+          <TopicTagFilter assistantId={assistant?.id} />
+        </>
       }>
       {(topic) => {
         const isActive = topic.id === activeTopic?.id
@@ -717,6 +740,18 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         )
       }}
     </DraggableVirtualList>
+    
+    {/* Empty state when no topics match the filter */}
+    {selectedTags.length > 0 && sortedTopics.length === 0 && (
+      <EmptyFilterState>
+        <EmptyFilterIcon>🏷️</EmptyFilterIcon>
+        <EmptyFilterTitle>{t('chat.topics.filter.no_results')}</EmptyFilterTitle>
+        <EmptyFilterDescription>
+          {t('chat.topics.filter.no_results_desc', { tags: selectedTags.join(', ') })}
+        </EmptyFilterDescription>
+      </EmptyFilterState>
+    )}
+    </>
   )
 }
 
@@ -976,6 +1011,36 @@ const TopicTag = styled.div`
     color: var(--color-text-5);
     opacity: 0.5;
   }
+`
+
+const EmptyFilterState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-3);
+`
+
+const EmptyFilterIcon = styled.div`
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+`
+
+const EmptyFilterTitle = styled.div`
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--color-text-2);
+`
+
+const EmptyFilterDescription = styled.div`
+  font-size: 12px;
+  color: var(--color-text-3);
+  line-height: 1.4;
+  max-width: 200px;
 `
 
 export default Topics

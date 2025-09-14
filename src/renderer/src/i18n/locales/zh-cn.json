@@ -661,6 +661,12 @@
         },
         "selected": "已选标签"
       },
+      "filter": {
+        "by_tags": "按标签筛选",
+        "no_results": "没有找到匹配的话题",
+        "no_results_desc": "没有话题包含标签：{{tags}}"
+      },
+      "count": "个话题",
       "title": "话题",
       "unpin": "取消固定"
     },

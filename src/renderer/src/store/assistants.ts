@@ -12,13 +12,21 @@ export interface AssistantsState {
   assistants: Assistant[]
   tagsOrder: string[]
   collapsedTags: Record<string, boolean>
+  topicTagFilter: {
+    selectedTags: string[]
+    assistantId?: string // 记录当前筛选的助手ID
+  }
 }
 
 const initialState: AssistantsState = {
   defaultAssistant: getDefaultAssistant(),
   assistants: [getDefaultAssistant()],
   tagsOrder: [],
-  collapsedTags: {}
+  collapsedTags: {},
+  topicTagFilter: {
+    selectedTags: [],
+    assistantId: undefined
+  }
 }
 
 const assistantsSlice = createSlice({
@@ -89,6 +97,41 @@ const assistantsSlice = createSlice({
       state.collapsedTags = {
         ...prev,
         [tag]: !prev[tag]
+      }
+    },
+    setTopicTagFilter: (state, action: PayloadAction<{ selectedTags: string[]; assistantId: string }>) => {
+      state.topicTagFilter = {
+        selectedTags: action.payload.selectedTags,
+        assistantId: action.payload.assistantId
+      }
+    },
+    toggleTopicTagFilter: (state, action: PayloadAction<{ tag: string; assistantId: string }>) => {
+      const { tag, assistantId } = action.payload
+      const currentFilter = state.topicTagFilter
+      
+      // 如果currentFilter不存在或切换到不同的助手，重置筛选
+      if (!currentFilter || currentFilter.assistantId !== assistantId) {
+        state.topicTagFilter = {
+          selectedTags: [tag],
+          assistantId
+        }
+        return
+      }
+      
+      // 切换标签选中状态
+      const selectedTags = (currentFilter.selectedTags || []).includes(tag)
+        ? (currentFilter.selectedTags || []).filter(t => t !== tag)
+        : [...(currentFilter.selectedTags || []), tag]
+      
+      state.topicTagFilter = {
+        selectedTags,
+        assistantId
+      }
+    },
+    clearTopicTagFilter: (state) => {
+      state.topicTagFilter = {
+        selectedTags: [],
+        assistantId: undefined
       }
     },
     addTopic: (state, action: PayloadAction<{ assistantId: string; topic: Topic }>) => {
@@ -193,7 +236,10 @@ export const {
   setModel,
   setTagsOrder,
   updateAssistantSettings,
-  updateTagCollapse
+  updateTagCollapse,
+  setTopicTagFilter,
+  toggleTopicTagFilter,
+  clearTopicTagFilter
 } = assistantsSlice.actions
 
 export const selectAllTopics = createSelector([(state: RootState) => state.assistants.assistants], (assistants) =>

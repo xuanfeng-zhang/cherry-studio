@@ -661,6 +661,12 @@
         },
         "selected": "Selected Tags"
       },
+      "filter": {
+        "by_tags": "Filter by Tags",
+        "no_results": "No matching topics found",
+        "no_results_desc": "No topics contain tags: {{tags}}"
+      },
+      "count": "topics",
       "title": "Topics",
       "unpin": "Unpin Topic"
     },

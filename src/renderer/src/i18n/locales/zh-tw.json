@@ -652,6 +652,21 @@
         "label": "話題提示詞",
         "tips": "話題提示詞：針對目前話題提供額外的補充提示詞"
       },
+      "tags": {
+        "add": "新建標籤",
+        "add_first": "添加標籤",
+        "available": "可用標籤",
+        "manage": {
+          "title": "標籤管理"
+        },
+        "selected": "已選標籤"
+      },
+      "filter": {
+        "by_tags": "按標籤篩選",
+        "no_results": "沒有找到匹配的話題",
+        "no_results_desc": "沒有話題包含標籤：{{tags}}"
+      },
+      "count": "個話題",
       "title": "話題",
       "unpin": "取消固定"
     },
