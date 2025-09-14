@@ -241,6 +241,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
   const exportMenuOptions = useSelector((state: RootState) => state.settings.exportMenuOptions)
 
   const [_targetTopic, setTargetTopic] = useState<Topic | null>(null)
+  const [dropdownVisible, setDropdownVisible] = useState<Record<string, boolean>>({})
   const targetTopic = useDeferredValue(_targetTopic)
   const getTopicMenuItems = useMemo(() => {
     const topic = targetTopic
@@ -351,9 +352,11 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                   </div>
                 ),
                 onClick: (e) => {
+                  e?.domEvent?.preventDefault()
                   e?.domEvent?.stopPropagation()
                   onTagToggle(topic, tag)
-                  return false // 阻止菜单关闭
+                  // 保持菜单打开
+                  setDropdownVisible(prev => ({ ...prev, [topic.id]: true }))
                 }
               })
             })
@@ -644,9 +647,22 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         }
 
         return (
-          <Dropdown menu={{ items: getTopicMenuItems }} trigger={['contextMenu']}>
+          <Dropdown 
+            menu={{ items: getTopicMenuItems }} 
+            trigger={['contextMenu']}
+            open={dropdownVisible[topic.id] || false}
+            onOpenChange={(visible) => {
+              setDropdownVisible(prev => ({ ...prev, [topic.id]: visible }))
+              if (visible) {
+                setTargetTopic(topic)
+              }
+            }}
+          >
             <TopicListItem
-              onContextMenu={() => setTargetTopic(topic)}
+              onContextMenu={() => {
+                setTargetTopic(topic)
+                setDropdownVisible(prev => ({ ...prev, [topic.id]: true }))
+              }}
               className={classNames(isActive ? 'active' : '', singlealone ? 'singlealone' : '')}
               onClick={editingTopicId === topic.id && topicEdit.isEditing ? undefined : () => onSwitchTopic(topic)}
               style={{
