@@ -3,6 +3,7 @@ import { CopyIcon, DeleteIcon, EditIcon } from '@renderer/components/Icons'
 import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import SaveToKnowledgePopup from '@renderer/components/Popups/SaveToKnowledgePopup'
+import TagManagementPopup from '@renderer/components/Popups/TagManagementPopup'
 import { isMac } from '@renderer/config/constant'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
 import { useInPlaceEdit } from '@renderer/hooks/useInPlaceEdit'
@@ -10,6 +11,7 @@ import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { finishTopicRenaming, startTopicRenaming, TopicManager } from '@renderer/hooks/useTopic'
+import { useTopicTags } from '@renderer/hooks/useTopicTags'
 import { fetchMessagesSummary } from '@renderer/services/ApiService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import store from '@renderer/store'
@@ -44,6 +46,7 @@ import {
   PlusIcon,
   Save,
   Sparkles,
+  TagIcon,
   UploadIcon,
   XIcon
 } from 'lucide-react'
@@ -67,6 +70,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
   const { assistants } = useAssistants()
   const { assistant, removeTopic, moveTopic, updateTopic, updateTopics } = useAssistant(_assistant.id)
   const { showTopicTime, pinTopicsToTop, setTopicPosition, topicPosition } = useSettings()
+  const { allTags } = useTopicTags()
 
   const renamingTopics = useSelector((state: RootState) => state.runtime.chat.renamingTopics)
   const topicLoadingQuery = useSelector((state: RootState) => state.messages.loadingByTopic)
@@ -275,6 +279,36 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         icon: topic.pinned ? <PinOffIcon size={14} /> : <PinIcon size={14} />,
         onClick() {
           onPinTopic(topic)
+        }
+      },
+      {
+        label: t('chat.topics.tags.manage.title'),
+        key: 'tags-manage',
+        icon: <TagIcon size={14} />,
+        onClick() {
+          // 使用 window.modal 来显示标签管理弹窗
+          const modal = window.modal.info({
+            title: null,
+            content: (
+              <TagManagementPopup
+                topic={topic}
+                availableTags={allTags}
+                onConfirm={(tags) => {
+                  const updatedTopic = { ...topic, tags }
+                  updateTopic(updatedTopic)
+                  window.toast.success(t('common.saved'))
+                  modal.destroy()
+                }}
+                onCancel={() => {
+                  modal.destroy()
+                }}
+              />
+            ),
+            footer: null,
+            closable: false,
+            width: 600,
+            centered: true
+          })
         }
       },
       {
@@ -591,7 +625,21 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                   {fullTopicPrompt}
                 </TopicPromptText>
               )}
-              {showTopicTime && <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>}
+              {showTopicTime && (
+                <TopicTimeContainer className="time-tags">
+                  <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>
+                  {topic.tags && topic.tags.length > 0 && (
+                    <>
+                      <TopicTimeSeparator>•</TopicTimeSeparator>
+                      <TopicTagsContainer className="tags">
+                        {topic.tags.map((tag) => (
+                          <TopicTag key={tag}>{tag}</TopicTag>
+                        ))}
+                      </TopicTagsContainer>
+                    </>
+                  )}
+                </TopicTimeContainer>
+              )}
             </TopicListItem>
           </Dropdown>
         )
@@ -793,6 +841,45 @@ const MenuButton = styled.div`
   min-height: 20px;
   .anticon {
     font-size: 12px;
+  }
+`
+
+const TopicTimeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+`
+
+const TopicTimeSeparator = styled.span`
+  color: var(--color-text-5);
+  font-size: 10px;
+  opacity: 0.5;
+`
+
+const TopicTagsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+`
+
+const TopicTag = styled.div`
+  color: var(--color-text-4);
+  font-size: 10px;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.6;
+  flex-shrink: 0;
+  position: relative;
+  
+  &:not(:last-child)::after {
+    content: '•';
+    margin-left: 4px;
+    color: var(--color-text-5);
+    opacity: 0.5;
   }
 `
 

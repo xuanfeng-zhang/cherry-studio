@@ -652,6 +652,14 @@
         "label": "Topic Prompts",
         "tips": "Topic Prompts: Additional supplementary prompts provided for the current topic"
       },
+      "tags": {
+        "add": "Add Tag",
+        "available": "Available Tags",
+        "manage": {
+          "title": "Tag Management"
+        },
+        "selected": "Selected Tags"
+      },
       "title": "Topics",
       "unpin": "Unpin Topic"
     },
