@@ -350,7 +350,11 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                     {isSelected && <Check size={14} />}
                   </div>
                 ),
-                onClick: () => onTagToggle(topic, tag)
+                onClick: (e) => {
+                  e?.domEvent?.stopPropagation()
+                  onTagToggle(topic, tag)
+                  return false // 阻止菜单关闭
+                }
               })
             })
             
