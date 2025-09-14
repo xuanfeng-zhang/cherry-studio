@@ -341,7 +341,20 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
               items.push({
                 key: `tag-${tag}`,
                 label: (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '120px' }}>
+                  <div 
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '120px' }}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      onTagToggle(topic, tag)
+                      // 保持菜单打开
+                      setDropdownVisible(prev => ({ ...prev, [topic.id]: true }))
+                    }}
+                  >
                     <span style={{ 
                       color: isSelected ? 'var(--color-primary)' : 'var(--color-text-1)',
                       fontWeight: isSelected ? 500 : 400
@@ -350,14 +363,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                     </span>
                     {isSelected && <Check size={14} />}
                   </div>
-                ),
-                onClick: (e) => {
-                  e?.domEvent?.preventDefault()
-                  e?.domEvent?.stopPropagation()
-                  onTagToggle(topic, tag)
-                  // 保持菜单打开
-                  setDropdownVisible(prev => ({ ...prev, [topic.id]: true }))
-                }
+                )
               })
             })
             
@@ -582,7 +588,10 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
     onClearMessages,
     setTopicPosition,
     onMoveTopic,
-    onDeleteTopic
+    onDeleteTopic,
+    allTags,
+    onTagToggle,
+    onOpenTagManager
   ])
 
   // Get tag filter state
