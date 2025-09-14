@@ -53,7 +53,7 @@ import {
   Check,
   Plus
 } from 'lucide-react'
-import { FC, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -205,6 +205,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
       
       const updatedTopic = { ...topic, tags: newTags }
       updateTopic(updatedTopic)
+      // 同时更新targetTopic状态以便菜单实时显示最新状态
+      setTargetTopic(updatedTopic)
       window.message.success(t('common.saved'))
     },
     [updateTopic, t]
@@ -242,9 +244,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
 
   const [_targetTopic, setTargetTopic] = useState<Topic | null>(null)
   const [dropdownVisible, setDropdownVisible] = useState<Record<string, boolean>>({})
-  const targetTopic = useDeferredValue(_targetTopic)
   const getTopicMenuItems = useMemo(() => {
-    const topic = targetTopic
+    const topic = _targetTopic // 使用最新的topic数据，不使用延迟值
     if (!topic) return []
 
     const menus: MenuProps['items'] = [
@@ -566,7 +567,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
 
     return menus
   }, [
-    targetTopic,
+    _targetTopic,
     t,
     isRenaming,
     exportMenuOptions.image,
