@@ -205,7 +205,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
       
       const updatedTopic = { ...topic, tags: newTags }
       updateTopic(updatedTopic)
-      window.toast.success(t('common.saved'))
+      window.message.success(t('common.saved'))
     },
     [updateTopic, t]
   )
@@ -221,7 +221,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
             onConfirm={(tags) => {
               const updatedTopic = { ...topic, tags }
               updateTopic(updatedTopic)
-              window.toast.success(t('common.saved'))
+              window.message.success(t('common.saved'))
               modal.destroy()
             }}
             onCancel={() => {
