@@ -1,5 +1,6 @@
 import { SearchOutlined } from '@ant-design/icons'
 import { VStack } from '@renderer/components/Layout'
+import TopicTags from '@renderer/components/TopicTags'
 import useScrollPosition from '@renderer/hooks/useScrollPosition'
 import { selectAllTopics } from '@renderer/store/assistants'
 import { Topic } from '@renderer/types'
@@ -67,7 +68,12 @@ const TopicsHistory: React.FC<Props> = ({ keywords, onClick, onSearch, ...props 
             <Divider style={{ margin: '5px 0' }} />
             {items.map((topic) => (
               <TopicItem key={topic.id} onClick={() => onClick(topic)}>
-                <TopicName>{topic.name.substring(0, 50)}</TopicName>
+                <TopicContent>
+                  <TopicNameRow>
+                    <TopicName>{topic.name.substring(0, 50)}</TopicName>
+                    <TopicTags tags={topic.tags} style={{ marginLeft: '8px' }} />
+                  </TopicNameRow>
+                </TopicContent>
                 <TopicDate>{dayjs(topic[sortType]).format('HH:mm')}</TopicDate>
               </TopicItem>
             ))}
@@ -122,18 +128,38 @@ const TopicItem = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 30px;
+  min-height: 30px;
+  padding: 4px 0;
+`
+
+const TopicContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+`
+
+const TopicNameRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  overflow: hidden;
 `
 
 const TopicName = styled.div`
   font-size: 14px;
   color: var(--color-text);
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `
 
 const TopicDate = styled.div`
   font-size: 14px;
   color: var(--color-text-3);
   margin-left: 10px;
+  flex-shrink: 0;
 `
 
 export default TopicsHistory

@@ -1,4 +1,5 @@
 import { LoadingIcon } from '@renderer/components/Icons'
+import TopicTags from '@renderer/components/TopicTags'
 import db from '@renderer/databases'
 import useScrollPosition from '@renderer/hooks/useScrollPosition'
 import { selectTopicsMap } from '@renderer/store/assistants'
@@ -151,12 +152,15 @@ const SearchResults: FC<Props> = ({ keywords, onMessageClick, onTopicClick, ...p
           style={{ opacity: isLoading ? 0 : 1 }}
           renderItem={({ message, topic, content }) => (
             <List.Item>
-              <Title
-                level={5}
-                style={{ color: 'var(--color-primary)', cursor: 'pointer' }}
-                onClick={() => onTopicClick(topic)}>
-                {topic.name}
-              </Title>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'nowrap' }}>
+                <Title
+                  level={5}
+                  style={{ color: 'var(--color-primary)', cursor: 'pointer', margin: 0, flex: 'none' }}
+                  onClick={() => onTopicClick(topic)}>
+                  {topic.name}
+                </Title>
+                <TopicTags tags={topic.tags} />
+              </div>
               <div style={{ cursor: 'pointer' }} onClick={() => onMessageClick(message)}>
                 <Text>{highlightText(content)}</Text>
               </div>
