@@ -1,6 +1,7 @@
 import { MessageOutlined } from '@ant-design/icons'
 import { HStack } from '@renderer/components/Layout'
 import SearchPopup from '@renderer/components/Popups/SearchPopup'
+import TopicTags from '@renderer/components/TopicTags'
 import { MessageEditingProvider } from '@renderer/context/MessageEditingContext'
 import useScrollPosition from '@renderer/hooks/useScrollPosition'
 import { useSettings } from '@renderer/hooks/useSettings'
@@ -12,13 +13,15 @@ import { isGenerating, locateToMessage } from '@renderer/services/MessagesServic
 import NavigationService from '@renderer/services/NavigationService'
 import { Topic } from '@renderer/types'
 import { classNames, runAsyncFunction } from '@renderer/utils'
-import { Button, Divider, Empty } from 'antd'
+import { Button, Divider, Empty, Typography } from 'antd'
 import { t } from 'i18next'
 import { Forward } from 'lucide-react'
 import { FC, useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import { default as MessageItem } from '../../home/Messages/Message'
+
+const { Title } = Typography
 
 interface Props extends React.HTMLAttributes<HTMLDivElement> {
   topic?: Topic
@@ -58,6 +61,15 @@ const TopicMessages: FC<Props> = ({ topic: _topic, ...props }) => {
   return (
     <MessageEditingProvider>
       <MessagesContainer {...props} ref={containerRef} onScroll={handleScroll}>
+        <TopicHeader>
+          <HStack alignItems="center" gap={8} style={{ flexWrap: 'nowrap' }}>
+            <Title level={4} style={{ margin: 0, color: 'var(--color-text-1)', flex: 'none' }}>
+              {topic.name}
+            </Title>
+            <TopicTags tags={topic.tags} />
+          </HStack>
+        </TopicHeader>
+        <Divider style={{ margin: '12px 0' }} />
         <ContainerWrapper className={messageStyle}>
           {topic?.messages.map((message) => (
             <MessageWrapper key={message.id} className={classNames([messageStyle, message.role])}>
@@ -92,6 +104,15 @@ const MessagesContainer = styled.div`
   flex-direction: column;
   align-items: center;
   overflow-y: scroll;
+`
+
+const TopicHeader = styled.div`
+  width: 100%;
+  padding: 16px 16px 0 16px;
+  background-color: var(--color-bg-container);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 `
 
 const ContainerWrapper = styled.div`
