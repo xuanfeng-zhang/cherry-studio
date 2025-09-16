@@ -2,10 +2,12 @@ import { InfoCircleOutlined } from '@ant-design/icons'
 import { loggerService } from '@logger'
 import { Box } from '@renderer/components/Layout'
 import MemoriesSettingsModal from '@renderer/pages/memory/settings-modal'
+import { DEFAULT_USER_ID } from '@renderer/pages/settings/MemorySettings/constants'
+import UserSelector from '@renderer/pages/settings/MemorySettings/UserSelector'
 import MemoryService from '@renderer/services/MemoryService'
-import { selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
+import { selectCurrentUserId, selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
 import { Assistant, AssistantSettings } from '@renderer/types'
-import { Alert, Button, Card, Space, Switch, Tooltip, Typography } from 'antd'
+import { Alert, Button, Card, Select, Space, Switch, Tooltip, Typography } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { Settings2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
@@ -28,35 +30,70 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const { t } = useTranslation()
   const memoryConfig = useSelector(selectMemoryConfig)
   const globalMemoryEnabled = useSelector(selectGlobalMemoryEnabled)
+  const currentUserId = useSelector(selectCurrentUserId)
   const [memoryStats, setMemoryStats] = useState<{ count: number; loading: boolean }>({
     count: 0,
     loading: true
   })
   const [settingsModalVisible, setSettingsModalVisible] = useState(false)
+  const [uniqueUsers, setUniqueUsers] = useState<string[]>([])
   const memoryService = MemoryService.getInstance()
   const form = useForm()
 
-  // Load memory statistics for this assistant
+  // Get the assistant's memory user ID, fallback to global current user
+  const assistantMemoryUserId = assistant.memoryUserId || currentUserId
+
+  // Load unique users from database
+  const loadUniqueUsers = useCallback(async () => {
+    try {
+      const usersList = await memoryService.getUsersList()
+      const users = usersList.map((user) => user.userId)
+      setUniqueUsers(users)
+    } catch (error) {
+      logger.error('Failed to load users list:', error as Error)
+    }
+  }, [memoryService])
+
+  // Load memory statistics for assistant's memory user
   const loadMemoryStats = useCallback(async () => {
     setMemoryStats((prev) => ({ ...prev, loading: true }))
     try {
+      // Temporarily set the memory service to use the assistant's memory user
+      const originalUserId = memoryService.getCurrentUser()
+      memoryService.setCurrentUser(assistantMemoryUserId)
+
       const result = await memoryService.list({
-        agentId: assistant.id,
         limit: 1000
       })
       setMemoryStats({ count: result.results.length, loading: false })
+
+      // Restore the original user
+      memoryService.setCurrentUser(originalUserId)
     } catch (error) {
       logger.error('Failed to load memory stats:', error as Error)
       setMemoryStats({ count: 0, loading: false })
     }
-  }, [assistant.id, memoryService])
+  }, [memoryService, assistantMemoryUserId])
 
   useEffect(() => {
+    loadUniqueUsers()
     loadMemoryStats()
-  }, [loadMemoryStats])
+  }, [loadUniqueUsers, loadMemoryStats, assistantMemoryUserId])
 
   const handleMemoryToggle = (enabled: boolean) => {
     updateAssistant({ ...assistant, enableMemory: enabled })
+  }
+
+  const handleMemoryUserChange = (userId: string) => {
+    updateAssistant({ ...assistant, memoryUserId: userId })
+  }
+
+  const handleAddUser = () => {
+    // Navigate to memory settings to add new user
+    if (onClose) {
+      onClose()
+    }
+    window.location.hash = '#/settings/memory'
   }
 
   const handleNavigateToMemory = () => {
@@ -126,6 +163,15 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
 
       <Card size="small" style={{ marginBottom: 16 }}>
         <Space direction="vertical" style={{ width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text strong>{t('memory.memory_role_selector')}: </Text>
+            <UserSelector
+              currentUser={assistantMemoryUserId}
+              uniqueUsers={uniqueUsers}
+              onUserSwitch={handleMemoryUserChange}
+              onAddUser={handleAddUser}
+            />
+          </div>
           <div>
             <Text strong>{t('memory.stored_memories')}: </Text>
             <Text>{memoryStats.loading ? t('common.loading') : memoryStats.count}</Text>

@@ -239,9 +239,11 @@ async function fetchExternalTool(
       }
 
       if (memoryConfig.llmApiClient && memoryConfig.embedderApiClient) {
-        const currentUserId = selectCurrentUserId(store.getState())
+        const globalCurrentUserId = selectCurrentUserId(store.getState())
+        // Use assistant's memory user ID if specified, otherwise use global current user
+        const memoryUserId = assistant.memoryUserId || globalCurrentUserId
         // Search for relevant memories
-        const processorConfig = MemoryProcessor.getProcessorConfig(memoryConfig, assistant.id, currentUserId)
+        const processorConfig = MemoryProcessor.getProcessorConfig(memoryConfig, assistant.id, memoryUserId)
         logger.info(`Searching for relevant memories with content: ${content}`)
         const memoryProcessor = new MemoryProcessor()
         const relevantMemories = await memoryProcessor.searchRelevantMemories(
@@ -583,10 +585,12 @@ async function processConversationMemory(messages: Message[], assistant: Assista
     }
 
     const lastUserMessage = findLast(messages, (m) => m.role === 'user')
+    // Use assistant's memory user ID if specified, otherwise use global current user
+    const memoryUserId = assistant.memoryUserId || currentUserId
     const processorConfig = MemoryProcessor.getProcessorConfig(
       updatedMemoryConfig,
       assistant.id,
-      currentUserId,
+      memoryUserId,
       lastUserMessage?.id
     )
 
