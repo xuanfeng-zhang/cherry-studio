@@ -213,10 +213,19 @@ const assistantsSlice = createSlice({
     },
     // 标签分类管理
     addTagCategory: (state, action: PayloadAction<TagCategory>) => {
+      // 确保 tagCategories 已初始化
+      if (!state.tagCategories) {
+        state.tagCategories = []
+      }
+      
       state.tagCategories.push(action.payload)
       state.tagCategories.sort((a, b) => a.order - b.order)
     },
     updateTagCategory: (state, action: PayloadAction<TagCategory>) => {
+      // 确保 tagCategories 已初始化
+      if (!state.tagCategories) {
+        state.tagCategories = []
+      }
       const index = state.tagCategories.findIndex(cat => cat.id === action.payload.id)
       if (index !== -1) {
         state.tagCategories[index] = action.payload
@@ -224,21 +233,39 @@ const assistantsSlice = createSlice({
       }
     },
     removeTagCategory: (state, action: PayloadAction<{ id: string }>) => {
+      // 确保 tagCategories 已初始化
+      if (!state.tagCategories) {
+        state.tagCategories = []
+      }
       state.tagCategories = state.tagCategories.filter(cat => cat.id !== action.payload.id)
       // 移除分类时，将该分类下的标签设为未分类
-      Object.values(state.categorizedTags).forEach(tag => {
-        if (tag.categoryId === action.payload.id) {
-          tag.categoryId = undefined
-        }
-      })
+      if (state.categorizedTags) {
+        Object.values(state.categorizedTags).forEach(tag => {
+          if (tag.categoryId === action.payload.id) {
+            tag.categoryId = undefined
+          }
+        })
+      }
     },
     updateCategorizedTag: (state, action: PayloadAction<CategorizedTag>) => {
+      // 确保 categorizedTags 已初始化
+      if (!state.categorizedTags) {
+        state.categorizedTags = {}
+      }
       state.categorizedTags[action.payload.name] = action.payload
     },
     removeCategorizedTag: (state, action: PayloadAction<{ tagName: string }>) => {
+      // 确保 categorizedTags 已初始化
+      if (!state.categorizedTags) {
+        state.categorizedTags = {}
+      }
       delete state.categorizedTags[action.payload.tagName]
     },
     bulkUpdateCategorizedTags: (state, action: PayloadAction<{ tags: string[], categoryId?: string }>) => {
+      // 确保 categorizedTags 已初始化
+      if (!state.categorizedTags) {
+        state.categorizedTags = {}
+      }
       action.payload.tags.forEach(tagName => {
         if (state.categorizedTags[tagName]) {
           state.categorizedTags[tagName].categoryId = action.payload.categoryId

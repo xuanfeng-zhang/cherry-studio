@@ -219,7 +219,16 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
   const handleCreateCategory = useCallback(async () => {
     try {
       const values = await form.validateFields()
-      const maxOrder = Math.max(...categoriesWithTags.map(cat => cat.order), 0)
+      
+      // 检查必填字段
+      if (!values.name || !values.name.trim()) {
+        window.message?.error?.('分类名称不能为空') || alert('分类名称不能为空')
+        return
+      }
+      
+      // 安全地计算最大order值
+      const orders = categoriesWithTags.map(cat => cat.order).filter(order => typeof order === 'number')
+      const maxOrder = orders.length > 0 ? Math.max(...orders) : 0
 
       createCategory({
         ...values,
@@ -230,6 +239,10 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
       setShowCreateForm(false)
     } catch (error) {
       console.error('Form validation failed:', error)
+      // 显示错误信息给用户
+      if (error instanceof Error) {
+        window.message?.error?.(error.message) || alert(error.message)
+      }
     }
   }, [form, categoriesWithTags, createCategory])
 
@@ -251,6 +264,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
 
     try {
       const values = await form.validateFields()
+      
       updateCategory({
         ...editingCategory,
         ...values
@@ -261,6 +275,10 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
       setShowCreateForm(false)
     } catch (error) {
       console.error('Form validation failed:', error)
+      // 显示错误信息给用户
+      if (error instanceof Error) {
+        window.message?.error?.(error.message) || alert(error.message)
+      }
     }
   }, [form, editingCategory, updateCategory])
 
@@ -333,7 +351,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
         {/* 创建/编辑分类表单 */}
         {showCreateForm && (
           <FormSection>
-            <Form form={form} layout="vertical">
+            <Form form={form} layout="vertical" onFinish={editingCategory ? handleUpdateCategory : handleCreateCategory}>
               <Form.Item
                 name="name"
                 label={t('chat.topics.tags.category_name')}
@@ -350,7 +368,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
               <Form.Item>
                 <Button
                   type="primary"
-                  onClick={editingCategory ? handleUpdateCategory : handleCreateCategory}
+                  htmlType="submit"
                   style={{ marginRight: 8 }}
                 >
                   {editingCategory ? t('common.update') : t('common.create')}

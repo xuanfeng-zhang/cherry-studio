@@ -2366,6 +2366,23 @@ const migrateConfig = {
       logger.error('migrate 146 error', error as Error)
       return state
     }
+  },
+  '147': (state: RootState) => {
+    try {
+      // Initialize tagCategories and categorizedTags if they don't exist
+      if (state.assistants) {
+        if (!state.assistants.tagCategories) {
+          state.assistants.tagCategories = []
+        }
+        if (!state.assistants.categorizedTags) {
+          state.assistants.categorizedTags = {}
+        }
+      }
+      return state
+    } catch (error) {
+      logger.error('migrate 147 error', error as Error)
+      return state
+    }
   }
 }
 
