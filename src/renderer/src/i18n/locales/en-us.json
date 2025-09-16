@@ -656,10 +656,29 @@
         "add": "Add Tag",
         "add_first": "Add Tag",
         "available": "Available Tags",
+        "available_by_category": "Available Tags by Category",
         "manage": {
           "title": "Tag Management"
         },
-        "selected": "Selected Tags"
+        "manage_categories": "Manage Categories",
+        "selected": "Selected Tags",
+        "category_management": "Tag Category Management",
+        "create_category": "Create Category",
+        "category_name": "Category Name",
+        "category_name_required": "Category name is required",
+        "enter_category_name": "Enter category name",
+        "category_color": "Category Color",
+        "category_description": "Category Description",
+        "enter_category_description": "Enter category description",
+        "no_categories": "No categories found",
+        "no_tags_in_category": "No tags in this category",
+        "confirm_delete_category": "Confirm Delete Category",
+        "delete_category_warning": "All tags in this category will be moved to uncategorized. Are you sure?",
+        "search_tags": "Search tags",
+        "assign_selected_tags": "Assign selected tags",
+        "move_to_uncategorized": "Move to uncategorized",
+        "move_to_category": "Move to Category",
+        "no_matching_tags": "No matching tags found"
       },
       "filter": {
         "by_tags": "Filter by Tags",

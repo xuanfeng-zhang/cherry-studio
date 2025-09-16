@@ -656,10 +656,29 @@
         "add": "新建标签",
         "add_first": "添加标签",
         "available": "可用标签",
+        "available_by_category": "按分类显示标签",
         "manage": {
           "title": "标签管理"
         },
-        "selected": "已选标签"
+        "manage_categories": "管理分类",
+        "selected": "已选标签",
+        "category_management": "标签分类管理",
+        "create_category": "创建分类",
+        "category_name": "分类名称",
+        "category_name_required": "分类名称不能为空",
+        "enter_category_name": "请输入分类名称",
+        "category_color": "分类颜色",
+        "category_description": "分类描述",
+        "enter_category_description": "请输入分类描述",
+        "no_categories": "暂无分类",
+        "no_tags_in_category": "该分类下暂无标签",
+        "confirm_delete_category": "确认删除分类",
+        "delete_category_warning": "该分类下的所有标签将被移至未分类，确定要删除吗？",
+        "search_tags": "搜索标签",
+        "assign_selected_tags": "分配选中的标签",
+        "move_to_uncategorized": "移至未分类",
+        "move_to_category": "移入分类",
+        "no_matching_tags": "没有找到匹配的标签"
       },
       "filter": {
         "by_tags": "按标签筛选",

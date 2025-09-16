@@ -189,6 +189,29 @@ export type Metrics = {
   time_thinking_millsec?: number
 }
 
+// 标签分类相关类型
+export type TagCategory = {
+  id: string
+  name: string
+  color?: string
+  icon?: string
+  description?: string
+  order: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type CategorizedTag = {
+  name: string
+  categoryId?: string
+  color?: string
+  usage: number // 使用次数统计
+}
+
+export type TagCategoryWithTags = TagCategory & {
+  tags: CategorizedTag[]
+}
+
 export type Topic = {
   id: string
   assistantId: string

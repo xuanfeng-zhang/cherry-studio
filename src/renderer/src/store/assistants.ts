@@ -2,7 +2,7 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import { Assistant, AssistantSettings, Model, Topic } from '@renderer/types'
+import { Assistant, AssistantSettings, Model, Topic, TagCategory, CategorizedTag } from '@renderer/types'
 import { isEmpty, uniqBy } from 'lodash'
 
 import { RootState } from '.'
@@ -16,6 +16,8 @@ export interface AssistantsState {
     selectedTags: string[]
     assistantId?: string // 记录当前筛选的助手ID
   }
+  tagCategories: TagCategory[] // 标签分类
+  categorizedTags: Record<string, CategorizedTag> // 分类标签映射 key: tagName, value: CategorizedTag
 }
 
 const initialState: AssistantsState = {
@@ -26,7 +28,9 @@ const initialState: AssistantsState = {
   topicTagFilter: {
     selectedTags: [],
     assistantId: undefined
-  }
+  },
+  tagCategories: [],
+  categorizedTags: {}
 }
 
 const assistantsSlice = createSlice({
@@ -207,6 +211,46 @@ const assistantsSlice = createSlice({
         }
       }
     },
+    // 标签分类管理
+    addTagCategory: (state, action: PayloadAction<TagCategory>) => {
+      state.tagCategories.push(action.payload)
+      state.tagCategories.sort((a, b) => a.order - b.order)
+    },
+    updateTagCategory: (state, action: PayloadAction<TagCategory>) => {
+      const index = state.tagCategories.findIndex(cat => cat.id === action.payload.id)
+      if (index !== -1) {
+        state.tagCategories[index] = action.payload
+        state.tagCategories.sort((a, b) => a.order - b.order)
+      }
+    },
+    removeTagCategory: (state, action: PayloadAction<{ id: string }>) => {
+      state.tagCategories = state.tagCategories.filter(cat => cat.id !== action.payload.id)
+      // 移除分类时，将该分类下的标签设为未分类
+      Object.values(state.categorizedTags).forEach(tag => {
+        if (tag.categoryId === action.payload.id) {
+          tag.categoryId = undefined
+        }
+      })
+    },
+    updateCategorizedTag: (state, action: PayloadAction<CategorizedTag>) => {
+      state.categorizedTags[action.payload.name] = action.payload
+    },
+    removeCategorizedTag: (state, action: PayloadAction<{ tagName: string }>) => {
+      delete state.categorizedTags[action.payload.tagName]
+    },
+    bulkUpdateCategorizedTags: (state, action: PayloadAction<{ tags: string[], categoryId?: string }>) => {
+      action.payload.tags.forEach(tagName => {
+        if (state.categorizedTags[tagName]) {
+          state.categorizedTags[tagName].categoryId = action.payload.categoryId
+        } else {
+          state.categorizedTags[tagName] = {
+            name: tagName,
+            categoryId: action.payload.categoryId,
+            usage: 0
+          }
+        }
+      })
+    },
     setModel: (state, action: PayloadAction<{ assistantId: string; model: Model }>) => {
       state.assistants = state.assistants.map((assistant) =>
         assistant.id === action.payload.assistantId
@@ -239,7 +283,14 @@ export const {
   updateTagCollapse,
   setTopicTagFilter,
   toggleTopicTagFilter,
-  clearTopicTagFilter
+  clearTopicTagFilter,
+  // 标签分类管理 actions
+  addTagCategory,
+  updateTagCategory,
+  removeTagCategory,
+  updateCategorizedTag,
+  removeCategorizedTag,
+  bulkUpdateCategorizedTags
 } = assistantsSlice.actions
 
 export const selectAllTopics = createSelector([(state: RootState) => state.assistants.assistants], (assistants) =>
