@@ -1,14 +1,14 @@
-import { Tag, Tooltip, Collapse, Button } from 'antd'
-import { X, Folder, Settings } from 'lucide-react'
+import { useTagCategories } from '@renderer/hooks/useTagCategories'
+import { useTopicTags } from '@renderer/hooks/useTopicTags'
+import { RootState } from '@renderer/store'
+import { clearTopicTagFilter, toggleTopicTagFilter } from '@renderer/store/assistants'
+import { Button, Collapse, Tag, Tooltip } from 'antd'
+import { Folder, Settings, X } from 'lucide-react'
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 
-import { RootState } from '@renderer/store'
-import { clearTopicTagFilter, toggleTopicTagFilter } from '@renderer/store/assistants'
-import { useTopicTags } from '@renderer/hooks/useTopicTags'
-import { useTagCategories } from '@renderer/hooks/useTagCategories'
 import TagCategoryManagementPopup from './Popups/TagCategoryManagementPopup'
 
 interface TopicTagFilterProps {
@@ -17,78 +17,77 @@ interface TopicTagFilterProps {
 }
 
 const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => {
-  // 如果assistantId为undefined，直接返回null
-  if (!assistantId) {
-    return null
-  }
-
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const { allTags } = useTopicTags()
   const { categoriesWithTags } = useTagCategories()
   const [showCategoryManagement, setShowCategoryManagement] = useState(false)
   // 智能展开：标签数≤3的分类默认展开
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(() => {
-    return categoriesWithTags
-      .filter(category => category.tags.length <= 3)
-      .map(category => category.id)
-  })
-  
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['uncategorized'])
+
   const topicTagFilter = useSelector((state: RootState) => state.assistants.topicTagFilter)
   const isCurrentAssistant = topicTagFilter?.assistantId === assistantId
-  const selectedTags = isCurrentAssistant ? (topicTagFilter?.selectedTags || []) : []
-  
+  const selectedTags = isCurrentAssistant ? topicTagFilter?.selectedTags || [] : []
+
   // 获取当前助手的话题
-  const assistant = useSelector((state: RootState) => 
-    state.assistants.assistants.find(a => a.id === assistantId)
-  )
-  
+  const assistant = useSelector((state: RootState) => state.assistants.assistants.find((a) => a.id === assistantId))
+
   // 获取当前助手话题的标签统计
   const assistantTagStats = useMemo(() => {
     if (!assistant) return {}
     const stats: Record<string, number> = {}
-    assistant.topics.forEach(topic => {
-      topic.tags?.forEach(tag => {
+    assistant.topics.forEach((topic) => {
+      topic.tags?.forEach((tag) => {
         stats[tag] = (stats[tag] || 0) + 1
       })
     })
     return stats
-  }, [assistant])
-  
+  }, [assistant?.id, assistant?.topics?.length])
+
   // 过滤当前助手的标签分类
   const assistantCategoriesWithTags = useMemo(() => {
-    return categoriesWithTags.map(category => ({
-      ...category,
-      tags: category.tags
-        .filter(tag => assistantTagStats[tag.name] > 0)
-        .map(tag => ({
-          ...tag,
-          usage: assistantTagStats[tag.name]
-        }))
-    })).filter(category => category.tags.length > 0)
+    return categoriesWithTags
+      .map((category) => ({
+        ...category,
+        tags: category.tags
+          .filter((tag) => assistantTagStats[tag.name] > 0)
+          .map((tag) => ({
+            ...tag,
+            usage: assistantTagStats[tag.name]
+          }))
+      }))
+      .filter((category) => category.tags.length > 0)
   }, [categoriesWithTags, assistantTagStats])
 
   // 当分类数据变化时，更新展开状态
   useEffect(() => {
     const shouldExpand = assistantCategoriesWithTags
-      .filter(category => category.tags.length <= 3)
-      .map(category => category.id)
-    setExpandedCategories(prev => {
+      .filter((category) => category.tags.length <= 3)
+      .map((category) => category.id)
+
+    setExpandedCategories((prev) => {
       const newExpanded = [...new Set([...prev, ...shouldExpand])]
-      return newExpanded
+      // 简单比较，避免不必要的更新
+      if (newExpanded.length !== prev.length) {
+        return newExpanded
+      }
+      return prev
     })
-  }, [assistantCategoriesWithTags])
+  }, [assistantCategoriesWithTags.length])
 
   // 只显示当前助手有的标签（fallback到旧版本显示）
   const availableTags = useMemo(() => {
-    return allTags.filter(tag => assistantTagStats[tag] > 0)
+    return allTags.filter((tag) => assistantTagStats[tag] > 0)
   }, [allTags, assistantTagStats])
 
-  const handleTagClick = useCallback((tag: string) => {
-    if (assistantId) {
-      dispatch(toggleTopicTagFilter({ tag, assistantId }))
-    }
-  }, [dispatch, assistantId])
+  const handleTagClick = useCallback(
+    (tag: string) => {
+      if (assistantId) {
+        dispatch(toggleTopicTagFilter({ tag, assistantId }))
+      }
+    },
+    [dispatch, assistantId]
+  )
 
   const handleClearFilter = useCallback(() => {
     dispatch(clearTopicTagFilter())
@@ -97,7 +96,7 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
   const handleCategoryChange = useCallback((keys: string | string[]) => {
     setExpandedCategories(Array.isArray(keys) ? keys : [keys])
   }, [])
-  
+
   // Keyboard shortcut for clearing filter (Escape key)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -105,15 +104,20 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
         handleClearFilter()
       }
     }
-    
+
     if (selectedTags.length > 0) {
       document.addEventListener('keydown', handleKeyDown)
       return () => document.removeEventListener('keydown', handleKeyDown)
     }
-    
+
     return undefined
   }, [selectedTags.length, handleClearFilter])
-  
+
+  // 如果assistantId为undefined，直接返回null
+  if (!assistantId) {
+    return null
+  }
+
   if (assistantCategoriesWithTags.length === 0 && availableTags.length === 0) {
     return null
   }
@@ -146,13 +150,8 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
         {/* 分类显示 */}
         {assistantCategoriesWithTags.length > 0 ? (
           <CategorizedContainer>
-            <Collapse
-              size="small"
-              ghost
-              activeKey={expandedCategories}
-              onChange={handleCategoryChange}
-            >
-              {assistantCategoriesWithTags.map(category => (
+            <Collapse size="small" ghost activeKey={expandedCategories} onChange={handleCategoryChange}>
+              {assistantCategoriesWithTags.map((category) => (
                 <Collapse.Panel
                   key={category.id}
                   header={
@@ -161,18 +160,14 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
                       <CategoryName>{category.name}</CategoryName>
                       <TagCount $selected={false}>({category.tags.length})</TagCount>
                     </CategoryHeader>
-                  }
-                >
+                  }>
                   <TagsContainer>
                     {category.tags.map((tag) => {
                       const isSelected = selectedTags.includes(tag.name)
 
                       return (
                         <Tooltip key={tag.name} title={`${tag.usage} ${t('chat.topics.count')}`}>
-                          <FilterTag
-                            $selected={isSelected}
-                            onClick={() => handleTagClick(tag.name)}
-                          >
+                          <FilterTag $selected={isSelected} onClick={() => handleTagClick(tag.name)}>
                             {tag.name}
                             <TagCount $selected={isSelected}>({tag.usage})</TagCount>
                           </FilterTag>
@@ -193,10 +188,7 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
 
               return (
                 <Tooltip key={tag} title={`${count} ${t('chat.topics.count')}`}>
-                  <FilterTag
-                    $selected={isSelected}
-                    onClick={() => handleTagClick(tag)}
-                  >
+                  <FilterTag $selected={isSelected} onClick={() => handleTagClick(tag)}>
                     {tag}
                     <TagCount $selected={isSelected}>({count})</TagCount>
                   </FilterTag>
@@ -207,10 +199,7 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
         )}
       </FilterContainer>
 
-      <TagCategoryManagementPopup
-        open={showCategoryManagement}
-        onClose={() => setShowCategoryManagement(false)}
-      />
+      <TagCategoryManagementPopup open={showCategoryManagement} onClose={() => setShowCategoryManagement(false)} />
     </>
   )
 }
@@ -360,8 +349,10 @@ const FilterTag = styled(Tag)<{ $selected: boolean }>`
   display: flex;
   align-items: center;
   gap: 3px;
-  
-  ${props => props.$selected ? `
+
+  ${(props) =>
+    props.$selected
+      ? `
     background-color: var(--color-primary);
     border-color: var(--color-primary);
     color: white;
@@ -371,7 +362,8 @@ const FilterTag = styled(Tag)<{ $selected: boolean }>`
       border-color: var(--color-primary-hover);
       color: white;
     }
-  ` : `
+  `
+      : `
     background-color: var(--color-fill-quaternary);
     border-color: var(--color-border-tertiary);
     color: var(--color-text-4);
@@ -388,7 +380,7 @@ const FilterTag = styled(Tag)<{ $selected: boolean }>`
 
 const TagCount = styled.span<{ $selected: boolean }>`
   font-size: 10px;
-  opacity: ${props => props.$selected ? 0.8 : 0.6};
+  opacity: ${(props) => (props.$selected ? 0.8 : 0.6)};
 `
 
 export default TopicTagFilter

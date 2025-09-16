@@ -1,15 +1,14 @@
-import { useCallback, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-
 import { RootState } from '@renderer/store'
 import {
   addTagCategory,
-  updateTagCategory,
+  bulkUpdateCategorizedTags,
   removeTagCategory,
-  bulkUpdateCategorizedTags
+  updateTagCategory
 } from '@renderer/store/assistants'
 import { TagCategory, TagCategoryWithTags } from '@renderer/types'
 import { uuid } from '@renderer/utils'
+import { useCallback, useMemo } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
 /**
  * 标签分类管理 Hook
@@ -21,15 +20,13 @@ export function useTagCategories() {
 
   // 获取所有话题的标签
   const allTopicTags = useSelector((state: RootState) =>
-    state.assistants.assistants.flatMap(assistant =>
-      assistant.topics.flatMap(topic => topic.tags || [])
-    )
+    state.assistants.assistants.flatMap((assistant) => assistant.topics.flatMap((topic) => topic.tags || []))
   )
 
   // 计算标签使用统计
   const tagUsageStats = useMemo(() => {
     const stats: Record<string, number> = {}
-    allTopicTags.forEach(tag => {
+    allTopicTags.forEach((tag) => {
       stats[tag] = (stats[tag] || 0) + 1
     })
     return stats
@@ -45,25 +42,27 @@ export function useTagCategories() {
     const result: TagCategoryWithTags[] = []
 
     // 添加已有分类
-    tagCategories.forEach(category => {
-      const categoryTags = Object.values(categorizedTags)
-        .filter(tag => tag.categoryId === category.id)
-        .map(tag => ({
-          ...tag,
-          usage: tagUsageStats[tag.name] || 0
-        }))
-        .sort((a, b) => b.usage - a.usage)
+    if (tagCategories && categorizedTags) {
+      tagCategories.forEach((category) => {
+        const categoryTags = Object.values(categorizedTags)
+          .filter((tag) => tag.categoryId === category.id)
+          .map((tag) => ({
+            ...tag,
+            usage: tagUsageStats[tag.name] || 0
+          }))
+          .sort((a, b) => b.usage - a.usage)
 
-      result.push({
-        ...category,
-        tags: categoryTags
+        result.push({
+          ...category,
+          tags: categoryTags
+        })
       })
-    })
+    }
 
     // 添加未分类的标签
     const uncategorizedTags = allUniqueTags
-      .filter(tagName => !categorizedTags[tagName] || !categorizedTags[tagName].categoryId)
-      .map(tagName => ({
+      .filter((tagName) => !categorizedTags?.[tagName] || !categorizedTags[tagName].categoryId)
+      .map((tagName) => ({
         name: tagName,
         usage: tagUsageStats[tagName] || 0
       }))
@@ -84,58 +83,78 @@ export function useTagCategories() {
   }, [tagCategories, categorizedTags, allUniqueTags, tagUsageStats])
 
   // 创建新分类
-  const createCategory = useCallback((categoryData: Omit<TagCategory, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const category: TagCategory = {
-      ...categoryData,
-      id: uuid(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-    dispatch(addTagCategory(category))
-    return category
-  }, [dispatch])
+  const createCategory = useCallback(
+    (categoryData: Omit<TagCategory, 'id' | 'createdAt' | 'updatedAt'>) => {
+      const category: TagCategory = {
+        ...categoryData,
+        id: uuid(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      dispatch(addTagCategory(category))
+      return category
+    },
+    [dispatch]
+  )
 
   // 更新分类
-  const updateCategory = useCallback((category: TagCategory) => {
-    const updatedCategory = {
-      ...category,
-      updatedAt: new Date().toISOString()
-    }
-    dispatch(updateTagCategory(updatedCategory))
-  }, [dispatch])
+  const updateCategory = useCallback(
+    (category: TagCategory) => {
+      const updatedCategory = {
+        ...category,
+        updatedAt: new Date().toISOString()
+      }
+      dispatch(updateTagCategory(updatedCategory))
+    },
+    [dispatch]
+  )
 
   // 删除分类
-  const deleteCategory = useCallback((categoryId: string) => {
-    dispatch(removeTagCategory({ id: categoryId }))
-  }, [dispatch])
+  const deleteCategory = useCallback(
+    (categoryId: string) => {
+      dispatch(removeTagCategory({ id: categoryId }))
+    },
+    [dispatch]
+  )
 
   // 将标签分配到分类
-  const assignTagsToCategory = useCallback((tags: string[], categoryId?: string) => {
-    dispatch(bulkUpdateCategorizedTags({ tags, categoryId }))
-  }, [dispatch])
+  const assignTagsToCategory = useCallback(
+    (tags: string[], categoryId?: string) => {
+      dispatch(bulkUpdateCategorizedTags({ tags, categoryId }))
+    },
+    [dispatch]
+  )
 
   // 移动标签到其他分类
-  const moveTagsToCategory = useCallback((tags: string[], targetCategoryId?: string) => {
-    assignTagsToCategory(tags, targetCategoryId)
-  }, [assignTagsToCategory])
+  const moveTagsToCategory = useCallback(
+    (tags: string[], targetCategoryId?: string) => {
+      assignTagsToCategory(tags, targetCategoryId)
+    },
+    [assignTagsToCategory]
+  )
 
   // 获取分类下的标签
-  const getTagsByCategory = useCallback((categoryId: string) => {
-    return Object.values(categorizedTags)
-      .filter(tag => tag.categoryId === categoryId)
-      .map(tag => ({
-        ...tag,
-        usage: tagUsageStats[tag.name] || 0
-      }))
-      .sort((a, b) => b.usage - a.usage)
-  }, [categorizedTags, tagUsageStats])
+  const getTagsByCategory = useCallback(
+    (categoryId: string) => {
+      if (!categorizedTags) return []
+      return Object.values(categorizedTags)
+        .filter((tag) => tag.categoryId === categoryId)
+        .map((tag) => ({
+          ...tag,
+          usage: tagUsageStats[tag.name] || 0
+        }))
+        .sort((a, b) => b.usage - a.usage)
+    },
+    [categorizedTags, tagUsageStats]
+  )
 
   // 搜索标签
-  const searchTags = useCallback((query: string) => {
-    return allUniqueTags.filter(tag =>
-      tag.toLowerCase().includes(query.toLowerCase())
-    )
-  }, [allUniqueTags])
+  const searchTags = useCallback(
+    (query: string) => {
+      return allUniqueTags.filter((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+    },
+    [allUniqueTags]
+  )
 
   return {
     tagCategories,
