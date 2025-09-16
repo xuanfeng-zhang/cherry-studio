@@ -147,6 +147,8 @@ export interface SettingsState {
   thoughtAutoCollapse: boolean
   notionExportReasoning: boolean
   excludeCitationsInExport: boolean
+  // 话题标签筛选区域折叠状态
+  topicTagFilterCollapsed: boolean
   standardizeCitationsInExport: boolean
   yuqueToken: string | null
   yuqueUrl: string | null
@@ -325,6 +327,8 @@ export const initialState: SettingsState = {
   thoughtAutoCollapse: true,
   notionExportReasoning: false,
   excludeCitationsInExport: false,
+  // 话题标签筛选区域默认折叠
+  topicTagFilterCollapsed: true,
   standardizeCitationsInExport: false,
   yuqueToken: '',
   yuqueUrl: '',
@@ -697,6 +701,9 @@ const settingsSlice = createSlice({
     setThoughtAutoCollapse: (state, action: PayloadAction<boolean>) => {
       state.thoughtAutoCollapse = action.payload
     },
+    setTopicTagFilterCollapsed: (state, action: PayloadAction<boolean>) => {
+      state.topicTagFilterCollapsed = action.payload
+    },
     setNotionExportReasoning: (state, action: PayloadAction<boolean>) => {
       state.notionExportReasoning = action.payload
     },
@@ -926,6 +933,7 @@ export const {
   setForceDollarMathInMarkdown,
   setUseTopicNamingForMessageTitle,
   setThoughtAutoCollapse,
+  setTopicTagFilterCollapsed,
   setNotionExportReasoning,
   setExcludeCitationsInExport,
   setStandardizeCitationsInExport,

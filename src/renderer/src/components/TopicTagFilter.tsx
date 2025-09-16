@@ -2,8 +2,9 @@ import { useTagCategories } from '@renderer/hooks/useTagCategories'
 import { useTopicTags } from '@renderer/hooks/useTopicTags'
 import { RootState } from '@renderer/store'
 import { clearTopicTagFilter, toggleTopicTagFilter } from '@renderer/store/assistants'
+import { setTopicTagFilterCollapsed } from '@renderer/store/settings'
 import { Button, Collapse, Tag, Tooltip } from 'antd'
-import { Folder, Settings, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Folder, Settings, X } from 'lucide-react'
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
@@ -28,6 +29,9 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
   const topicTagFilter = useSelector((state: RootState) => state.assistants.topicTagFilter)
   const isCurrentAssistant = topicTagFilter?.assistantId === assistantId
   const selectedTags = isCurrentAssistant ? topicTagFilter?.selectedTags || [] : []
+  
+  // 获取折叠状态
+  const isCollapsed = useSelector((state: RootState) => state.settings.topicTagFilterCollapsed)
 
   // 获取当前助手的话题
   const assistant = useSelector((state: RootState) => state.assistants.assistants.find((a) => a.id === assistantId))
@@ -97,6 +101,10 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
     setExpandedCategories(Array.isArray(keys) ? keys : [keys])
   }, [])
 
+  const handleToggleCollapse = useCallback(() => {
+    dispatch(setTopicTagFilterCollapsed(!isCollapsed))
+  }, [dispatch, isCollapsed])
+
   // Keyboard shortcut for clearing filter (Escape key)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -126,76 +134,91 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
     <>
       <FilterContainer className={className}>
         <FilterHeader>
-          <FilterTitle>{t('chat.topics.filter.by_tags')}</FilterTitle>
-          <FilterActions>
+          <FilterTitleContainer onClick={handleToggleCollapse}>
+            <CollapseIcon>
+              {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            </CollapseIcon>
+            <FilterTitle>{t('chat.topics.filter.by_tags')}</FilterTitle>
             {selectedTags.length > 0 && (
-              <Tooltip title={`${t('common.clear')} (Esc)`}>
-                <ClearButton onClick={handleClearFilter}>
-                  <X size={12} />
-                  {t('common.clear')}
-                </ClearButton>
-              </Tooltip>
+              <SelectedCount>({selectedTags.length})</SelectedCount>
             )}
-            <Tooltip title={t('chat.topics.tags.manage_categories')}>
-              <Button
-                type="text"
-                size="small"
-                icon={<Settings size={12} />}
-                onClick={() => setShowCategoryManagement(true)}
-              />
-            </Tooltip>
-          </FilterActions>
+          </FilterTitleContainer>
+          {!isCollapsed && (
+            <FilterActions>
+              {selectedTags.length > 0 && (
+                <Tooltip title={`${t('common.clear')} (Esc)`}>
+                  <ClearButton onClick={handleClearFilter}>
+                    <X size={12} />
+                    {t('common.clear')}
+                  </ClearButton>
+                </Tooltip>
+              )}
+              <Tooltip title={t('chat.topics.tags.manage_categories')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Settings size={12} />}
+                  onClick={() => setShowCategoryManagement(true)}
+                />
+              </Tooltip>
+            </FilterActions>
+          )}
         </FilterHeader>
 
-        {/* 分类显示 */}
-        {assistantCategoriesWithTags.length > 0 ? (
-          <CategorizedContainer>
-            <Collapse size="small" ghost activeKey={expandedCategories} onChange={handleCategoryChange}>
-              {assistantCategoriesWithTags.map((category) => (
-                <Collapse.Panel
-                  key={category.id}
-                  header={
-                    <CategoryHeader>
-                      <Folder size={14} style={{ color: category.color || 'var(--color-text-2)' }} />
-                      <CategoryName>{category.name}</CategoryName>
-                      <TagCount $selected={false}>({category.tags.length})</TagCount>
-                    </CategoryHeader>
-                  }>
-                  <TagsContainer>
-                    {category.tags.map((tag) => {
-                      const isSelected = selectedTags.includes(tag.name)
+        {/* 只在展开时显示内容 */}
+        {!isCollapsed && (
+          <>
+            {/* 分类显示 */}
+            {assistantCategoriesWithTags.length > 0 ? (
+              <CategorizedContainer>
+                <Collapse size="small" ghost activeKey={expandedCategories} onChange={handleCategoryChange}>
+                  {assistantCategoriesWithTags.map((category) => (
+                    <Collapse.Panel
+                      key={category.id}
+                      header={
+                        <CategoryHeader>
+                          <Folder size={14} style={{ color: category.color || 'var(--color-text-2)' }} />
+                          <CategoryName>{category.name}</CategoryName>
+                          <TagCount $selected={false}>({category.tags.length})</TagCount>
+                        </CategoryHeader>
+                      }>
+                      <TagsContainer>
+                        {category.tags.map((tag) => {
+                          const isSelected = selectedTags.includes(tag.name)
 
-                      return (
-                        <Tooltip key={tag.name} title={`${tag.usage} ${t('chat.topics.count')}`}>
-                          <FilterTag $selected={isSelected} onClick={() => handleTagClick(tag.name)}>
-                            {tag.name}
-                            <TagCount $selected={isSelected}>({tag.usage})</TagCount>
-                          </FilterTag>
-                        </Tooltip>
-                      )
-                    })}
-                  </TagsContainer>
-                </Collapse.Panel>
-              ))}
-            </Collapse>
-          </CategorizedContainer>
-        ) : (
-          // Fallback 到原来的显示方式
-          <TagsContainer>
-            {availableTags.map((tag) => {
-              const isSelected = selectedTags.includes(tag)
-              const count = assistantTagStats[tag] || 0
+                          return (
+                            <Tooltip key={tag.name} title={`${tag.usage} ${t('chat.topics.count')}`}>
+                              <FilterTag $selected={isSelected} onClick={() => handleTagClick(tag.name)}>
+                                {tag.name}
+                                <TagCount $selected={isSelected}>({tag.usage})</TagCount>
+                              </FilterTag>
+                            </Tooltip>
+                          )
+                        })}
+                      </TagsContainer>
+                    </Collapse.Panel>
+                  ))}
+                </Collapse>
+              </CategorizedContainer>
+            ) : (
+              // Fallback 到原来的显示方式
+              <TagsContainer>
+                {availableTags.map((tag) => {
+                  const isSelected = selectedTags.includes(tag)
+                  const count = assistantTagStats[tag] || 0
 
-              return (
-                <Tooltip key={tag} title={`${count} ${t('chat.topics.count')}`}>
-                  <FilterTag $selected={isSelected} onClick={() => handleTagClick(tag)}>
-                    {tag}
-                    <TagCount $selected={isSelected}>({count})</TagCount>
-                  </FilterTag>
-                </Tooltip>
-              )
-            })}
-          </TagsContainer>
+                  return (
+                    <Tooltip key={tag} title={`${count} ${t('chat.topics.count')}`}>
+                      <FilterTag $selected={isSelected} onClick={() => handleTagClick(tag)}>
+                        {tag}
+                        <TagCount $selected={isSelected}>({count})</TagCount>
+                      </FilterTag>
+                    </Tooltip>
+                  )
+                })}
+              </TagsContainer>
+            )}
+          </>
         )}
       </FilterContainer>
 
@@ -231,16 +254,54 @@ const FilterHeader = styled.div`
   padding: 0 2px;
 `
 
+const FilterTitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  flex: 1;
+  padding: 2px 0;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: var(--color-fill-quaternary);
+  }
+`
+
+const CollapseIcon = styled.div`
+  display: flex;
+  align-items: center;
+  color: var(--color-text-4);
+  transition: color 0.2s;
+
+  ${FilterTitleContainer}:hover & {
+    color: var(--color-text-3);
+  }
+`
+
 const FilterTitle = styled.span`
   color: var(--color-text-4);
   font-size: 11px;
   font-weight: 400;
+  transition: color 0.2s;
+
+  ${FilterTitleContainer}:hover & {
+    color: var(--color-text-3);
+  }
+`
+
+const SelectedCount = styled.span`
+  color: var(--color-primary);
+  font-size: 10px;
+  font-weight: 500;
+  margin-left: 2px;
 `
 
 const FilterActions = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   flex-shrink: 0;
   min-width: fit-content;
 `
