@@ -1233,7 +1233,20 @@
     "user_memories_reset": "All memories for {{user}} have been reset",
     "user_switch_failed": "Failed to switch user",
     "user_switched": "User context switched to {{user}}",
-    "users": "users"
+    "users": "users",
+    "confirm_title": "Confirm Memory Storage",
+    "confirm_description": "Please confirm the content to be added to memory. You can edit or deselect items you don't need",
+    "confirm_save": "Save {{count}} Memory Items",
+    "action_add": "Add",
+    "action_update": "Update",
+    "action_delete": "Delete",
+    "conversation_context": "Conversation Context",
+    "old_content": "Original Content",
+    "edit_content_placeholder": "Edit memory content...",
+    "select_all": "Select All",
+    "no_pending_memories": "No pending memories",
+    "auto_confirm_memories": "Auto Confirm Memories",
+    "auto_confirm_memories_desc": "When enabled, extracted memories will be stored directly without user confirmation"
   },
   "message": {
     "agents": {

@@ -1,5 +1,6 @@
 import { loggerService } from '@logger'
 import { getModel } from '@renderer/hooks/useModel'
+import { PendingMemoryItem } from '@renderer/components/MemoryConfirmModal'
 import { AssistantMessage } from '@renderer/types'
 import {
   FactRetrievalSchema,
@@ -10,6 +11,7 @@ import {
 } from '@renderer/utils/memory-prompts'
 import { MemoryConfig, MemoryItem } from '@types'
 import jaison from 'jaison/lib/index.js'
+// Use browser crypto API for UUID generation
 
 import { fetchGenerate } from './ApiService'
 import MemoryService from './MemoryService'
@@ -219,6 +221,154 @@ export class MemoryProcessor {
       logger.error('Error processing conversation:', error as Error)
       return { facts: [], operations: [] }
     }
+  }
+
+  /**
+   * Prepare pending memories for user confirmation
+   * @param messages - Array of conversation messages
+   * @param config - Memory processor configuration
+   * @returns Pending memory items and conversation context
+   */
+  async preparePendingMemories(messages: AssistantMessage[], config: MemoryProcessorConfig): Promise<{
+    pendingMemories: PendingMemoryItem[]
+    conversationContext: string
+  }> {
+    try {
+      // Extract facts from conversation
+      const facts = await this.extractFacts(messages, config)
+
+      if (facts.length === 0) {
+        return { pendingMemories: [], conversationContext: '' }
+      }
+
+      const { memoryConfig, assistantId, userId, lastMessageId } = config
+      const existingMemoriesResult = window.keyv.get(`memory-search-${lastMessageId}`) as MemoryItem[] | []
+      const existingMemories = existingMemoriesResult.map((memory) => ({
+        id: memory.id,
+        text: memory.memory
+      }))
+
+      let pendingMemories: PendingMemoryItem[] = []
+
+      if (existingMemories.length === 0) {
+        // All facts are new additions
+        pendingMemories = facts.map(fact => ({
+          id: window.crypto.randomUUID(),
+          type: 'ADD' as const,
+          content: fact,
+          enabled: true
+        }))
+      } else {
+        // Generate update memory prompt to determine operations
+        const updateMemoryUserPrompt = getUpdateMemoryMessages(existingMemories, facts)
+
+        const responseContent = await fetchGenerate({
+          prompt: updateMemorySystemPrompt,
+          content: updateMemoryUserPrompt,
+          model: getModel(memoryConfig.llmApiClient.model, memoryConfig.llmApiClient.provider)
+        })
+
+        if (responseContent && responseContent.trim() !== '') {
+          try {
+            logger.debug(`Response content for memory update: ${responseContent}`)
+            const jsonParsed = jaison(responseContent)
+            const dataToValidate = Array.isArray(jsonParsed) ? jsonParsed : jsonParsed.memory
+            const parsed = MemoryUpdateSchema.parse(dataToValidate)
+
+            pendingMemories = parsed.map(memoryOp => ({
+              id: memoryOp.id || window.crypto.randomUUID(),
+              type: memoryOp.event as 'ADD' | 'UPDATE' | 'DELETE',
+              content: memoryOp.text,
+              oldContent: memoryOp.old_memory,
+              enabled: memoryOp.event !== 'NONE'
+            })).filter(item => item.type !== 'NONE')
+          } catch (error) {
+            logger.error(`Failed to parse memory update response: ${responseContent}`, error as Error)
+            // Fallback: treat all facts as new additions
+            pendingMemories = facts.map(fact => ({
+              id: window.crypto.randomUUID(),
+              type: 'ADD' as const,
+              content: fact,
+              enabled: true
+            }))
+          }
+        }
+      }
+
+      // Create conversation context
+      const conversationContext = messages
+        .map(msg => `${msg.role}: ${msg.content}`)
+        .join('\n')
+        .slice(0, 1000) // Limit context length
+
+      return { pendingMemories, conversationContext }
+    } catch (error) {
+      logger.error('Error preparing pending memories:', error as Error)
+      return { pendingMemories: [], conversationContext: '' }
+    }
+  }
+
+  /**
+   * Execute confirmed memory operations
+   * @param confirmedMemories - Array of confirmed memory items
+   * @param config - Memory processor configuration
+   * @returns Array of memory operations performed
+   */
+  async executeConfirmedMemories(
+    confirmedMemories: PendingMemoryItem[],
+    config: MemoryProcessorConfig
+  ): Promise<Array<{ action: string; [key: string]: any }>> {
+    const { assistantId, userId } = config
+    const operations: Array<{ action: string; [key: string]: any }> = []
+
+    for (const memoryItem of confirmedMemories) {
+      switch (memoryItem.type) {
+        case 'ADD':
+          try {
+            const result = await this.memoryService.add(memoryItem.content, {
+              userId,
+              agentId: assistantId
+            })
+            operations.push({ action: 'ADD', memory: memoryItem.content, result })
+          } catch (error) {
+            logger.error('Failed to add memory:', error as Error)
+          }
+          break
+
+        case 'UPDATE':
+          try {
+            if (memoryItem.id) {
+              await this.memoryService.update(memoryItem.id, memoryItem.content, {
+                userId,
+                assistantId,
+                oldMemory: memoryItem.oldContent
+              })
+              operations.push({
+                action: 'UPDATE',
+                id: memoryItem.id,
+                oldMemory: memoryItem.oldContent,
+                newMemory: memoryItem.content
+              })
+            }
+          } catch (error) {
+            logger.error('Failed to update memory:', error as Error)
+          }
+          break
+
+        case 'DELETE':
+          try {
+            if (memoryItem.id) {
+              await this.memoryService.delete(memoryItem.id)
+              operations.push({ action: 'DELETE', id: memoryItem.id, memory: memoryItem.content })
+            }
+          } catch (error) {
+            logger.error('Failed to delete memory:', error as Error)
+          }
+          break
+      }
+    }
+
+    return operations
   }
 
   /**

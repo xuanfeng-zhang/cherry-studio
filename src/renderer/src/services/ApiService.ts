@@ -64,6 +64,7 @@ import {
 } from './AssistantService'
 import { processKnowledgeSearch } from './KnowledgeService'
 import { MemoryProcessor } from './MemoryProcessor'
+import MemoryConfirmService from './MemoryConfirmService'
 import {
   filterAfterContextClearMessages,
   filterEmptyMessages,
@@ -594,22 +595,42 @@ async function processConversationMemory(messages: Message[], assistant: Assista
       lastUserMessage?.id
     )
 
-    // Process the conversation in the background (don't await to avoid blocking UI)
-    const memoryProcessor = new MemoryProcessor()
-    memoryProcessor
-      .processConversation(conversationMessages, processorConfig)
-      .then((result) => {
-        logger.debug('Memory processing completed:', result)
-        if (result.facts.length > 0) {
-          logger.debug('Extracted facts from conversation:', result.facts)
-          logger.debug('Memory operations performed:', result.operations)
-        } else {
-          logger.debug('No facts extracted from conversation')
-        }
-      })
-      .catch((error) => {
-        logger.error('Background memory processing failed:', error as Error)
-      })
+    // Process the conversation with user confirmation if required
+    const autoConfirmMemories = memoryConfig.autoConfirmMemories ?? false
+
+    if (autoConfirmMemories) {
+      // Use the original auto-processing logic
+      const memoryProcessor = new MemoryProcessor()
+      memoryProcessor
+        .processConversation(conversationMessages, processorConfig)
+        .then((result) => {
+          logger.debug('Memory processing completed:', result)
+          if (result.facts.length > 0) {
+            logger.debug('Extracted facts from conversation:', result.facts)
+            logger.debug('Memory operations performed:', result.operations)
+          } else {
+            logger.debug('No facts extracted from conversation')
+          }
+        })
+        .catch((error) => {
+          logger.error('Background memory processing failed:', error as Error)
+        })
+    } else {
+      // Use the new confirmation flow
+      const memoryConfirmService = MemoryConfirmService.getInstance()
+      memoryConfirmService
+        .showConfirmDialog(conversationMessages, processorConfig)
+        .then((confirmedMemories) => {
+          if (confirmedMemories.length > 0) {
+            logger.debug(`User confirmed ${confirmedMemories.length} memories`)
+          } else {
+            logger.debug('No memories confirmed by user or no memories to confirm')
+          }
+        })
+        .catch((error) => {
+          logger.error('Memory confirmation failed:', error as Error)
+        })
+    }
   } catch (error) {
     logger.error('Error in post-conversation memory processing:', error as Error)
   }

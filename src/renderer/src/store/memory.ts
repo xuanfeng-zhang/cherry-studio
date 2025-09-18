@@ -20,7 +20,8 @@ const defaultMemoryConfig: MemoryConfig = {
   embedderDimensions: 1536,
   isAutoDimensions: true,
   customFactExtractionPrompt: factExtractionPrompt,
-  customUpdateMemoryPrompt: updateMemorySystemPrompt
+  customUpdateMemoryPrompt: updateMemorySystemPrompt,
+  autoConfirmMemories: false
 }
 
 /**

@@ -1233,7 +1233,20 @@
     "user_memories_reset": "{{user}} 的所有记忆已重置",
     "user_switch_failed": "切换用户失败",
     "user_switched": "用户上下文已切换到 {{user}}",
-    "users": "用户"
+    "users": "用户",
+    "confirm_title": "确认记忆存储",
+    "confirm_description": "请确认要添加到记忆中的内容，您可以编辑或取消选择不需要的项目",
+    "confirm_save": "保存 {{count}} 项记忆",
+    "action_add": "新增",
+    "action_update": "更新",
+    "action_delete": "删除",
+    "conversation_context": "对话上下文",
+    "old_content": "原内容",
+    "edit_content_placeholder": "编辑记忆内容...",
+    "select_all": "全选",
+    "no_pending_memories": "暂无待确认的记忆",
+    "auto_confirm_memories": "自动确认记忆",
+    "auto_confirm_memories_desc": "启用后将跳过用户确认步骤，直接存储提取的记忆"
   },
   "message": {
     "agents": {

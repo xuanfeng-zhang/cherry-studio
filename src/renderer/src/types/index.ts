@@ -1154,6 +1154,8 @@ export interface MemoryConfig {
   customUpdateMemoryPrompt?: string
   /** Indicates whether embedding dimensions are automatically detected */
   isAutoDimensions?: boolean
+  /** Whether to auto-confirm memories without user interaction */
+  autoConfirmMemories?: boolean
 }
 
 export interface MemoryItem {

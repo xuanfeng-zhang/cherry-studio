@@ -9,7 +9,7 @@ import { useProviders } from '@renderer/hooks/useProvider'
 import { getModelUniqId } from '@renderer/services/ModelService'
 import { selectMemoryConfig, updateMemoryConfig } from '@renderer/store/memory'
 import { Model } from '@renderer/types'
-import { Flex, Form, Modal } from 'antd'
+import { Flex, Form, Modal, Switch } from 'antd'
 import { t } from 'i18next'
 import { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -27,6 +27,7 @@ type formValue = {
   llmModel: string
   embedderModel: string
   embedderDimensions: number
+  autoConfirmMemories: boolean
 }
 
 const MemoriesSettingsModal: FC<MemoriesSettingsModalProps> = ({ visible, onSubmit, onCancel, form }) => {
@@ -51,7 +52,8 @@ const MemoriesSettingsModal: FC<MemoriesSettingsModalProps> = ({ visible, onSubm
       form.setFieldsValue({
         llmModel: getModelUniqId(llmModel),
         embedderModel: getModelUniqId(embedderModel),
-        embedderDimensions: memoryConfig.embedderDimensions
+        embedderDimensions: memoryConfig.embedderDimensions,
+        autoConfirmMemories: memoryConfig.autoConfirmMemories ?? false
         // customFactExtractionPrompt: memoryConfig.customFactExtractionPrompt,
         // customUpdateMemoryPrompt: memoryConfig.customUpdateMemoryPrompt
       })
@@ -96,7 +98,8 @@ const MemoriesSettingsModal: FC<MemoriesSettingsModalProps> = ({ visible, onSubm
             baseURL: aiEmbedderProvider.getBaseURL(),
             apiVersion: embedderProvider?.apiVersion
           },
-          embedderDimensions: finalDimensions
+          embedderDimensions: finalDimensions,
+          autoConfirmMemories: values.autoConfirmMemories
           // customFactExtractionPrompt: values.customFactExtractionPrompt,
           // customUpdateMemoryPrompt: values.customUpdateMemoryPrompt
         }
@@ -187,6 +190,19 @@ const MemoriesSettingsModal: FC<MemoriesSettingsModalProps> = ({ visible, onSubm
             )
           }}
         </Form.Item>
+
+        <Form.Item
+          label={
+            <Flex align="center" gap={4}>
+              {t('memory.auto_confirm_memories')}
+              <InfoTooltip title={t('memory.auto_confirm_memories_desc')} />
+            </Flex>
+          }
+          name="autoConfirmMemories"
+          valuePropName="checked">
+          <Switch />
+        </Form.Item>
+
         {/* <Form.Item label="Custom Fact Extraction Prompt" name="customFactExtractionPrompt">
           <Input.TextArea placeholder="Optional custom prompt for fact extraction..." rows={3} />
         </Form.Item>

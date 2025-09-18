@@ -7,6 +7,7 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import TopViewContainer from './components/TopView'
+import GlobalMemoryConfirm from './components/GlobalMemoryConfirm'
 import AntdProvider from './context/AntdProvider'
 import { CodeStyleProvider } from './context/CodeStyleProvider'
 import { NotificationProvider } from './context/NotificationProvider'
@@ -40,6 +41,7 @@ function App(): React.ReactElement {
                   <PersistGate loading={null} persistor={persistor}>
                     <TopViewContainer>
                       <Router />
+                      <GlobalMemoryConfirm />
                     </TopViewContainer>
                   </PersistGate>
                 </CodeStyleProvider>
