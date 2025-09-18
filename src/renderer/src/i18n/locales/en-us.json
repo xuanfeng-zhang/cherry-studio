@@ -1246,7 +1246,9 @@
     "select_all": "Select All",
     "no_pending_memories": "No pending memories",
     "auto_confirm_memories": "Auto Confirm Memories",
-    "auto_confirm_memories_desc": "When enabled, extracted memories will be stored directly without user confirmation"
+    "auto_confirm_memories_desc": "When enabled, extracted memories will be stored directly without user confirmation",
+    "target_users": "Target Users",
+    "confirm_save_to_users": "Save {{memoryCount}} Memory Items to {{userCount}} Users"
   },
   "message": {
     "agents": {

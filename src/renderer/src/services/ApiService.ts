@@ -620,9 +620,9 @@ async function processConversationMemory(messages: Message[], assistant: Assista
       const memoryConfirmService = MemoryConfirmService.getInstance()
       memoryConfirmService
         .showConfirmDialog(conversationMessages, processorConfig)
-        .then((confirmedMemories) => {
-          if (confirmedMemories.length > 0) {
-            logger.debug(`User confirmed ${confirmedMemories.length} memories`)
+        .then(({ confirmedMemories, selectedUsers }) => {
+          if (confirmedMemories.length > 0 && selectedUsers.length > 0) {
+            logger.debug(`User confirmed ${confirmedMemories.length} memories for ${selectedUsers.length} users`)
           } else {
             logger.debug('No memories confirmed by user or no memories to confirm')
           }

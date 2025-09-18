@@ -1246,7 +1246,9 @@
     "select_all": "全选",
     "no_pending_memories": "暂无待确认的记忆",
     "auto_confirm_memories": "自动确认记忆",
-    "auto_confirm_memories_desc": "启用后将跳过用户确认步骤，直接存储提取的记忆"
+    "auto_confirm_memories_desc": "启用后将跳过用户确认步骤，直接存储提取的记忆",
+    "target_users": "目标用户",
+    "confirm_save_to_users": "保存 {{memoryCount}} 项记忆至 {{userCount}} 个用户"
   },
   "message": {
     "agents": {

@@ -1,6 +1,7 @@
 import { loggerService } from '@logger'
-import { PendingMemoryItem } from '@renderer/components/MemoryConfirmModal'
+import { PendingMemoryItem, UserSelectOption } from '@renderer/components/MemoryConfirmModal'
 import { AssistantMessage } from '@renderer/types'
+import MemoryService from './MemoryService'
 
 import { MemoryProcessor, MemoryProcessorConfig } from './MemoryProcessor'
 
@@ -11,7 +12,8 @@ export interface MemoryConfirmState {
   pendingMemories: PendingMemoryItem[]
   conversationContext: string
   processorConfig: MemoryProcessorConfig | null
-  resolveCallback: ((confirmedMemories: PendingMemoryItem[]) => void) | null
+  userOptions: UserSelectOption[]
+  resolveCallback: ((confirmedMemories: PendingMemoryItem[], selectedUsers: string[]) => void) | null
   rejectCallback: (() => void) | null
 }
 
@@ -22,6 +24,7 @@ class MemoryConfirmService {
     pendingMemories: [],
     conversationContext: '',
     processorConfig: null,
+    userOptions: [],
     resolveCallback: null,
     rejectCallback: null
   }
@@ -59,7 +62,7 @@ class MemoryConfirmService {
   public async showConfirmDialog(
     messages: AssistantMessage[],
     config: MemoryProcessorConfig
-  ): Promise<PendingMemoryItem[]> {
+  ): Promise<{ confirmedMemories: PendingMemoryItem[], selectedUsers: string[] }> {
     return new Promise(async (resolve, reject) => {
       try {
         const memoryProcessor = new MemoryProcessor()
@@ -70,17 +73,21 @@ class MemoryConfirmService {
 
         if (pendingMemories.length === 0) {
           logger.debug('No pending memories to confirm')
-          resolve([])
+          resolve({ confirmedMemories: [], selectedUsers: [] })
           return
         }
 
-        logger.debug(`Showing memory confirm dialog with ${pendingMemories.length} items`)
+        // Prepare user options
+        const userOptions = await this.prepareUserOptions(config)
+
+        logger.debug(`Showing memory confirm dialog with ${pendingMemories.length} items for ${userOptions.length} users`)
 
         this.state = {
           visible: true,
           pendingMemories,
           conversationContext,
           processorConfig: config,
+          userOptions,
           resolveCallback: resolve,
           rejectCallback: reject
         }
@@ -96,20 +103,22 @@ class MemoryConfirmService {
   /**
    * Confirm selected memories
    */
-  public async confirmMemories(confirmedMemories: PendingMemoryItem[]): Promise<void> {
+  public async confirmMemories(confirmedMemories: PendingMemoryItem[], selectedUsers: string[]): Promise<void> {
     try {
-      if (this.state.processorConfig && confirmedMemories.length > 0) {
-        const memoryProcessor = new MemoryProcessor()
-        const operations = await memoryProcessor.executeConfirmedMemories(
-          confirmedMemories,
-          this.state.processorConfig
-        )
+      if (this.state.processorConfig && confirmedMemories.length > 0 && selectedUsers.length > 0) {
+        // Execute memories for each selected user
+        let totalOperations = 0
+        for (const userId of selectedUsers) {
+          const userConfig = { ...this.state.processorConfig, userId }
+          const operations = await this.executeMemoriesForUser(confirmedMemories, userConfig)
+          totalOperations += operations.length
+        }
 
-        logger.debug(`Executed ${operations.length} memory operations:`, operations)
+        logger.debug(`Executed ${totalOperations} memory operations across ${selectedUsers.length} users`)
       }
 
       if (this.state.resolveCallback) {
-        this.state.resolveCallback(confirmedMemories)
+        this.state.resolveCallback({ confirmedMemories, selectedUsers })
       }
 
       this.hideDialog()
@@ -128,7 +137,7 @@ class MemoryConfirmService {
   public cancelConfirmation(): void {
     logger.debug('Memory confirmation cancelled by user')
     if (this.state.resolveCallback) {
-      this.state.resolveCallback([])
+      this.state.resolveCallback({ confirmedMemories: [], selectedUsers: [] })
     }
     this.hideDialog()
   }
@@ -142,10 +151,70 @@ class MemoryConfirmService {
       pendingMemories: [],
       conversationContext: '',
       processorConfig: null,
+      userOptions: [],
       resolveCallback: null,
       rejectCallback: null
     }
     this.notifyListeners()
+  }
+
+  /**
+   * Prepare user options for selection
+   */
+  private async prepareUserOptions(config: MemoryProcessorConfig): Promise<UserSelectOption[]> {
+    try {
+      const memoryService = MemoryService.getInstance()
+      const usersList = await memoryService.getUsersList()
+
+      // Get the default user from config
+      const defaultUserId = config.userId || 'default-user'
+
+      // Build user options with default user first
+      const userOptions: UserSelectOption[] = []
+
+      // Add default user
+      const isDefaultUser = defaultUserId === 'default-user'
+      userOptions.push({
+        userId: defaultUserId,
+        displayName: isDefaultUser ? 'Default User' : defaultUserId,
+        selected: true, // Default user is selected by default
+        isDefault: true
+      })
+
+      // Add other users
+      for (const user of usersList) {
+        if (user.userId !== defaultUserId) {
+          userOptions.push({
+            userId: user.userId,
+            displayName: user.userId === 'default-user' ? 'Default User' : user.userId,
+            selected: false,
+            isDefault: false
+          })
+        }
+      }
+
+      return userOptions
+    } catch (error) {
+      logger.error('Failed to prepare user options:', error as Error)
+      // Fallback to default user only
+      return [{
+        userId: config.userId || 'default-user',
+        displayName: 'Default User',
+        selected: true,
+        isDefault: true
+      }]
+    }
+  }
+
+  /**
+   * Execute memories for a specific user
+   */
+  private async executeMemoriesForUser(
+    confirmedMemories: PendingMemoryItem[],
+    userConfig: MemoryProcessorConfig
+  ): Promise<Array<{ action: string; [key: string]: any }>> {
+    const memoryProcessor = new MemoryProcessor()
+    return await memoryProcessor.executeConfirmedMemories(confirmedMemories, userConfig)
   }
 
   /**

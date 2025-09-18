@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import MemoryConfirmModal, { PendingMemoryItem } from './MemoryConfirmModal'
+import MemoryConfirmModal, { PendingMemoryItem, UserSelectOption } from './MemoryConfirmModal'
 import MemoryConfirmService, { MemoryConfirmState } from '../services/MemoryConfirmService'
 
 const GlobalMemoryConfirm: React.FC = () => {
@@ -22,9 +22,9 @@ const GlobalMemoryConfirm: React.FC = () => {
     return unsubscribe
   }, [])
 
-  const handleConfirm = async (confirmedMemories: PendingMemoryItem[]) => {
+  const handleConfirm = async (confirmedMemories: PendingMemoryItem[], selectedUsers: string[]) => {
     const service = MemoryConfirmService.getInstance()
-    await service.confirmMemories(confirmedMemories)
+    await service.confirmMemories(confirmedMemories, selectedUsers)
   }
 
   const handleCancel = () => {
@@ -39,6 +39,7 @@ const GlobalMemoryConfirm: React.FC = () => {
       onConfirm={handleConfirm}
       pendingMemories={state.pendingMemories}
       conversationContext={state.conversationContext}
+      userOptions={state.userOptions || []}
     />
   )
 }

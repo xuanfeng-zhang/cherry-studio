@@ -2,7 +2,7 @@ import { loggerService } from '@logger'
 import { EditIcon } from '@renderer/components/Icons'
 import { Badge, Button, Card, Checkbox, Flex, Form, Input, Modal, Space, Typography } from 'antd'
 import { CheckboxChangeEvent } from 'antd/es/checkbox'
-import { Brain, Calendar, MessageSquare } from 'lucide-react'
+import { Brain, Calendar, MessageSquare, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -20,12 +20,20 @@ export interface PendingMemoryItem {
   enabled: boolean
 }
 
+export interface UserSelectOption {
+  userId: string
+  displayName: string
+  selected: boolean
+  isDefault: boolean // 是否为助手绑定的默认用户
+}
+
 export interface MemoryConfirmModalProps {
   visible: boolean
   onCancel: () => void
-  onConfirm: (confirmedItems: PendingMemoryItem[]) => Promise<void>
+  onConfirm: (confirmedItems: PendingMemoryItem[], selectedUsers: string[]) => Promise<void>
   pendingMemories: PendingMemoryItem[]
   conversationContext?: string
+  userOptions: UserSelectOption[]
 }
 
 const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
@@ -33,20 +41,25 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
   onCancel,
   onConfirm,
   pendingMemories,
-  conversationContext
+  conversationContext,
+  userOptions
 }) => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [editingMemories, setEditingMemories] = useState<PendingMemoryItem[]>([])
+  const [selectedUsers, setSelectedUsers] = useState<UserSelectOption[]>([])
   const [expandedContext, setExpandedContext] = useState(false)
 
-  // Initialize editing memories when modal opens
+  // Initialize editing memories and user selections when modal opens
   useEffect(() => {
     if (visible && pendingMemories.length > 0) {
       setEditingMemories([...pendingMemories])
     }
-  }, [visible, pendingMemories])
+    if (visible && userOptions.length > 0) {
+      setSelectedUsers([...userOptions])
+    }
+  }, [visible, pendingMemories, userOptions])
 
   const handleMemoryToggle = (id: string, checked: boolean) => {
     setEditingMemories(prev =>
@@ -65,12 +78,24 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
     setEditingMemories(prev => prev.map(item => ({ ...item, enabled: checked })))
   }
 
+  const handleUserToggle = (userId: string, checked: boolean) => {
+    setSelectedUsers(prev =>
+      prev.map(user => (user.userId === userId ? { ...user, selected: checked } : user))
+    )
+  }
+
+  const handleSelectAllUsers = (e: CheckboxChangeEvent) => {
+    const checked = e.target.checked
+    setSelectedUsers(prev => prev.map(user => ({ ...user, selected: checked })))
+  }
+
   const handleConfirm = async () => {
     setLoading(true)
     try {
       const confirmedItems = editingMemories.filter(item => item.enabled)
-      await onConfirm(confirmedItems)
-      logger.debug(`Confirmed ${confirmedItems.length} memory items`)
+      const confirmedUsers = selectedUsers.filter(user => user.selected).map(user => user.userId)
+      await onConfirm(confirmedItems, confirmedUsers)
+      logger.debug(`Confirmed ${confirmedItems.length} memory items for ${confirmedUsers.length} users`)
     } catch (error) {
       logger.error('Failed to confirm memories:', error as Error)
     } finally {
@@ -109,6 +134,11 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
   const allEnabled = enabledCount === totalCount && totalCount > 0
   const someEnabled = enabledCount > 0 && enabledCount < totalCount
 
+  const selectedUserCount = selectedUsers.filter(user => user.selected).length
+  const totalUserCount = selectedUsers.length
+  const allUsersSelected = selectedUserCount === totalUserCount && totalUserCount > 0
+  const someUsersSelected = selectedUserCount > 0 && selectedUserCount < totalUserCount
+
   return (
     <Modal
       open={visible}
@@ -131,9 +161,12 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
           type="primary"
           size="large"
           loading={loading}
-          disabled={enabledCount === 0}
+          disabled={enabledCount === 0 || selectedUserCount === 0}
           onClick={handleConfirm}>
-          {t('memory.confirm_save', { count: enabledCount })}
+          {t('memory.confirm_save_to_users', {
+            memoryCount: enabledCount,
+            userCount: selectedUserCount
+          })}
         </Button>
       ]}
       styles={{
@@ -177,7 +210,7 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
           </Card>
         )}
 
-        {/* Controls */}
+        {/* Memory Controls */}
         <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
           <Checkbox
             indeterminate={someEnabled}
@@ -189,6 +222,42 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
             {t('memory.confirm_description')}
           </Text>
         </Flex>
+
+        {/* User Selection */}
+        {selectedUsers.length > 0 && (
+          <Card size="small" style={{ marginBottom: 16, backgroundColor: 'var(--color-background-soft)' }}>
+            <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
+              <UserRound size={16} color="var(--color-text-secondary)" />
+              <Text strong>{t('memory.target_users')}</Text>
+              <Checkbox
+                indeterminate={someUsersSelected}
+                checked={allUsersSelected}
+                onChange={handleSelectAllUsers}>
+                {t('memory.select_all')} ({selectedUserCount}/{totalUserCount})
+              </Checkbox>
+            </Flex>
+            <Flex wrap="wrap" gap={8}>
+              {selectedUsers.map((user) => (
+                <Checkbox
+                  key={user.userId}
+                  checked={user.selected}
+                  onChange={(e) => handleUserToggle(user.userId, e.target.checked)}>
+                  <Space size={4}>
+                    <span>{user.displayName}</span>
+                    {user.isDefault && (
+                      <Badge
+                        size="small"
+                        color="blue"
+                        text={t('memory.default')}
+                        style={{ fontSize: '10px' }}
+                      />
+                    )}
+                  </Space>
+                </Checkbox>
+              ))}
+            </Flex>
+          </Card>
+        )}
 
         {/* Memory Items */}
         <MemoryListContainer>
