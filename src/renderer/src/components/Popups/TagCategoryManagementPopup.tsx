@@ -210,8 +210,10 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
 
         {/* 标签分类列表 - 卡片式设计 */}
         <CategoriesSection>
-          {filteredCategoriesWithTags.map((category) => (
-            <CategoryCard key={category.id}>
+          {filteredCategoriesWithTags.map((category, index) => (
+            <>
+              {index > 0 && <CategoryDivider />}
+              <CategoryCard key={category.id}>
               <CategoryCardHeader>
                 <CategoryCardTitle>
                   <CategoryName>{category.name}</CategoryName>
@@ -280,7 +282,8 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
                   </EmptyTagsContainer>
                 )}
               </TagsGrid>
-            </CategoryCard>
+              </CategoryCard>
+            </>
           ))}
 
           {filteredCategoriesWithTags.length === 0 && (
@@ -326,26 +329,36 @@ const ActionBar = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
+  padding: 12px;
   background: transparent;
   border-radius: 12px;
-  border: 1px solid #3a3a3a;
+  border: 1px solid var(--color-border-secondary);
 `
 
 const FormSection = styled.div`
-  padding: 20px;
-  background: #2a2a2a;
+  padding: 16px;
+  background: var(--color-fill-secondary);
   border-radius: 12px;
-  border: 1px solid #3a3a3a;
-  margin: 12px 0;
+  border: 1px solid var(--color-border-secondary);
+  margin: 8px 0;
   position: relative;
   z-index: 2;
+
+  /* 浅色模式阴影 */
+  body[theme-mode="light"] & {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  /* 深色模式增强边界 */
+  body[theme-mode="dark"] & {
+    border: 2px solid var(--color-border);
+  }
 `
 
 const CategoriesSection = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding-right: 8px;
+  padding: 8px 8px 8px 0;
 
   /* 自定义滚动条样式 */
   &::-webkit-scrollbar {
@@ -357,12 +370,12 @@ const CategoriesSection = styled.div`
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #4a4a4a;
+    background: var(--color-border);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: #5a5a5a;
+    background: var(--color-border-secondary);
   }
 `
 
@@ -371,9 +384,9 @@ const CategoryName = styled.span`
 `
 
 const TagCount = styled.span`
-  color: #999;
+  color: var(--color-text-tertiary);
   font-size: 12px;
-  background: #1a1a1a;
+  background: var(--color-fill-quaternary);
   padding: 2px 8px;
   border-radius: 12px;
   font-weight: 500;
@@ -406,15 +419,15 @@ const StyledTag = styled(Tag)`
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 6px;
-  background: #1a1a1a !important;
-  border: 1px solid #3a3a3a !important;
-  color: #ccc !important;
+  background: var(--color-fill-quaternary) !important;
+  border: 1px solid var(--color-border-secondary) !important;
+  color: var(--color-text-tertiary) !important;
   transition: all 0.2s;
 
   &:hover {
-    background: #333 !important;
-    border-color: #4a4a4a !important;
-    color: #fff !important;
+    background: var(--color-fill-tertiary) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text-secondary) !important;
   }
 `
 
@@ -432,25 +445,45 @@ const EmptyMessage = styled.div`
 const EmptyTagsContainer = styled.div`
   padding: 16px;
   text-align: center;
-  background: #1a1a1a;
+  background: var(--color-fill-quaternary);
   border-radius: 8px;
-  border: 1px dashed #3a3a3a;
+  border: 1px dashed var(--color-border-secondary);
   width: 100%;
 `
 
 const EmptyStateContainer = styled.div`
   padding: 40px 20px;
   text-align: center;
-  background: #2a2a2a;
+  background: var(--color-fill-secondary);
   border-radius: 12px;
-  border: 1px solid #3a3a3a;
+  border: 1px solid var(--color-border-secondary);
+
+  /* 浅色模式阴影 */
+  body[theme-mode="light"] & {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  /* 深色模式增强边界 */
+  body[theme-mode="dark"] & {
+    border: 2px solid var(--color-border);
+  }
 `
 
 const QuickAssignSection = styled.div`
   padding: 20px;
-  background: #2a2a2a;
+  background: var(--color-fill-secondary);
   border-radius: 12px;
-  border: 1px solid #4a4a4a;
+  border: 1px solid var(--color-border);
+
+  /* 浅色模式阴影 */
+  body[theme-mode="light"] & {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  /* 深色模式增强边界 */
+  body[theme-mode="dark"] & {
+    border: 2px solid var(--color-border-secondary);
+  }
 `
 
 const QuickAssignTitle = styled.div`
@@ -465,18 +498,45 @@ const QuickAssignActions = styled.div`
 `
 
 const CategoryCard = styled.div`
-  background: #2a2a2a;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  border: 1px solid #3a3a3a;
-  transition: all 0.2s;
+  background: var(--color-fill-secondary);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-border-tertiary);
+  transition: all 0.3s ease;
   position: relative;
   z-index: 1;
 
+  /* 浅色模式阴影 */
+  body[theme-mode="light"] & {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-border-secondary);
+
+    &:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+  }
+
+  /* 深色模式边界处理 */
+  body[theme-mode="dark"] & {
+    border: 2px solid var(--color-border);
+    background: var(--color-fill-tertiary);
+
+    &:hover {
+      border-color: var(--color-border-secondary);
+      background: var(--color-fill-secondary);
+      transform: translateY(-1px);
+    }
+  }
+
   &:hover {
-    background: #323232;
-    border-color: #4a4a4a;
+    background: var(--color-fill-tertiary);
+    border-color: var(--color-border-secondary);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
   }
 `
 
@@ -491,9 +551,12 @@ const CategoryCardTitle = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--color-text-1);
+  padding-bottom: 2px;
+  border-bottom: 2px solid var(--color-border-tertiary);
+  margin-bottom: 4px;
 `
 
 const TagsGrid = styled.div`
@@ -505,9 +568,9 @@ const TagsGrid = styled.div`
 `
 
 const MoveButton = styled.button`
-  background: #333;
-  border: 1px solid #4a4a4a;
-  color: #999;
+  background: var(--color-fill-tertiary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-tertiary);
   font-size: 10px;
   cursor: pointer;
   padding: 2px 6px;
@@ -522,14 +585,33 @@ const MoveButton = styled.button`
   margin-left: 4px;
 
   &:hover {
-    background: #4a4a4a;
-    color: #fff;
+    background: var(--color-fill-secondary);
+    color: var(--color-text-secondary);
     opacity: 1;
-    border-color: #5a5a5a;
+    border-color: var(--color-border-secondary);
   }
 
   &:active {
     transform: scale(0.95);
+  }
+`
+
+const CategoryDivider = styled.div`
+  height: 1px;
+  background: var(--color-border-tertiary);
+  margin: 16px 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 3px;
+    background: var(--color-border-secondary);
+    border-radius: 2px;
   }
 `
 
