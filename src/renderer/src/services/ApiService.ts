@@ -63,8 +63,8 @@ import {
   getQuickModel
 } from './AssistantService'
 import { processKnowledgeSearch } from './KnowledgeService'
-import { MemoryProcessor } from './MemoryProcessor'
 import MemoryConfirmService from './MemoryConfirmService'
+import { MemoryProcessor } from './MemoryProcessor'
 import {
   filterAfterContextClearMessages,
   filterEmptyMessages,
@@ -595,10 +595,13 @@ async function processConversationMemory(messages: Message[], assistant: Assista
       lastUserMessage?.id
     )
 
+    // Check if assistant has write permission for memory (default to true for backward compatibility)
+    const hasWritePermission = assistant.memoryWritePermission !== false
+
     // Process the conversation with user confirmation if required
     const autoConfirmMemories = memoryConfig.autoConfirmMemories ?? false
 
-    if (autoConfirmMemories) {
+    if (hasWritePermission && autoConfirmMemories) {
       // Use the original auto-processing logic
       const memoryProcessor = new MemoryProcessor()
       memoryProcessor
@@ -615,8 +618,8 @@ async function processConversationMemory(messages: Message[], assistant: Assista
         .catch((error) => {
           logger.error('Background memory processing failed:', error as Error)
         })
-    } else {
-      // Use the new confirmation flow
+    } else if (hasWritePermission) {
+      // Use the new confirmation flow (only if has write permission)
       const memoryConfirmService = MemoryConfirmService.getInstance()
       memoryConfirmService
         .showConfirmDialog(conversationMessages, processorConfig)
@@ -630,6 +633,13 @@ async function processConversationMemory(messages: Message[], assistant: Assista
         .catch((error) => {
           logger.error('Memory confirmation failed:', error as Error)
         })
+    } else {
+      // No write permission - only log the fact that write was skipped
+      logger.debug('Memory write skipped: assistant has no write permission for memory', {
+        assistantId: assistant.id,
+        assistantName: assistant.name,
+        memoryWritePermission: assistant.memoryWritePermission
+      })
     }
   } catch (error) {
     logger.error('Error in post-conversation memory processing:', error as Error)

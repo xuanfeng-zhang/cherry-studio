@@ -2,12 +2,11 @@ import { InfoCircleOutlined } from '@ant-design/icons'
 import { loggerService } from '@logger'
 import { Box } from '@renderer/components/Layout'
 import MemoriesSettingsModal from '@renderer/pages/memory/settings-modal'
-import { DEFAULT_USER_ID } from '@renderer/pages/settings/MemorySettings/constants'
 import UserSelector from '@renderer/pages/settings/MemorySettings/UserSelector'
 import MemoryService from '@renderer/services/MemoryService'
 import { selectCurrentUserId, selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
 import { Assistant, AssistantSettings } from '@renderer/types'
-import { Alert, Button, Card, Select, Space, Switch, Tooltip, Typography } from 'antd'
+import { Alert, Button, Card, Space, Switch, Tooltip, Typography } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { Settings2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
@@ -86,6 +85,10 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
 
   const handleMemoryUserChange = (userId: string) => {
     updateAssistant({ ...assistant, memoryUserId: userId })
+  }
+
+  const handleMemoryWritePermissionToggle = (enabled: boolean) => {
+    updateAssistant({ ...assistant, memoryWritePermission: enabled })
   }
 
   const handleAddUser = () => {
@@ -170,6 +173,19 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
               uniqueUsers={uniqueUsers}
               onUserSwitch={handleMemoryUserChange}
               onAddUser={handleAddUser}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Space>
+              <Text strong>{t('memory.write_permission')}: </Text>
+              <Tooltip title={t('memory.write_permission_desc')}>
+                <InfoIcon />
+              </Tooltip>
+            </Space>
+            <Switch
+              checked={assistant.memoryWritePermission !== false}
+              onChange={handleMemoryWritePermissionToggle}
+              disabled={!assistant.enableMemory || !isMemoryEnabled}
             />
           </div>
           <div>

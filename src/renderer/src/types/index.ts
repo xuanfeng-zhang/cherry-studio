@@ -39,6 +39,7 @@ export type Assistant = {
   tags?: string[] // 助手标签
   enableMemory?: boolean
   memoryUserId?: string // 助手专用的记忆角色ID
+  memoryWritePermission?: boolean // 记忆写入权限，默认为true，false时只能读取不能写入
   // for translate. 更好的做法是定义base assistant，把 Assistant 作为多种不同定义 assistant 的联合类型，但重构代价太大
   content?: string
   targetLanguage?: TranslateLanguage

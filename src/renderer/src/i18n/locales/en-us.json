@@ -1143,6 +1143,8 @@
     "current_memory_role": "Current Memory Role",
     "current_user": "Current User",
     "memory_role_selector": "Memory Role",
+    "write_permission": "Write Permission",
+    "write_permission_desc": "Controls whether the assistant can write memory content. When disabled, the assistant can only read memories but cannot write new ones",
     "custom": "Custom",
     "default": "Default",
     "default_user": "Default User",

@@ -1143,6 +1143,8 @@
     "current_memory_role": "当前记忆角色",
     "current_user": "当前用户",
     "memory_role_selector": "记忆角色",
+    "write_permission": "写入权限",
+    "write_permission_desc": "控制助手是否可以写入记忆内容。关闭后助手只能读取记忆，无法写入新的记忆",
     "custom": "自定义",
     "default": "默认",
     "default_user": "默认用户",
