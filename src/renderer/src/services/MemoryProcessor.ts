@@ -1,6 +1,6 @@
 import { loggerService } from '@logger'
-import { getModel } from '@renderer/hooks/useModel'
 import { PendingMemoryItem } from '@renderer/components/MemoryConfirmModal'
+import { getModel } from '@renderer/hooks/useModel'
 import { AssistantMessage } from '@renderer/types'
 import {
   FactRetrievalSchema,
@@ -11,8 +11,8 @@ import {
 } from '@renderer/utils/memory-prompts'
 import { MemoryConfig, MemoryItem } from '@types'
 import jaison from 'jaison/lib/index.js'
-// Use browser crypto API for UUID generation
 
+// Use browser crypto API for UUID generation
 import { fetchGenerate } from './ApiService'
 import MemoryService from './MemoryService'
 
@@ -229,7 +229,10 @@ export class MemoryProcessor {
    * @param config - Memory processor configuration
    * @returns Pending memory items and conversation context
    */
-  async preparePendingMemories(messages: AssistantMessage[], config: MemoryProcessorConfig): Promise<{
+  async preparePendingMemories(
+    messages: AssistantMessage[],
+    config: MemoryProcessorConfig
+  ): Promise<{
     pendingMemories: PendingMemoryItem[]
     conversationContext: string
   }> {
@@ -241,7 +244,7 @@ export class MemoryProcessor {
         return { pendingMemories: [], conversationContext: '' }
       }
 
-      const { memoryConfig, assistantId, userId, lastMessageId } = config
+      const { memoryConfig, lastMessageId } = config
       const existingMemoriesResult = window.keyv.get(`memory-search-${lastMessageId}`) as MemoryItem[] | []
       const existingMemories = existingMemoriesResult.map((memory) => ({
         id: memory.id,
@@ -252,7 +255,7 @@ export class MemoryProcessor {
 
       if (existingMemories.length === 0) {
         // All facts are new additions
-        pendingMemories = facts.map(fact => ({
+        pendingMemories = facts.map((fact) => ({
           id: window.crypto.randomUUID(),
           type: 'ADD' as const,
           content: fact,
@@ -265,7 +268,7 @@ export class MemoryProcessor {
         const responseContent = await fetchGenerate({
           prompt: updateMemorySystemPrompt,
           content: updateMemoryUserPrompt,
-          model: getModel(memoryConfig.llmApiClient.model, memoryConfig.llmApiClient.provider)
+          model: getModel(memoryConfig.llmApiClient!.model, memoryConfig.llmApiClient!.provider)
         })
 
         if (responseContent && responseContent.trim() !== '') {
@@ -275,17 +278,19 @@ export class MemoryProcessor {
             const dataToValidate = Array.isArray(jsonParsed) ? jsonParsed : jsonParsed.memory
             const parsed = MemoryUpdateSchema.parse(dataToValidate)
 
-            pendingMemories = parsed.map(memoryOp => ({
-              id: memoryOp.id || window.crypto.randomUUID(),
-              type: memoryOp.event as 'ADD' | 'UPDATE' | 'DELETE',
-              content: memoryOp.text,
-              oldContent: memoryOp.old_memory,
-              enabled: memoryOp.event !== 'NONE'
-            })).filter(item => item.type !== 'NONE')
+            pendingMemories = parsed
+              .filter((memoryOp) => memoryOp.event !== 'NONE')
+              .map((memoryOp) => ({
+                id: memoryOp.id || window.crypto.randomUUID(),
+                type: memoryOp.event as 'ADD' | 'UPDATE' | 'DELETE',
+                content: memoryOp.text,
+                oldContent: memoryOp.old_memory,
+                enabled: true
+              }))
           } catch (error) {
             logger.error(`Failed to parse memory update response: ${responseContent}`, error as Error)
             // Fallback: treat all facts as new additions
-            pendingMemories = facts.map(fact => ({
+            pendingMemories = facts.map((fact) => ({
               id: window.crypto.randomUUID(),
               type: 'ADD' as const,
               content: fact,
@@ -297,7 +302,7 @@ export class MemoryProcessor {
 
       // Create conversation context
       const conversationContext = messages
-        .map(msg => `${msg.role}: ${msg.content}`)
+        .map((msg) => `${msg.role}: ${msg.content}`)
         .join('\n')
         .slice(0, 1000) // Limit context length
 

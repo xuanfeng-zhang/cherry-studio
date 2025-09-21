@@ -37,6 +37,7 @@ import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
 import {
   BrushCleaning,
+  Check,
   FolderOpen,
   HelpCircle,
   MenuIcon,
@@ -44,14 +45,13 @@ import {
   PackagePlus,
   PinIcon,
   PinOffIcon,
+  Plus,
   PlusIcon,
   Save,
   Sparkles,
   TagIcon,
   UploadIcon,
-  XIcon,
-  Check,
-  Plus
+  XIcon
 } from 'lucide-react'
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -199,10 +199,8 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
   const onTagToggle = useCallback(
     (topic: Topic, tag: string) => {
       const currentTags = topic.tags || []
-      const newTags = currentTags.includes(tag)
-        ? currentTags.filter(t => t !== tag)
-        : [...currentTags, tag]
-      
+      const newTags = currentTags.includes(tag) ? currentTags.filter((t) => t !== tag) : [...currentTags, tag]
+
       const updatedTopic = { ...topic, tags: newTags }
       updateTopic(updatedTopic)
       // 同时更新targetTopic状态以便菜单实时显示最新状态
@@ -334,7 +332,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         icon: <TagIcon size={14} />,
         children: (() => {
           const items: MenuProps['items'] = []
-          
+
           // 添加已有标签选项
           if (allTags.length > 0) {
             allTags.forEach((tag) => {
@@ -342,8 +340,13 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
               items.push({
                 key: `tag-${tag}`,
                 label: (
-                  <div 
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minWidth: '120px' }}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      minWidth: '120px'
+                    }}
                     onMouseDown={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
@@ -353,13 +356,13 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                       e.stopPropagation()
                       onTagToggle(topic, tag)
                       // 保持菜单打开
-                      setDropdownVisible(prev => ({ ...prev, [topic.id]: true }))
-                    }}
-                  >
-                    <span style={{ 
-                      color: isSelected ? 'var(--color-primary)' : 'var(--color-text-1)',
-                      fontWeight: isSelected ? 500 : 400
+                      setDropdownVisible((prev) => ({ ...prev, [topic.id]: true }))
                     }}>
+                    <span
+                      style={{
+                        color: isSelected ? 'var(--color-primary)' : 'var(--color-text-1)',
+                        fontWeight: isSelected ? 500 : 400
+                      }}>
                       {tag}
                     </span>
                     {isSelected && <Check size={14} />}
@@ -367,25 +370,22 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                 )
               })
             })
-            
+
             items.push({ type: 'divider' })
           }
-          
+
           // 添加标签管理选项
           items.push({
             key: 'manage-tags',
             label: (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Plus size={14} />
-                {allTags.length > 0 
-                  ? t('chat.topics.tags.add')
-                  : t('chat.topics.tags.add_first')
-                }
+                {allTags.length > 0 ? t('chat.topics.tags.add') : t('chat.topics.tags.add_first')}
               </div>
             ),
             onClick: () => onOpenTagManager(topic)
           })
-          
+
           return items
         })()
       },
@@ -598,19 +598,17 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
   // Get tag filter state
   const topicTagFilter = useSelector((state: RootState) => state.assistants.topicTagFilter)
   const isCurrentAssistant = assistant && topicTagFilter?.assistantId === assistant.id
-  const selectedTags = isCurrentAssistant ? (topicTagFilter?.selectedTags || []) : []
+  const selectedTags = isCurrentAssistant ? topicTagFilter?.selectedTags || [] : []
 
   // Filter and sort topics based on tags and pinned status
   const sortedTopics = useMemo(() => {
     if (!assistant) return []
-    
+
     let filteredTopics = assistant.topics
 
     // Apply tag filter if any tags are selected for current assistant
     if (selectedTags.length > 0) {
-      filteredTopics = assistant.topics.filter(topic => 
-        selectedTags.every(tag => topic.tags?.includes(tag))
-      )
+      filteredTopics = assistant.topics.filter((topic) => selectedTags.every((tag) => topic.tags?.includes(tag)))
     }
 
     // Sort by pinned status if enabled
@@ -621,7 +619,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         return 0
       })
     }
-    
+
     return filteredTopics
   }, [assistant?.topics, pinTopicsToTop, selectedTags, assistant])
 
@@ -630,157 +628,156 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
   return (
     <>
       <DraggableVirtualList
-      className="topics-tab"
-      list={sortedTopics}
-      onUpdate={updateTopics}
-      style={{ height: '100%', padding: '13px 0 10px 10px' }}
-      itemContainerStyle={{ paddingBottom: '8px' }}
-      header={
-        <>
-          <AddTopicButton onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}>
-            <PlusIcon size={16} />
-            {t('chat.add.topic.title')}
-          </AddTopicButton>
-          <TopicTagFilter assistantId={assistant?.id} />
-        </>
-      }>
-      {(topic) => {
-        const isActive = topic.id === activeTopic?.id
-        const topicName = topic.name.replace('`', '')
-        const topicPrompt = topic.prompt
-        const fullTopicPrompt = t('common.prompt') + ': ' + topicPrompt
+        className="topics-tab"
+        list={sortedTopics}
+        onUpdate={updateTopics}
+        style={{ height: '100%', padding: '13px 0 10px 10px' }}
+        itemContainerStyle={{ paddingBottom: '8px' }}
+        header={
+          <>
+            <AddTopicButton onClick={() => EventEmitter.emit(EVENT_NAMES.ADD_NEW_TOPIC)}>
+              <PlusIcon size={16} />
+              {t('chat.add.topic.title')}
+            </AddTopicButton>
+            <TopicTagFilter assistantId={assistant?.id} />
+          </>
+        }>
+        {(topic) => {
+          const isActive = topic.id === activeTopic?.id
+          const topicName = topic.name.replace('`', '')
+          const topicPrompt = topic.prompt
+          const fullTopicPrompt = t('common.prompt') + ': ' + topicPrompt
 
-        const getTopicNameClassName = () => {
-          if (isRenaming(topic.id)) return 'shimmer'
-          if (isNewlyRenamed(topic.id)) return 'typing'
-          return ''
-        }
+          const getTopicNameClassName = () => {
+            if (isRenaming(topic.id)) return 'shimmer'
+            if (isNewlyRenamed(topic.id)) return 'typing'
+            return ''
+          }
 
-        return (
-          <Dropdown 
-            menu={{ items: getTopicMenuItems }} 
-            trigger={['contextMenu']}
-            open={dropdownVisible[topic.id] || false}
-            onOpenChange={(visible) => {
-              setDropdownVisible(prev => ({ ...prev, [topic.id]: visible }))
-              if (visible) {
-                setTargetTopic(topic)
-              }
-            }}
-          >
-            <TopicListItem
-              onContextMenu={() => {
-                setTargetTopic(topic)
-                setDropdownVisible(prev => ({ ...prev, [topic.id]: true }))
-              }}
-              className={classNames(isActive ? 'active' : '', singlealone ? 'singlealone' : '')}
-              onClick={editingTopicId === topic.id && topicEdit.isEditing ? undefined : () => onSwitchTopic(topic)}
-              style={{
-                borderRadius,
-                cursor: editingTopicId === topic.id && topicEdit.isEditing ? 'default' : 'pointer'
+          return (
+            <Dropdown
+              menu={{ items: getTopicMenuItems }}
+              trigger={['contextMenu']}
+              open={dropdownVisible[topic.id] || false}
+              onOpenChange={(visible) => {
+                setDropdownVisible((prev) => ({ ...prev, [topic.id]: visible }))
+                if (visible) {
+                  setTargetTopic(topic)
+                }
               }}>
-              {isPending(topic.id) && !isActive && <PendingIndicator />}
-              {isFulfilled(topic.id) && !isActive && <FulfilledIndicator />}
-              <TopicNameContainer>
-                {editingTopicId === topic.id && topicEdit.isEditing ? (
-                  <TopicEditInput
-                    ref={topicEdit.inputRef}
-                    value={topicEdit.editValue}
-                    onChange={topicEdit.handleInputChange}
-                    onKeyDown={topicEdit.handleKeyDown}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ) : (
-                  <TopicName
-                    className={getTopicNameClassName()}
-                    title={topicName}
-                    onDoubleClick={() => {
-                      setEditingTopicId(topic.id)
-                      topicEdit.startEdit(topic.name)
-                    }}>
-                    {topicName}
-                  </TopicName>
-                )}
-                
-                {/* 标签指示器 */}
-                {topic.tags && topic.tags.length > 0 && (
-                  <TopicTagsIndicator>
-                    <TagIcon size={12} />
-                    <TopicTagsCount>{topic.tags.length}</TopicTagsCount>
-                  </TopicTagsIndicator>
-                )}
-                
-                {!topic.pinned && (
-                  <Tooltip
-                    placement="bottom"
-                    mouseEnterDelay={0.7}
-                    mouseLeaveDelay={0}
-                    title={
-                      <div style={{ fontSize: '12px', opacity: 0.8, fontStyle: 'italic' }}>
-                        {t('chat.topics.delete.shortcut', { key: isMac ? '⌘' : 'Ctrl' })}
-                      </div>
-                    }>
-                    <MenuButton
-                      className="menu"
-                      onClick={(e) => {
-                        if (e.ctrlKey || e.metaKey) {
-                          handleConfirmDelete(topic, e)
-                        } else if (deletingTopicId === topic.id) {
-                          handleConfirmDelete(topic, e)
-                        } else {
-                          handleDeleteClick(topic.id, e)
-                        }
+              <TopicListItem
+                onContextMenu={() => {
+                  setTargetTopic(topic)
+                  setDropdownVisible((prev) => ({ ...prev, [topic.id]: true }))
+                }}
+                className={classNames(isActive ? 'active' : '', singlealone ? 'singlealone' : '')}
+                onClick={editingTopicId === topic.id && topicEdit.isEditing ? undefined : () => onSwitchTopic(topic)}
+                style={{
+                  borderRadius,
+                  cursor: editingTopicId === topic.id && topicEdit.isEditing ? 'default' : 'pointer'
+                }}>
+                {isPending(topic.id) && !isActive && <PendingIndicator />}
+                {isFulfilled(topic.id) && !isActive && <FulfilledIndicator />}
+                <TopicNameContainer>
+                  {editingTopicId === topic.id && topicEdit.isEditing ? (
+                    <TopicEditInput
+                      ref={topicEdit.inputRef}
+                      value={topicEdit.editValue}
+                      onChange={topicEdit.handleInputChange}
+                      onKeyDown={topicEdit.handleKeyDown}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <TopicName
+                      className={getTopicNameClassName()}
+                      title={topicName}
+                      onDoubleClick={() => {
+                        setEditingTopicId(topic.id)
+                        topicEdit.startEdit(topic.name)
                       }}>
-                      {deletingTopicId === topic.id ? (
-                        <DeleteIcon size={14} color="var(--color-error)" style={{ pointerEvents: 'none' }} />
-                      ) : (
-                        <XIcon size={14} color="var(--color-text-3)" style={{ pointerEvents: 'none' }} />
-                      )}
-                    </MenuButton>
-                  </Tooltip>
-                )}
-                {topic.pinned && (
-                  <MenuButton className="pin">
-                    <PinIcon size={14} color="var(--color-text-3)" />
-                  </MenuButton>
-                )}
-              </TopicNameContainer>
-              {topicPrompt && (
-                <TopicPromptText className="prompt" title={fullTopicPrompt}>
-                  {fullTopicPrompt}
-                </TopicPromptText>
-              )}
-              {showTopicTime && (
-                <TopicTimeContainer className="time-tags">
-                  <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>
-                  {topic.tags && topic.tags.length > 0 && (
-                    <>
-                      <TopicTimeSeparator>•</TopicTimeSeparator>
-                      <TopicTagsContainer className="tags">
-                        {topic.tags.map((tag) => (
-                          <TopicTag key={tag}>{tag}</TopicTag>
-                        ))}
-                      </TopicTagsContainer>
-                    </>
+                      {topicName}
+                    </TopicName>
                   )}
-                </TopicTimeContainer>
-              )}
-            </TopicListItem>
-          </Dropdown>
-        )
-      }}
-    </DraggableVirtualList>
-    
-    {/* Empty state when no topics match the filter */}
-    {selectedTags.length > 0 && sortedTopics.length === 0 && (
-      <EmptyFilterState>
-        <EmptyFilterIcon>🏷️</EmptyFilterIcon>
-        <EmptyFilterTitle>{t('chat.topics.filter.no_results')}</EmptyFilterTitle>
-        <EmptyFilterDescription>
-          {t('chat.topics.filter.no_results_desc', { tags: selectedTags.join(', ') })}
-        </EmptyFilterDescription>
-      </EmptyFilterState>
-    )}
+
+                  {/* 标签指示器 */}
+                  {topic.tags && topic.tags.length > 0 && (
+                    <TopicTagsIndicator>
+                      <TagIcon size={12} />
+                      <TopicTagsCount>{topic.tags.length}</TopicTagsCount>
+                    </TopicTagsIndicator>
+                  )}
+
+                  {!topic.pinned && (
+                    <Tooltip
+                      placement="bottom"
+                      mouseEnterDelay={0.7}
+                      mouseLeaveDelay={0}
+                      title={
+                        <div style={{ fontSize: '12px', opacity: 0.8, fontStyle: 'italic' }}>
+                          {t('chat.topics.delete.shortcut', { key: isMac ? '⌘' : 'Ctrl' })}
+                        </div>
+                      }>
+                      <MenuButton
+                        className="menu"
+                        onClick={(e) => {
+                          if (e.ctrlKey || e.metaKey) {
+                            handleConfirmDelete(topic, e)
+                          } else if (deletingTopicId === topic.id) {
+                            handleConfirmDelete(topic, e)
+                          } else {
+                            handleDeleteClick(topic.id, e)
+                          }
+                        }}>
+                        {deletingTopicId === topic.id ? (
+                          <DeleteIcon size={14} color="var(--color-error)" style={{ pointerEvents: 'none' }} />
+                        ) : (
+                          <XIcon size={14} color="var(--color-text-3)" style={{ pointerEvents: 'none' }} />
+                        )}
+                      </MenuButton>
+                    </Tooltip>
+                  )}
+                  {topic.pinned && (
+                    <MenuButton className="pin">
+                      <PinIcon size={14} color="var(--color-text-3)" />
+                    </MenuButton>
+                  )}
+                </TopicNameContainer>
+                {topicPrompt && (
+                  <TopicPromptText className="prompt" title={fullTopicPrompt}>
+                    {fullTopicPrompt}
+                  </TopicPromptText>
+                )}
+                {showTopicTime && (
+                  <TopicTimeContainer className="time-tags">
+                    <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>
+                    {topic.tags && topic.tags.length > 0 && (
+                      <>
+                        <TopicTimeSeparator>•</TopicTimeSeparator>
+                        <TopicTagsContainer className="tags">
+                          {topic.tags.map((tag) => (
+                            <TopicTag key={tag}>{tag}</TopicTag>
+                          ))}
+                        </TopicTagsContainer>
+                      </>
+                    )}
+                  </TopicTimeContainer>
+                )}
+              </TopicListItem>
+            </Dropdown>
+          )
+        }}
+      </DraggableVirtualList>
+
+      {/* Empty state when no topics match the filter */}
+      {selectedTags.length > 0 && sortedTopics.length === 0 && (
+        <EmptyFilterState>
+          <EmptyFilterIcon>🏷️</EmptyFilterIcon>
+          <EmptyFilterTitle>{t('chat.topics.filter.no_results')}</EmptyFilterTitle>
+          <EmptyFilterDescription>
+            {t('chat.topics.filter.no_results_desc', { tags: selectedTags.join(', ') })}
+          </EmptyFilterDescription>
+        </EmptyFilterState>
+      )}
     </>
   )
 }
@@ -1011,7 +1008,7 @@ const TopicTagsIndicator = styled.div`
   border: 1px solid var(--color-border);
   opacity: 0.7;
   transition: opacity 0.2s;
-  
+
   &:hover {
     opacity: 1;
   }
@@ -1034,7 +1031,7 @@ const TopicTag = styled.div`
   opacity: 0.6;
   flex-shrink: 0;
   position: relative;
-  
+
   &:not(:last-child)::after {
     content: '•';
     margin-left: 4px;

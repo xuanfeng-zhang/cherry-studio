@@ -152,7 +152,8 @@ const SearchResults: FC<Props> = ({ keywords, onMessageClick, onTopicClick, ...p
           style={{ opacity: isLoading ? 0 : 1 }}
           renderItem={({ message, topic, content }) => (
             <List.Item>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'nowrap' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px', flexWrap: 'nowrap' }}>
                 <Title
                   level={5}
                   style={{ color: 'var(--color-primary)', cursor: 'pointer', margin: 0, flex: 'none' }}

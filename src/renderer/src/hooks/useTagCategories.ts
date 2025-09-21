@@ -91,9 +91,9 @@ export function useTagCategories() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
-      
+
       dispatch(addTagCategory(category))
-      
+
       return category
     },
     [dispatch]

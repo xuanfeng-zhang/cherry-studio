@@ -1,11 +1,11 @@
+import { FolderOutlined, PlusOutlined, SettingOutlined } from '@ant-design/icons'
+import { useTagCategories } from '@renderer/hooks/useTagCategories'
+import { Button, Collapse, Divider, Input, Modal, Tag, Tooltip } from 'antd'
 import React from 'react'
-import { Modal, Input, Tag, Divider, Button, Collapse, Tooltip } from 'antd'
-import { PlusOutlined, SettingOutlined, FolderOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { Topic } from '../../types'
-import { useTagCategories } from '@renderer/hooks/useTagCategories'
 import TagCategoryManagementPopup from './TagCategoryManagementPopup'
 
 interface TagManagementPopupProps {
@@ -15,12 +15,7 @@ interface TagManagementPopupProps {
   onCancel: () => void
 }
 
-const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
-  topic,
-  availableTags,
-  onConfirm,
-  onCancel
-}) => {
+const TagManagementPopup: React.FC<TagManagementPopupProps> = ({ topic, availableTags, onConfirm, onCancel }) => {
   const { t } = useTranslation()
   const { categoriesWithTags } = useTagCategories()
   const [selectedTags, setSelectedTags] = React.useState<string[]>(topic.tags || [])
@@ -36,7 +31,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
   }, [inputVisible])
 
   const handleClose = (removedTag: string) => {
-    const newTags = selectedTags.filter(tag => tag !== removedTag)
+    const newTags = selectedTags.filter((tag) => tag !== removedTag)
     setSelectedTags(newTags)
   }
 
@@ -58,7 +53,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
 
   const handleTagClick = (tag: string) => {
     if (selectedTags.includes(tag)) {
-      setSelectedTags(selectedTags.filter(t => t !== tag))
+      setSelectedTags(selectedTags.filter((t) => t !== tag))
     } else {
       setSelectedTags([...selectedTags, tag])
     }
@@ -94,11 +89,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
             <SectionTitle>{t('chat.topics.tags.selected')}</SectionTitle>
             <TagContainer>
               {selectedTags.map((tag) => (
-                <Tag
-                  key={tag}
-                  closable
-                  onClose={() => handleClose(tag)}
-                  color="blue">
+                <Tag key={tag} closable onClose={() => handleClose(tag)} color="blue">
                   {tag}
                 </Tag>
               ))}
@@ -128,7 +119,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
             <CategorizedTagsContainer>
               {categoriesWithTags.length > 0 ? (
                 <Collapse size="small" ghost>
-                  {categoriesWithTags.map(category => (
+                  {categoriesWithTags.map((category) => (
                     <Collapse.Panel
                       key={category.id}
                       header={
@@ -139,8 +130,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
                             ({category.tags.length})
                           </span>
                         </CategoryHeader>
-                      }
-                    >
+                      }>
                       <TagContainer>
                         {category.tags.map((tag) => (
                           <Tag
@@ -152,9 +142,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
                               color: selectedTags.includes(tag.name) ? 'white' : undefined
                             }}>
                             {tag.name}
-                            <span style={{ opacity: 0.7, marginLeft: 4, fontSize: '10px' }}>
-                              ({tag.usage})
-                            </span>
+                            <span style={{ opacity: 0.7, marginLeft: 4, fontSize: '10px' }}>({tag.usage})</span>
                           </Tag>
                         ))}
                         {category.tags.length === 0 && (
@@ -185,10 +173,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({
         </Container>
       </Modal>
 
-      <TagCategoryManagementPopup
-        open={showCategoryManagement}
-        onClose={() => setShowCategoryManagement(false)}
-      />
+      <TagCategoryManagementPopup open={showCategoryManagement} onClose={() => setShowCategoryManagement(false)} />
     </>
   )
 }

@@ -1,16 +1,10 @@
-import { Modal, Input, Button, Tag, Tooltip, Empty, Form, Dropdown } from 'antd'
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  SearchOutlined
-} from '@ant-design/icons'
-import { useTranslation } from 'react-i18next'
-import { useState, useCallback, useMemo } from 'react'
-import styled from 'styled-components'
-
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useTagCategories } from '@renderer/hooks/useTagCategories'
 import { TagCategory } from '@renderer/types'
+import { Button, Dropdown, Empty, Form, Input, Modal, Tag, Tooltip } from 'antd'
+import { useCallback, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
 
 interface TagCategoryManagementPopupProps {
   open: boolean
@@ -21,19 +15,9 @@ interface CategoryFormData {
   name: string
 }
 
-
-const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
-  open,
-  onClose
-}) => {
+const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({ open, onClose }) => {
   const { t } = useTranslation()
-  const {
-    categoriesWithTags,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-    moveTagsToCategory
-  } = useTagCategories()
+  const { categoriesWithTags, createCategory, updateCategory, deleteCategory, moveTagsToCategory } = useTagCategories()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [showCreateForm, setShowCreateForm] = useState(false)
@@ -45,28 +29,27 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
   const filteredCategoriesWithTags = useMemo(() => {
     if (!searchQuery) return categoriesWithTags
 
-    return categoriesWithTags.map(category => ({
-      ...category,
-      tags: category.tags.filter(tag =>
-        tag.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    })).filter(category => category.tags.length > 0)
+    return categoriesWithTags
+      .map((category) => ({
+        ...category,
+        tags: category.tags.filter((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      }))
+      .filter((category) => category.tags.length > 0)
   }, [categoriesWithTags, searchQuery])
-
 
   // 创建分类
   const handleCreateCategory = useCallback(async () => {
     try {
       const values = await form.validateFields()
-      
+
       // 检查必填字段
       if (!values.name || !values.name.trim()) {
         window.message?.error?.('分类名称不能为空') || alert('分类名称不能为空')
         return
       }
-      
+
       // 安全地计算最大order值
-      const orders = categoriesWithTags.map(cat => cat.order).filter(order => typeof order === 'number')
+      const orders = categoriesWithTags.map((cat) => cat.order).filter((order) => typeof order === 'number')
       const maxOrder = orders.length > 0 ? Math.max(...orders) : 0
 
       createCategory({
@@ -86,13 +69,16 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
   }, [form, categoriesWithTags, createCategory])
 
   // 编辑分类
-  const handleEditCategory = useCallback((category: TagCategory) => {
-    setEditingCategory(category)
-    form.setFieldsValue({
-      name: category.name
-    })
-    setShowCreateForm(true)
-  }, [form])
+  const handleEditCategory = useCallback(
+    (category: TagCategory) => {
+      setEditingCategory(category)
+      form.setFieldsValue({
+        name: category.name
+      })
+      setShowCreateForm(true)
+    },
+    [form]
+  )
 
   // 更新分类
   const handleUpdateCategory = useCallback(async () => {
@@ -100,7 +86,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
 
     try {
       const values = await form.validateFields()
-      
+
       updateCategory({
         ...editingCategory,
         ...values
@@ -119,26 +105,35 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
   }, [form, editingCategory, updateCategory])
 
   // 删除分类
-  const handleDeleteCategory = useCallback((categoryId: string) => {
-    Modal.confirm({
-      title: t('chat.topics.tags.confirm_delete_category'),
-      content: t('chat.topics.tags.delete_category_warning'),
-      onOk: () => deleteCategory(categoryId)
-    })
-  }, [deleteCategory, t])
+  const handleDeleteCategory = useCallback(
+    (categoryId: string) => {
+      Modal.confirm({
+        title: t('chat.topics.tags.confirm_delete_category'),
+        content: t('chat.topics.tags.delete_category_warning'),
+        onOk: () => deleteCategory(categoryId)
+      })
+    },
+    [deleteCategory, t]
+  )
 
   // 移动标签
-  const handleMoveTag = useCallback((tagName: string, _fromCategoryId: string, toCategoryId?: string) => {
-    moveTagsToCategory([tagName], toCategoryId)
-  }, [moveTagsToCategory])
+  const handleMoveTag = useCallback(
+    (tagName: string, _fromCategoryId: string, toCategoryId?: string) => {
+      moveTagsToCategory([tagName], toCategoryId)
+    },
+    [moveTagsToCategory]
+  )
 
   // 批量分配标签到分类
-  const handleAssignToCategory = useCallback((categoryId: string) => {
-    if (selectedTags.length === 0) return
+  const handleAssignToCategory = useCallback(
+    (categoryId: string) => {
+      if (selectedTags.length === 0) return
 
-    moveTagsToCategory(selectedTags, categoryId)
-    setSelectedTags([])
-  }, [selectedTags, moveTagsToCategory])
+      moveTagsToCategory(selectedTags, categoryId)
+      setSelectedTags([])
+    },
+    [selectedTags, moveTagsToCategory]
+  )
 
   const handleCancel = useCallback(() => {
     form.resetFields()
@@ -174,8 +169,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
           paddingBottom: '16px',
           marginBottom: '0'
         }
-      }}
-    >
+      }}>
       <Container>
         {/* 搜索和操作栏 */}
         <ActionBar>
@@ -186,11 +180,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ flex: 1, marginRight: 12 }}
           />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setShowCreateForm(true)}
-          >
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setShowCreateForm(true)}>
             {t('chat.topics.tags.create_category')}
           </Button>
         </ActionBar>
@@ -198,34 +188,29 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
         {/* 创建/编辑分类表单 */}
         {showCreateForm && (
           <FormSection>
-            <Form form={form} layout="vertical" onFinish={editingCategory ? handleUpdateCategory : handleCreateCategory}>
+            <Form
+              form={form}
+              layout="vertical"
+              onFinish={editingCategory ? handleUpdateCategory : handleCreateCategory}>
               <Form.Item
                 name="name"
                 label={t('chat.topics.tags.category_name')}
-                rules={[{ required: true, message: t('chat.topics.tags.category_name_required') }]}
-              >
+                rules={[{ required: true, message: t('chat.topics.tags.category_name_required') }]}>
                 <Input placeholder={t('chat.topics.tags.enter_category_name')} />
               </Form.Item>
               <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  style={{ marginRight: 8 }}
-                >
+                <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
                   {editingCategory ? t('common.update') : t('common.create')}
                 </Button>
-                <Button onClick={handleCancel}>
-                  {t('common.cancel')}
-                </Button>
+                <Button onClick={handleCancel}>{t('common.cancel')}</Button>
               </Form.Item>
             </Form>
           </FormSection>
         )}
 
-
         {/* 标签分类列表 - 卡片式设计 */}
         <CategoriesSection>
-          {filteredCategoriesWithTags.map(category => (
+          {filteredCategoriesWithTags.map((category) => (
             <CategoryCard key={category.id}>
               <CategoryCardHeader>
                 <CategoryCardTitle>
@@ -257,15 +242,16 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
 
               <TagsGrid>
                 {category.tags.map((tag: any) => {
-                  const moveToMenuItems = category.id === 'uncategorized'
-                    ? filteredCategoriesWithTags
-                        .filter(cat => cat.id !== 'uncategorized')
-                        .map(cat => ({
-                          key: cat.id,
-                          label: cat.name,
-                          onClick: () => handleMoveTag(tag.name, category.id, cat.id)
-                        }))
-                    : []
+                  const moveToMenuItems =
+                    category.id === 'uncategorized'
+                      ? filteredCategoriesWithTags
+                          .filter((cat) => cat.id !== 'uncategorized')
+                          .map((cat) => ({
+                            key: cat.id,
+                            label: cat.name,
+                            onClick: () => handleMoveTag(tag.name, category.id, cat.id)
+                          }))
+                      : []
 
                   return (
                     <TagItem key={tag.name}>
@@ -274,23 +260,15 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
                         <TagUsage>({tag.usage})</TagUsage>
                       </StyledTag>
                       {category.id === 'uncategorized' && moveToMenuItems.length > 0 && (
-                        <Dropdown
-                          menu={{ items: moveToMenuItems }}
-                          placement="bottomRight"
-                          trigger={['click']}
-                        >
+                        <Dropdown menu={{ items: moveToMenuItems }} placement="bottomRight" trigger={['click']}>
                           <Tooltip title={t('chat.topics.tags.move_to_category')}>
-                            <MoveButton>
-                              移入
-                            </MoveButton>
+                            <MoveButton>移入</MoveButton>
                           </Tooltip>
                         </Dropdown>
                       )}
                       {category.id !== 'uncategorized' && (
                         <Tooltip title={t('chat.topics.tags.move_to_uncategorized')}>
-                          <MoveButton onClick={() => handleMoveTag(tag.name, category.id, undefined)}>
-                            ×
-                          </MoveButton>
+                          <MoveButton onClick={() => handleMoveTag(tag.name, category.id, undefined)}>×</MoveButton>
                         </Tooltip>
                       )}
                     </TagItem>
@@ -307,7 +285,7 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
 
           {filteredCategoriesWithTags.length === 0 && (
             <EmptyStateContainer>
-              <Empty 
+              <Empty
                 description={searchQuery ? t('chat.topics.tags.no_matching_tags') : t('chat.topics.tags.no_categories')}
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               />
@@ -323,13 +301,9 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
             </QuickAssignTitle>
             <QuickAssignActions>
               {categoriesWithTags
-                .filter(cat => cat.id !== 'uncategorized')
-                .map(category => (
-                  <Button
-                    key={category.id}
-                    size="small"
-                    onClick={() => handleAssignToCategory(category.id)}
-                  >
+                .filter((cat) => cat.id !== 'uncategorized')
+                .map((category) => (
+                  <Button key={category.id} size="small" onClick={() => handleAssignToCategory(category.id)}>
                     {category.name}
                   </Button>
                 ))}
@@ -340,7 +314,6 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
     </Modal>
   )
 }
-
 
 const Container = styled.div`
   display: flex;
@@ -393,7 +366,6 @@ const CategoriesSection = styled.div`
   }
 `
 
-
 const CategoryName = styled.span`
   font-weight: 400;
 `
@@ -414,7 +386,6 @@ const CategoryActions = styled.div`
   gap: 8px;
   flex-shrink: 0;
 `
-
 
 const TagItem = styled.div`
   display: flex;

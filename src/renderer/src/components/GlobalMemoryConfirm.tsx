@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import MemoryConfirmModal, { PendingMemoryItem, UserSelectOption } from './MemoryConfirmModal'
 import MemoryConfirmService, { MemoryConfirmState } from '../services/MemoryConfirmService'
+import MemoryConfirmModal, { PendingMemoryItem } from './MemoryConfirmModal'
 
 const GlobalMemoryConfirm: React.FC = () => {
   const [state, setState] = useState<MemoryConfirmState>({

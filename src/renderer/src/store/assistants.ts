@@ -2,7 +2,7 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import { Assistant, AssistantSettings, Model, Topic, TagCategory, CategorizedTag } from '@renderer/types'
+import { Assistant, AssistantSettings, CategorizedTag, Model, TagCategory, Topic } from '@renderer/types'
 import { isEmpty, uniqBy } from 'lodash'
 
 import { RootState } from '.'
@@ -112,7 +112,7 @@ const assistantsSlice = createSlice({
     toggleTopicTagFilter: (state, action: PayloadAction<{ tag: string; assistantId: string }>) => {
       const { tag, assistantId } = action.payload
       const currentFilter = state.topicTagFilter
-      
+
       // 如果currentFilter不存在或切换到不同的助手，重置筛选
       if (!currentFilter || currentFilter.assistantId !== assistantId) {
         state.topicTagFilter = {
@@ -121,12 +121,12 @@ const assistantsSlice = createSlice({
         }
         return
       }
-      
+
       // 切换标签选中状态
       const selectedTags = (currentFilter.selectedTags || []).includes(tag)
-        ? (currentFilter.selectedTags || []).filter(t => t !== tag)
+        ? (currentFilter.selectedTags || []).filter((t) => t !== tag)
         : [...(currentFilter.selectedTags || []), tag]
-      
+
       state.topicTagFilter = {
         selectedTags,
         assistantId
@@ -217,7 +217,7 @@ const assistantsSlice = createSlice({
       if (!state.tagCategories) {
         state.tagCategories = []
       }
-      
+
       state.tagCategories.push(action.payload)
       state.tagCategories.sort((a, b) => a.order - b.order)
     },
@@ -226,7 +226,7 @@ const assistantsSlice = createSlice({
       if (!state.tagCategories) {
         state.tagCategories = []
       }
-      const index = state.tagCategories.findIndex(cat => cat.id === action.payload.id)
+      const index = state.tagCategories.findIndex((cat) => cat.id === action.payload.id)
       if (index !== -1) {
         state.tagCategories[index] = action.payload
         state.tagCategories.sort((a, b) => a.order - b.order)
@@ -237,10 +237,10 @@ const assistantsSlice = createSlice({
       if (!state.tagCategories) {
         state.tagCategories = []
       }
-      state.tagCategories = state.tagCategories.filter(cat => cat.id !== action.payload.id)
+      state.tagCategories = state.tagCategories.filter((cat) => cat.id !== action.payload.id)
       // 移除分类时，将该分类下的标签设为未分类
       if (state.categorizedTags) {
-        Object.values(state.categorizedTags).forEach(tag => {
+        Object.values(state.categorizedTags).forEach((tag) => {
           if (tag.categoryId === action.payload.id) {
             tag.categoryId = undefined
           }
@@ -261,12 +261,12 @@ const assistantsSlice = createSlice({
       }
       delete state.categorizedTags[action.payload.tagName]
     },
-    bulkUpdateCategorizedTags: (state, action: PayloadAction<{ tags: string[], categoryId?: string }>) => {
+    bulkUpdateCategorizedTags: (state, action: PayloadAction<{ tags: string[]; categoryId?: string }>) => {
       // 确保 categorizedTags 已初始化
       if (!state.categorizedTags) {
         state.categorizedTags = {}
       }
-      action.payload.tags.forEach(tagName => {
+      action.payload.tags.forEach((tagName) => {
         if (state.categorizedTags[tagName]) {
           state.categorizedTags[tagName].categoryId = action.payload.categoryId
         } else {

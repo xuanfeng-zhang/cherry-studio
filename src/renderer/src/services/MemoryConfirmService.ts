@@ -1,9 +1,9 @@
 import { loggerService } from '@logger'
 import { PendingMemoryItem, UserSelectOption } from '@renderer/components/MemoryConfirmModal'
 import { AssistantMessage } from '@renderer/types'
-import MemoryService from './MemoryService'
 
 import { MemoryProcessor, MemoryProcessorConfig } from './MemoryProcessor'
+import MemoryService from './MemoryService'
 
 const logger = loggerService.withContext('MemoryConfirmService')
 
@@ -62,14 +62,11 @@ class MemoryConfirmService {
   public async showConfirmDialog(
     messages: AssistantMessage[],
     config: MemoryProcessorConfig
-  ): Promise<{ confirmedMemories: PendingMemoryItem[], selectedUsers: string[] }> {
+  ): Promise<{ confirmedMemories: PendingMemoryItem[]; selectedUsers: string[] }> {
     return new Promise(async (resolve, reject) => {
       try {
         const memoryProcessor = new MemoryProcessor()
-        const { pendingMemories, conversationContext } = await memoryProcessor.preparePendingMemories(
-          messages,
-          config
-        )
+        const { pendingMemories, conversationContext } = await memoryProcessor.preparePendingMemories(messages, config)
 
         if (pendingMemories.length === 0) {
           logger.debug('No pending memories to confirm')
@@ -80,7 +77,9 @@ class MemoryConfirmService {
         // Prepare user options
         const userOptions = await this.prepareUserOptions(config)
 
-        logger.debug(`Showing memory confirm dialog with ${pendingMemories.length} items for ${userOptions.length} users`)
+        logger.debug(
+          `Showing memory confirm dialog with ${pendingMemories.length} items for ${userOptions.length} users`
+        )
 
         this.state = {
           visible: true,
@@ -197,12 +196,14 @@ class MemoryConfirmService {
     } catch (error) {
       logger.error('Failed to prepare user options:', error as Error)
       // Fallback to default user only
-      return [{
-        userId: config.userId || 'default-user',
-        displayName: 'Default User',
-        selected: true,
-        isDefault: true
-      }]
+      return [
+        {
+          userId: config.userId || 'default-user',
+          displayName: 'Default User',
+          selected: true,
+          isDefault: true
+        }
+      ]
     }
   }
 
@@ -221,7 +222,7 @@ class MemoryConfirmService {
    * Notify all listeners of state change
    */
   private notifyListeners(): void {
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(this.getState())
       } catch (error) {

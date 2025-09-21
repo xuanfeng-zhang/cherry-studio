@@ -1,8 +1,7 @@
 import { loggerService } from '@logger'
-import { EditIcon } from '@renderer/components/Icons'
 import { Badge, Button, Card, Checkbox, Flex, Form, Input, Modal, Space, Typography } from 'antd'
 import { CheckboxChangeEvent } from 'antd/es/checkbox'
-import { Brain, Calendar, MessageSquare, UserRound } from 'lucide-react'
+import { Brain, MessageSquare, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -62,38 +61,32 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
   }, [visible, pendingMemories, userOptions])
 
   const handleMemoryToggle = (id: string, checked: boolean) => {
-    setEditingMemories(prev =>
-      prev.map(item => (item.id === id ? { ...item, enabled: checked } : item))
-    )
+    setEditingMemories((prev) => prev.map((item) => (item.id === id ? { ...item, enabled: checked } : item)))
   }
 
   const handleMemoryEdit = (id: string, newContent: string) => {
-    setEditingMemories(prev =>
-      prev.map(item => (item.id === id ? { ...item, content: newContent } : item))
-    )
+    setEditingMemories((prev) => prev.map((item) => (item.id === id ? { ...item, content: newContent } : item)))
   }
 
   const handleSelectAll = (e: CheckboxChangeEvent) => {
     const checked = e.target.checked
-    setEditingMemories(prev => prev.map(item => ({ ...item, enabled: checked })))
+    setEditingMemories((prev) => prev.map((item) => ({ ...item, enabled: checked })))
   }
 
   const handleUserToggle = (userId: string, checked: boolean) => {
-    setSelectedUsers(prev =>
-      prev.map(user => (user.userId === userId ? { ...user, selected: checked } : user))
-    )
+    setSelectedUsers((prev) => prev.map((user) => (user.userId === userId ? { ...user, selected: checked } : user)))
   }
 
   const handleSelectAllUsers = (e: CheckboxChangeEvent) => {
     const checked = e.target.checked
-    setSelectedUsers(prev => prev.map(user => ({ ...user, selected: checked })))
+    setSelectedUsers((prev) => prev.map((user) => ({ ...user, selected: checked })))
   }
 
   const handleConfirm = async () => {
     setLoading(true)
     try {
-      const confirmedItems = editingMemories.filter(item => item.enabled)
-      const confirmedUsers = selectedUsers.filter(user => user.selected).map(user => user.userId)
+      const confirmedItems = editingMemories.filter((item) => item.enabled)
+      const confirmedUsers = selectedUsers.filter((user) => user.selected).map((user) => user.userId)
       await onConfirm(confirmedItems, confirmedUsers)
       logger.debug(`Confirmed ${confirmedItems.length} memory items for ${confirmedUsers.length} users`)
     } catch (error) {
@@ -129,12 +122,12 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
     }
   }
 
-  const enabledCount = editingMemories.filter(item => item.enabled).length
+  const enabledCount = editingMemories.filter((item) => item.enabled).length
   const totalCount = editingMemories.length
   const allEnabled = enabledCount === totalCount && totalCount > 0
   const someEnabled = enabledCount > 0 && enabledCount < totalCount
 
-  const selectedUserCount = selectedUsers.filter(user => user.selected).length
+  const selectedUserCount = selectedUsers.filter((user) => user.selected).length
   const totalUserCount = selectedUsers.length
   const allUsersSelected = selectedUserCount === totalUserCount && totalUserCount > 0
   const someUsersSelected = selectedUserCount > 0 && selectedUserCount < totalUserCount
@@ -212,10 +205,7 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
 
         {/* Memory Controls */}
         <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-          <Checkbox
-            indeterminate={someEnabled}
-            checked={allEnabled}
-            onChange={handleSelectAll}>
+          <Checkbox indeterminate={someEnabled} checked={allEnabled} onChange={handleSelectAll}>
             {t('memory.select_all')} ({enabledCount}/{totalCount})
           </Checkbox>
           <Text type="secondary" style={{ fontSize: '13px' }}>
@@ -229,10 +219,7 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
             <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
               <UserRound size={16} color="var(--color-text-secondary)" />
               <Text strong>{t('memory.target_users')}</Text>
-              <Checkbox
-                indeterminate={someUsersSelected}
-                checked={allUsersSelected}
-                onChange={handleSelectAllUsers}>
+              <Checkbox indeterminate={someUsersSelected} checked={allUsersSelected} onChange={handleSelectAllUsers}>
                 {t('memory.select_all')} ({selectedUserCount}/{totalUserCount})
               </Checkbox>
             </Flex>
@@ -245,12 +232,7 @@ const MemoryConfirmModal: React.FC<MemoryConfirmModalProps> = ({
                   <Space size={4}>
                     <span>{user.displayName}</span>
                     {user.isDefault && (
-                      <Badge
-                        size="small"
-                        color="blue"
-                        text={t('memory.default')}
-                        style={{ fontSize: '10px' }}
-                      />
+                      <Badge size="small" color="blue" text={t('memory.default')} style={{ fontSize: '10px' }} />
                     )}
                   </Space>
                 </Checkbox>

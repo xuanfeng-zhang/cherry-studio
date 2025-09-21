@@ -29,7 +29,7 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
   const topicTagFilter = useSelector((state: RootState) => state.assistants.topicTagFilter)
   const isCurrentAssistant = topicTagFilter?.assistantId === assistantId
   const selectedTags = isCurrentAssistant ? topicTagFilter?.selectedTags || [] : []
-  
+
   // 获取折叠状态
   const isCollapsed = useSelector((state: RootState) => state.settings.topicTagFilterCollapsed)
 
@@ -135,13 +135,9 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
       <FilterContainer className={className}>
         <FilterHeader>
           <FilterTitleContainer onClick={handleToggleCollapse}>
-            <CollapseIcon>
-              {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-            </CollapseIcon>
+            <CollapseIcon>{isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}</CollapseIcon>
             <FilterTitle>{t('chat.topics.filter.by_tags')}</FilterTitle>
-            {selectedTags.length > 0 && (
-              <SelectedCount>({selectedTags.length})</SelectedCount>
-            )}
+            {selectedTags.length > 0 && <SelectedCount>({selectedTags.length})</SelectedCount>}
           </FilterTitleContainer>
           {!isCollapsed && (
             <FilterActions>

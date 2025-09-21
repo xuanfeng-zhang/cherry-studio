@@ -16,9 +16,7 @@ const TopicTags: FC<TopicTagsProps> = ({ tags, style, className }) => {
   return (
     <TagsContainer style={style} className={className}>
       {tags.map((tag, index) => (
-        <StyledTag key={index}>
-          {tag}
-        </StyledTag>
+        <StyledTag key={index}>{tag}</StyledTag>
       ))}
     </TagsContainer>
   )
@@ -41,7 +39,7 @@ const StyledTag = styled(Tag)`
   border-color: var(--color-border-secondary);
   color: var(--color-text-tertiary);
   border-width: 1px;
-  
+
   &:hover {
     background-color: var(--color-fill-tertiary);
     border-color: var(--color-border);
