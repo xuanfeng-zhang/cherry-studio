@@ -10,6 +10,11 @@ import { toFile } from 'openai/uploads'
 import { CompletionsParams, CompletionsResult, GenericChunk } from '../schemas'
 import { CompletionsContext, CompletionsMiddleware } from '../types'
 
+// Helper function to check if the provider is X.AI (Grok)
+const isXAIProvider = (apiHost: string): boolean => {
+  return apiHost.includes('api.x.ai')
+}
+
 export const MIDDLEWARE_NAME = 'ImageGenerationMiddleware'
 
 export const ImageGenerationMiddleware: CompletionsMiddleware =
@@ -48,9 +53,11 @@ export const ImageGenerationMiddleware: CompletionsMiddleware =
           const userImages = await Promise.all(
             userImageBlocks.map(async (block) => {
               if (!block.file) return null
-              const binaryData: Uint8Array = await FileManager.readBinaryImage(block.file)
+              const binaryData = await FileManager.readBinaryImage(block.file)
               const mimeType = `${block.file.type}/${block.file.ext.slice(1)}`
-              return await toFile(new Blob([binaryData]), block.file.origin_name || 'image.png', { type: mimeType })
+              // Convert Buffer to Uint8Array for Blob compatibility
+              const uint8Array = new Uint8Array(binaryData)
+              return await toFile(new Blob([uint8Array]), block.file.origin_name || 'image.png', { type: mimeType })
             })
           )
           imageFiles = imageFiles.concat(userImages.filter(Boolean) as Blob[])
@@ -76,25 +83,97 @@ export const ImageGenerationMiddleware: CompletionsMiddleware =
           const startTime = Date.now()
           let response: OpenAI.Images.ImagesResponse
           const options = { signal, timeout: defaultTimeout }
+          const isXAI = isXAIProvider(client.provider.apiHost)
 
           if (imageFiles.length > 0) {
-            response = await sdk.images.edit(
-              {
-                model: assistant.model.id,
-                image: imageFiles,
-                prompt: prompt || ''
-              },
-              options
-            )
-          } else {
-            response = await sdk.images.generate(
-              {
+            if (isXAI) {
+              // For X.AI, we need to convert images to base64 and use JSON format
+              const imageBase64Array = await Promise.all(
+                imageFiles.map(async (file) => {
+                  // Use FileReader for efficient base64 conversion
+                  return new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                      const result = reader.result as string
+                      resolve(result) // FileReader already returns data:image/...;base64,... format
+                    }
+                    reader.onerror = () => reject(new Error('Failed to read file as base64'))
+                    reader.readAsDataURL(file)
+                  })
+                })
+              )
+
+              // Use a direct fetch call for X.AI since it expects JSON format
+              const requestBody = {
                 model: assistant.model.id,
                 prompt: prompt || '',
-                response_format: assistant.model.id.includes('gpt-image-1') ? undefined : 'b64_json'
-              },
-              options
-            )
+                images: imageBase64Array,
+                response_format: 'b64_json'
+              }
+
+              const fetchResponse = await fetch(`${client.provider.apiHost}/v1/images/generations`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${client.provider.apiKey}`
+                },
+                body: JSON.stringify(requestBody),
+                signal
+              })
+
+              if (!fetchResponse.ok) {
+                const errorText = await fetchResponse.text()
+                throw new Error(`X.AI API error: ${fetchResponse.status} ${errorText}`)
+              }
+
+              response = await fetchResponse.json()
+            } else {
+              // Standard OpenAI format for other providers
+              response = await sdk.images.edit(
+                {
+                  model: assistant.model.id,
+                  image: imageFiles,
+                  prompt: prompt || ''
+                },
+                options
+              )
+            }
+          } else {
+            if (isXAI) {
+              // For X.AI text-to-image generation, also use JSON format
+              const requestBody = {
+                model: assistant.model.id,
+                prompt: prompt || '',
+                response_format: 'b64_json'
+              }
+
+              const fetchResponse = await fetch(`${client.provider.apiHost}/v1/images/generations`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${client.provider.apiKey}`
+                },
+                body: JSON.stringify(requestBody),
+                signal
+              })
+
+              if (!fetchResponse.ok) {
+                const errorText = await fetchResponse.text()
+                throw new Error(`X.AI API error: ${fetchResponse.status} ${errorText}`)
+              }
+
+              response = await fetchResponse.json()
+            } else {
+              // Standard OpenAI format for other providers
+              response = await sdk.images.generate(
+                {
+                  model: assistant.model.id,
+                  prompt: prompt || '',
+                  response_format: assistant.model.id.includes('gpt-image-1') ? undefined : 'b64_json'
+                },
+                options
+              )
+            }
           }
 
           let imageType: 'url' | 'base64' = 'base64'
