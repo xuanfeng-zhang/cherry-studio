@@ -31,7 +31,7 @@ import {
   exportTopicToNotion,
   topicToMarkdown
 } from '@renderer/utils/export'
-import { Dropdown, MenuProps, Tooltip } from 'antd'
+import { Dropdown, MenuProps, Tooltip, message } from 'antd'
 import { ItemType, MenuItemType } from 'antd/es/menu/interface'
 import dayjs from 'dayjs'
 import { findIndex } from 'lodash'
@@ -205,7 +205,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
       updateTopic(updatedTopic)
       // 同时更新targetTopic状态以便菜单实时显示最新状态
       setTargetTopic(updatedTopic)
-      window.message.success(t('common.saved'))
+      message.success(t('common.saved'))
     },
     [updateTopic, t]
   )
@@ -221,7 +221,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
             onConfirm={(tags) => {
               const updatedTopic = { ...topic, tags }
               updateTopic(updatedTopic)
-              window.message.success(t('common.saved'))
+              message.success(t('common.saved'))
               modal.destroy()
             }}
             onCancel={() => {
