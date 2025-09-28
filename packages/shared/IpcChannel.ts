@@ -8,6 +8,7 @@ export enum IpcChannel {
   App_ShowUpdateDialog = 'app:show-update-dialog',
   App_CheckForUpdate = 'app:check-for-update',
   App_Reload = 'app:reload',
+  App_Quit = 'app:quit',
   App_Info = 'app:info',
   App_Proxy = 'app:proxy',
   App_SetLaunchToTray = 'app:set-launch-to-tray',
@@ -321,10 +322,14 @@ export enum IpcChannel {
 
   // CodeTools
   CodeTools_Run = 'code-tools:run',
+  CodeTools_GetAvailableTerminals = 'code-tools:get-available-terminals',
+  CodeTools_SetCustomTerminalPath = 'code-tools:set-custom-terminal-path',
+  CodeTools_GetCustomTerminalPath = 'code-tools:get-custom-terminal-path',
+  CodeTools_RemoveCustomTerminalPath = 'code-tools:remove-custom-terminal-path',
 
   // OCR
   OCR_ocr = 'ocr:ocr',
 
-  // Cherryin
-  Cherryin_GetSignature = 'cherryin:get-signature'
+  // CherryAI
+  Cherryai_GetSignature = 'cherryai:get-signature'
 }

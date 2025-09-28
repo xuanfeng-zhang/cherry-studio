@@ -362,8 +362,9 @@
       "translate": "Traduzir para {{target_language}}",
       "translating": "Traduzindo...",
       "upload": {
+        "attachment": "Carregar anexo",
         "document": "Carregar documento (o modelo não suporta imagens)",
-        "label": "Carregar imagem ou documento",
+        "image_or_document": "Carregar imagem ou documento",
         "upload_from_local": "Fazer upload de arquivo local..."
       },
       "url_context": "Contexto da Página da Web",
@@ -659,13 +660,22 @@
       "title": "Tópicos",
       "unpin": "Desfixar"
     },
-    "translate": "Traduzir"
+    "translate": "Traduzir",
+    "web_search": {
+      "warning": {
+        "openai": "O modelo GPT5 com intensidade mínima de pensamento não suporta pesquisa na web"
+      }
+    }
   },
   "code": {
     "auto_update_to_latest": "Verificar atualizações e instalar a versão mais recente",
     "bun_required_message": "Executar a ferramenta CLI requer a instalação do ambiente Bun",
     "cli_tool": "Ferramenta de linha de comando",
     "cli_tool_placeholder": "Selecione a ferramenta de linha de comando a ser utilizada",
+    "custom_path": "Caminho personalizado",
+    "custom_path_error": "Falha ao definir caminho de terminal personalizado",
+    "custom_path_required": "Este terminal requer a definição de um caminho personalizado",
+    "custom_path_set": "Configuração personalizada do caminho do terminal bem-sucedida",
     "description": "Inicie rapidamente várias ferramentas de linha de comando de código, aumentando a eficiência do desenvolvimento",
     "env_vars_help": "Insira variáveis de ambiente personalizadas (uma por linha, formato: CHAVE=valor)",
     "environment_variables": "variáveis de ambiente",
@@ -684,7 +694,10 @@
     "model_placeholder": "Selecione o modelo a ser utilizado",
     "model_required": "Selecione o modelo",
     "select_folder": "Selecionar pasta",
+    "set_custom_path": "Definir caminho personalizado do terminal",
     "supported_providers": "Provedores de serviço suportados",
+    "terminal": "terminal",
+    "terminal_placeholder": "Selecionar aplicativo de terminal",
     "title": "Ferramenta de código",
     "update_options": "Opções de atualização",
     "working_directory": "diretório de trabalho"
@@ -1065,10 +1078,6 @@
       "error": {
         "failed": "Falha na migração"
       },
-      "migrate_to_langchain": {
-        "content": "A migração da base de conhecimento não elimina a base antiga, mas sim cria uma cópia e reprocessa todas as entradas, o que pode consumir muitos tokens. Por favor, proceda com cautela.",
-        "info": "A arquitetura da base de conhecimento foi atualizada, clique para migrar para a nova arquitetura."
-      },
       "source_dimensions": "Dimensões de origem",
       "source_model": "Modelo de origem",
       "target_dimensions": "Dimensões de destino",
@@ -1087,20 +1096,6 @@
     "quota": "Cota restante de {{name}}: {{quota}}",
     "quota_infinity": "Cota restante de {{name}}: ilimitada",
     "rename": "Renomear",
-    "retriever": "Modo de pesquisa",
-    "retriever_bm25": "pesquisa de texto completo",
-    "retriever_bm25_desc": "Pesquisar documentos com base na relevância e frequência das palavras-chave.",
-    "retriever_hybrid": "Pesquisa híbrida (recomendada)",
-    "retriever_hybrid_desc": "Combine a pesquisa por palavras-chave com a pesquisa semântica para alcançar a melhor precisão de recuperação.",
-    "retriever_hybrid_weight": {
-      "bm25": "texto integral",
-      "recommended": "Recomendar",
-      "title": "Ajuste de ponderação de pesquisa híbrida (texto completo/vetorial)",
-      "vector": "vetor"
-    },
-    "retriever_tooltip": "Utilize diferentes métodos de pesquisa para consultar a base de conhecimento.",
-    "retriever_vector": "pesquisa vetorial",
-    "retriever_vector_desc": "Encontrar documentos com base na similaridade semântica e significado.",
     "search": "Pesquisar repositório de conhecimento",
     "search_placeholder": "Digite o conteúdo da consulta",
     "settings": {
@@ -2024,6 +2019,7 @@
   "provider": {
     "302ai": "302.AI",
     "aihubmix": "AiHubMix",
+    "aionly": "AiOnly",
     "alayanew": "Alaya NeW",
     "anthropic": "Antropológico",
     "aws-bedrock": "AWS Bedrock",

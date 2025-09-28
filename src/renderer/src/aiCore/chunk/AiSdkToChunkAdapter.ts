@@ -13,16 +13,6 @@ import { ToolCallChunkHandler } from './handleToolCallChunk'
 
 const logger = loggerService.withContext('AiSdkToChunkAdapter')
 
-export interface CherryStudioChunk {
-  type: 'text-delta' | 'text-complete' | 'tool-call' | 'tool-result' | 'finish' | 'error'
-  text?: string
-  toolCall?: any
-  toolResult?: any
-  finishReason?: string
-  usage?: any
-  error?: any
-}
-
 /**
  * AI SDK 到 Cherry Studio Chunk 适配器类
  * 处理 fullStream 到 Cherry Studio chunk 的转换
@@ -180,8 +170,7 @@ export class AiSdkToChunkAdapter {
       case 'reasoning-end':
         this.onChunk({
           type: ChunkType.THINKING_COMPLETE,
-          text: (chunk.providerMetadata?.metadata?.thinking_content as string) || '',
-          thinking_millsec: (chunk.providerMetadata?.metadata?.thinking_millsec as number) || 0
+          text: (chunk.providerMetadata?.metadata?.thinking_content as string) || final.reasoningContent
         })
         final.reasoningContent = ''
         break
@@ -314,7 +303,7 @@ export class AiSdkToChunkAdapter {
       // === 源和文件相关事件 ===
       case 'source':
         if (chunk.sourceType === 'url') {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // oxlint-disable-next-line @typescript-eslint/no-unused-vars
           const { sourceType: _, ...rest } = chunk
           final.webSearchResults.push(rest)
         }

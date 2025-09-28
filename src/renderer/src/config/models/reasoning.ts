@@ -93,7 +93,17 @@ export function isSupportedThinkingTokenModel(model?: Model): boolean {
   // Specifically for DeepSeek V3.1. White list for now
   if (isDeepSeekHybridInferenceModel(model)) {
     return (
-      ['openrouter', 'dashscope', 'modelscope', 'doubao', 'silicon', 'nvidia', 'ppio'] satisfies SystemProviderId[]
+      [
+        'openrouter',
+        'dashscope',
+        'modelscope',
+        'doubao',
+        'silicon',
+        'nvidia',
+        'ppio',
+        'hunyuan',
+        'tencent-cloud-ti'
+      ] satisfies SystemProviderId[]
     ).some((id) => id === model.provider)
   }
 
@@ -225,6 +235,8 @@ export function isSupportedThinkingTokenQwenModel(model?: Model): boolean {
     'qwen-plus-2025-04-28',
     'qwen-plus-0714',
     'qwen-plus-2025-07-14',
+    'qwen-plus-2025-07-28',
+    'qwen-plus-2025-09-11',
     'qwen-turbo',
     'qwen-turbo-latest',
     'qwen-turbo-0428',
@@ -323,7 +335,7 @@ export const isDeepSeekHybridInferenceModel = (model: Model) => {
   const modelId = getLowerBaseModelName(model.id)
   // deepseek官方使用chat和reasoner做推理控制，其他provider需要单独判断，id可能会有所差别
   // openrouter: deepseek/deepseek-chat-v3.1 不知道会不会有其他provider仿照ds官方分出一个同id的作为非思考模式的模型，这里有风险
-  return /deepseek-v3(?:\.1|-1-\d+)?/.test(modelId) || modelId.includes('deepseek-chat-v3.1')
+  return /deepseek-v3(?:\.1|-1-\d+)/.test(modelId) || modelId.includes('deepseek-chat-v3.1')
 }
 
 export const isSupportedThinkingTokenDeepSeekModel = isDeepSeekHybridInferenceModel
@@ -379,7 +391,8 @@ export function isReasoningModel(model?: Model): boolean {
     isDeepSeekHybridInferenceModel(model) ||
     modelId.includes('magistral') ||
     modelId.includes('minimax-m1') ||
-    modelId.includes('pangu-pro-moe')
+    modelId.includes('pangu-pro-moe') ||
+    modelId.includes('seed-oss')
   ) {
     return true
   }
@@ -410,13 +423,14 @@ export const THINKING_TOKEN_MAP: Record<string, { min: number; max: number }> = 
   'gemini-.*-pro.*$': { min: 128, max: 32768 },
 
   // Qwen models
+  // qwen-plus-x 系列自 qwen-plus-2025-07-28 后模型最长思维链变为 81_920, qwen-plus 模型于 2025.9.16 同步变更
   'qwen3-235b-a22b-thinking-2507$': { min: 0, max: 81_920 },
   'qwen3-30b-a3b-thinking-2507$': { min: 0, max: 81_920 },
-  'qwen-plus-2025-07-28$': { min: 0, max: 81_920 },
-  'qwen-plus-latest$': { min: 0, max: 81_920 },
+  'qwen-plus-2025-07-14$': { min: 0, max: 38_912 },
+  'qwen-plus-2025-04-28$': { min: 0, max: 38_912 },
   'qwen3-1\\.7b$': { min: 0, max: 30_720 },
   'qwen3-0\\.6b$': { min: 0, max: 30_720 },
-  'qwen-plus.*$': { min: 0, max: 38_912 },
+  'qwen-plus.*$': { min: 0, max: 81_920 },
   'qwen-turbo.*$': { min: 0, max: 38_912 },
   'qwen-flash.*$': { min: 0, max: 81_920 },
   'qwen3-(?!max).*$': { min: 1024, max: 38_912 },

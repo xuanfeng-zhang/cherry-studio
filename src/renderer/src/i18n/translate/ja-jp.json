@@ -362,8 +362,9 @@
       "translate": "{{target_language}}に翻訳",
       "translating": "翻訳中...",
       "upload": {
+        "attachment": "添付ファイルをアップロード",
         "document": "ドキュメントをアップロード（モデルは画像をサポートしません）",
-        "label": "画像またはドキュメントをアップロード",
+        "image_or_document": "画像またはドキュメントをアップロード",
         "upload_from_local": "ローカルファイルをアップロード..."
       },
       "url_context": "URLコンテキスト",
@@ -659,13 +660,22 @@
       "title": "トピック",
       "unpin": "固定解除"
     },
-    "translate": "翻訳"
+    "translate": "翻訳",
+    "web_search": {
+      "warning": {
+        "openai": "GPT5モデルの最小思考強度ではネット検索はサポートされません"
+      }
+    }
   },
   "code": {
     "auto_update_to_latest": "最新バージョンを自動的に更新する",
     "bun_required_message": "CLI ツールを実行するには Bun 環境が必要です",
     "cli_tool": "CLI ツール",
     "cli_tool_placeholder": "使用する CLI ツールを選択してください",
+    "custom_path": "カスタムパス",
+    "custom_path_error": "カスタムターミナルパスの設定に失敗しました",
+    "custom_path_required": "この端末にはカスタムパスを設定する必要があります",
+    "custom_path_set": "カスタムターミナルパスの設定が成功しました",
     "description": "開発効率を向上させるために、複数のコード CLI ツールを迅速に起動します",
     "env_vars_help": "環境変数を設定して、CLI ツールの実行時に使用します。各変数は 1 行ごとに設定してください。",
     "environment_variables": "環境変数",
@@ -684,7 +694,10 @@
     "model_placeholder": "使用するモデルを選択してください",
     "model_required": "モデルを選択してください",
     "select_folder": "フォルダを選択",
+    "set_custom_path": "カスタムターミナルパスを設定",
     "supported_providers": "サポートされているプロバイダー",
+    "terminal": "端末",
+    "terminal_placeholder": "ターミナルアプリを選択",
     "title": "コードツール",
     "update_options": "更新オプション",
     "working_directory": "作業ディレクトリ"
@@ -1065,10 +1078,6 @@
       "error": {
         "failed": "移行が失敗しました"
       },
-      "migrate_to_langchain": {
-        "content": "ナレッジベースの移行は旧ナレッジベースを削除せず、すべてのエントリーを再処理したコピーを作成します。大量のトークンを消費する可能性があるため、操作には十分注意してください。",
-        "info": "ナレッジベースのアーキテクチャが更新されました、新しいアーキテクチャに移行するにはクリックしてください"
-      },
       "source_dimensions": "ソース次元",
       "source_model": "ソースモデル",
       "target_dimensions": "ターゲット次元",
@@ -1087,20 +1096,6 @@
     "quota": "{{name}} 残りクォータ: {{quota}}",
     "quota_infinity": "{{name}} クォータ: 無制限",
     "rename": "名前を変更",
-    "retriever": "検索モード",
-    "retriever_bm25": "全文検索",
-    "retriever_bm25_desc": "キーワードの関連性と頻度に基づいてドキュメントを検索します。",
-    "retriever_hybrid": "ハイブリッド検索（おすすめ）",
-    "retriever_hybrid_desc": "キーワード検索と意味検索を組み合わせて、最高の検索精度を実現します。",
-    "retriever_hybrid_weight": {
-      "bm25": "全文（ぜんぶん）",
-      "recommended": "おすすめ",
-      "title": "ハイブリッド検索の重み付け調整 (全文/ベクトル)",
-      "vector": "ベクトル"
-    },
-    "retriever_tooltip": "異なる検索方法を使用してナレッジベースを検索する",
-    "retriever_vector": "ベクトル検索",
-    "retriever_vector_desc": "意味的な類似性と意味に基づいて文書を検索します。",
     "search": "ナレッジベースを検索",
     "search_placeholder": "検索するテキストを入力",
     "settings": {
@@ -2024,6 +2019,7 @@
   "provider": {
     "302ai": "302.AI",
     "aihubmix": "AiHubMix",
+    "aionly": "AiOnly",
     "alayanew": "Alaya NeW",
     "anthropic": "Anthropic",
     "aws-bedrock": "AWS Bedrock",

@@ -52,7 +52,7 @@ export function getReasoningEffort(assistant: Assistant, model: Model): Reasonin
         return {}
       }
       // Don't disable reasoning for models that require it
-      if (isGrokReasoningModel(model) || isOpenAIReasoningModel(model)) {
+      if (isGrokReasoningModel(model) || isOpenAIReasoningModel(model) || model.id.includes('seed-oss')) {
         return {}
       }
       return { reasoning: { enabled: false, exclude: true } }
@@ -112,6 +112,8 @@ export function getReasoningEffort(assistant: Assistant, model: Model): Reasonin
           return {
             enable_thinking: true
           }
+        case SystemProviderIds.hunyuan:
+        case SystemProviderIds['tencent-cloud-ti']:
         case SystemProviderIds.doubao:
           return {
             thinking: {
@@ -312,7 +314,7 @@ export function getOpenAIReasoningParams(assistant: Assistant, model: Model): Re
 
 export function getAnthropicThinkingBudget(assistant: Assistant, model: Model): number {
   const { maxTokens, reasoning_effort: reasoningEffort } = getAssistantSettings(assistant)
-  if (maxTokens === undefined || reasoningEffort === undefined) {
+  if (reasoningEffort === undefined) {
     return 0
   }
   const effortRatio = EFFORT_RATIO[reasoningEffort]

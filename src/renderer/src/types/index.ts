@@ -17,6 +17,7 @@ import type { BaseTool, MCPTool } from './tool'
 
 export * from './knowledge'
 export * from './mcp'
+export * from './notification'
 export * from './ocr'
 
 export type Assistant = {
@@ -294,7 +295,7 @@ export type Provider = {
 }
 
 export const SystemProviderIds = {
-  cherryin: 'cherryin',
+  // cherryin: 'cherryin',
   silicon: 'silicon',
   aihubmix: 'aihubmix',
   ocoolai: 'ocoolai',
@@ -346,7 +347,8 @@ export const SystemProviderIds = {
   gpustack: 'gpustack',
   voyageai: 'voyageai',
   'aws-bedrock': 'aws-bedrock',
-  poe: 'poe'
+  poe: 'poe',
+  aionly: 'aionly'
 } as const
 
 export type SystemProviderId = keyof typeof SystemProviderIds

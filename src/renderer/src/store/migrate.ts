@@ -1394,7 +1394,7 @@ const migrateConfig = {
       if (state.websearch?.providers) {
         state.websearch.providers = state.websearch.providers.map((provider) => {
           if (provider.id === 'exa' || provider.id === 'tavily') {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // oxlint-disable-next-line @typescript-eslint/no-unused-vars
             const { basicAuthUsername, basicAuthPassword, ...rest } = provider
             return rest
           }
@@ -2387,8 +2387,8 @@ const migrateConfig = {
 
       // Also apply knowledge base framework migration
       state.knowledge.bases.forEach((base) => {
-        if (!base.framework) {
-          base.framework = 'embedjs'
+        if ((base as any).framework) {
+          delete (base as any).framework
         }
       })
       return state
@@ -2409,8 +2409,8 @@ const migrateConfig = {
   '149': (state: RootState) => {
     try {
       state.knowledge.bases.forEach((base) => {
-        if (!base.framework) {
-          base.framework = 'embedjs'
+        if ((base as any).framework) {
+          delete (base as any).framework
         }
       })
       return state
@@ -2472,6 +2472,91 @@ const migrateConfig = {
       return state
     } catch (error) {
       logger.error('migrate 154 error', error as Error)
+      return state
+    }
+  },
+  '155': (state: RootState) => {
+    try {
+      state.knowledge.bases.forEach((base) => {
+        if ((base as any).framework) {
+          delete (base as any).framework
+        }
+      })
+      return state
+    } catch (error) {
+      logger.error('migrate 155 error', error as Error)
+      return state
+    }
+  },
+  '156': (state: RootState) => {
+    try {
+      state.llm.providers.forEach((provider) => {
+        if (provider.id === SystemProviderIds.anthropic) {
+          if (provider.apiHost.endsWith('/')) {
+            provider.apiHost = provider.apiHost.slice(0, -1)
+          }
+        }
+      })
+      return state
+    } catch (error) {
+      logger.error('migrate 156 error', error as Error)
+      return state
+    }
+  },
+  '157': (state: RootState) => {
+    try {
+      addProvider(state, 'aionly')
+      state.llm.providers = moveProvider(state.llm.providers, 'aionly', 10)
+
+      const cherryinProvider = state.llm.providers.find((provider) => provider.id === 'cherryin')
+
+      if (cherryinProvider) {
+        updateProvider(state, 'cherryin', { apiHost: 'https://open.cherryin.ai', models: [] })
+      }
+
+      if (state.llm.defaultModel?.provider === 'cherryin') {
+        state.llm.defaultModel.provider = 'cherryai'
+      }
+
+      if (state.llm.quickModel?.provider === 'cherryin') {
+        state.llm.quickModel.provider = 'cherryai'
+      }
+
+      if (state.llm.translateModel?.provider === 'cherryin') {
+        state.llm.translateModel.provider = 'cherryai'
+      }
+
+      state.assistants.assistants.forEach((assistant) => {
+        if (assistant.model?.provider === 'cherryin') {
+          assistant.model.provider = 'cherryai'
+        }
+        if (assistant.defaultModel?.provider === 'cherryin') {
+          assistant.defaultModel.provider = 'cherryai'
+        }
+      })
+
+      state.agents.agents.forEach((agent) => {
+        // @ts-ignore model is not defined in Agent
+        if (agent.model?.provider === 'cherryin') {
+          // @ts-ignore model is not defined in Agent
+          agent.model.provider = 'cherryai'
+        }
+        if (agent.defaultModel?.provider === 'cherryin') {
+          agent.defaultModel.provider = 'cherryai'
+        }
+      })
+      return state
+    } catch (error) {
+      logger.error('migrate 157 error', error as Error)
+      return state
+    }
+  },
+  '158': (state: RootState) => {
+    try {
+      state.llm.providers = state.llm.providers.filter((provider) => provider.id !== 'cherryin')
+      return state
+    } catch (error) {
+      logger.error('migrate 158 error', error as Error)
       return state
     }
   }

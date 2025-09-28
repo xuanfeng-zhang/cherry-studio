@@ -24,7 +24,6 @@ import {
   KnowledgeBase,
   KnowledgeItem,
   KnowledgeNoteItem,
-  MigrationModeEnum,
   ProcessingStatus
 } from '@renderer/types'
 import { runAsyncFunction, uuid } from '@renderer/utils'
@@ -68,7 +67,8 @@ export const useKnowledge = (baseId: string) => {
   // 添加笔记
   const addNote = async (content: string) => {
     await dispatch(addNoteThunk(baseId, content))
-    checkAllBases()
+    // 确保数据库写入完成后再触发队列检查
+    setTimeout(() => KnowledgeQueue.checkAllBases(), 100)
   }
 
   // 添加URL
@@ -231,7 +231,7 @@ export const useKnowledge = (baseId: string) => {
   }
 
   // 迁移知识库（保留原知识库）
-  const migrateBase = async (newBase: KnowledgeBase, mode: MigrationModeEnum) => {
+  const migrateBase = async (newBase: KnowledgeBase) => {
     if (!base) return
 
     const timestamp = dayjs().format('YYMMDDHHmmss')
@@ -244,13 +244,8 @@ export const useKnowledge = (baseId: string) => {
       name: newName,
       created_at: Date.now(),
       updated_at: Date.now(),
-      items: [],
-      framework: mode === MigrationModeEnum.MigrationToLangChain ? 'langchain' : base.framework
+      items: []
     } satisfies KnowledgeBase
-
-    if (mode === MigrationModeEnum.MigrationToLangChain) {
-      await window.api.knowledgeBase.create(getKnowledgeBaseParams(migratedBase))
-    }
 
     dispatch(addBase(migratedBase))
 
