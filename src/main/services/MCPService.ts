@@ -16,6 +16,7 @@ import {
   type StreamableHTTPClientTransportOptions
 } from '@modelcontextprotocol/sdk/client/streamableHttp'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory'
+import { McpError, type Tool as SDKTool } from '@modelcontextprotocol/sdk/types'
 // Import notification schemas from MCP SDK
 import {
   CancelledNotificationSchema,
@@ -27,6 +28,9 @@ import {
   ToolListChangedNotificationSchema
 } from '@modelcontextprotocol/sdk/types.js'
 import { nanoid } from '@reduxjs/toolkit'
+import { MCPProgressEvent } from '@shared/config/types'
+import { IpcChannel } from '@shared/IpcChannel'
+import { defaultAppHeaders } from '@shared/utils'
 import {
   BuiltinMCPServerNames,
   type GetResourceResponse,
@@ -92,7 +96,7 @@ function getServerLogger(server: MCPServer, extra?: Record<string, any>) {
     baseUrl: server?.baseUrl,
     type: server?.type || (server?.command ? 'stdio' : server?.baseUrl ? 'http' : 'inmemory')
   }
-  return loggerService.withContext('MCPService', { ...base, ...(extra || {}) })
+  return loggerService.withContext('MCPService', { ...base, ...extra })
 }
 
 /**
@@ -191,8 +195,15 @@ class McpService {
           return existingClient
         }
       } catch (error: any) {
-        getServerLogger(server).error(`Error pinging server`, error as Error)
+        getServerLogger(server).error(`Error pinging server ${server.name}`, error as Error)
         this.clients.delete(serverKey)
+      }
+    }
+
+    const prepareHeaders = () => {
+      return {
+        ...defaultAppHeaders(),
+        ...server.headers
       }
     }
 
@@ -233,8 +244,11 @@ class McpService {
           } else if (server.baseUrl) {
             if (server.type === 'streamableHttp') {
               const options: StreamableHTTPClientTransportOptions = {
+                fetch: async (url, init) => {
+                  return net.fetch(typeof url === 'string' ? url : url.toString(), init)
+                },
                 requestInit: {
-                  headers: server.headers || {}
+                  headers: prepareHeaders()
                 },
                 authProvider
               }
@@ -265,7 +279,7 @@ class McpService {
                   }
                 },
                 requestInit: {
-                  headers: server.headers || {}
+                  headers: prepareHeaders()
                 },
                 authProvider
               }
@@ -443,7 +457,7 @@ class McpService {
           logger.debug(`Activated server: ${server.name}`)
           return client
         } catch (error: any) {
-          getServerLogger(server).error(`Error activating server`, error as Error)
+          getServerLogger(server).error(`Error activating server ${server.name}`, error as Error)
           throw new Error(`[MCP] Error activating server ${server.name}: ${error.message}`)
         }
       } finally {
@@ -612,19 +626,20 @@ class McpService {
   }
 
   private async listToolsImpl(server: MCPServer): Promise<MCPTool[]> {
-    getServerLogger(server).debug(`Listing tools`)
     const client = await this.initClient(server)
     try {
       const { tools } = await client.listTools()
       const serverTools: MCPTool[] = []
-      tools.map((tool: any) => {
+      tools.map((tool: SDKTool) => {
         const serverTool: MCPTool = {
           ...tool,
           id: buildFunctionCallToolName(server.name, tool.name),
           serverId: server.id,
-          serverName: server.name
+          serverName: server.name,
+          type: 'mcp'
         }
         serverTools.push(serverTool)
+        getServerLogger(server).debug(`Listing tools`, { tool: serverTool })
       })
       return serverTools
     } catch (error: any) {
@@ -688,7 +703,10 @@ class McpService {
             })
             const mainWindow = windowService.getMainWindow()
             if (mainWindow) {
-              mainWindow.webContents.send('mcp-progress', process.progress / (process.total || 1))
+              mainWindow.webContents.send(IpcChannel.Mcp_Progress, {
+                callId: toolCallId,
+                progress: process.progress / (process.total || 1)
+              } as MCPProgressEvent)
             }
           },
           timeout: server.timeout ? server.timeout * 1000 : 60000, // Default timeout of 1 minute,
@@ -733,9 +751,9 @@ class McpService {
         serverId: server.id,
         serverName: server.name
       }))
-    } catch (error: any) {
+    } catch (error: unknown) {
       // -32601 is the code for the method not found
-      if (error?.code !== -32601) {
+      if (error instanceof McpError && error.code !== -32601) {
         getServerLogger(server).error(`Failed to list prompts`, error as Error)
       }
       return []

@@ -175,6 +175,7 @@ export const getAssistantSettings = (assistant: Assistant): AssistantSettings =>
     streamOutput: assistant?.settings?.streamOutput ?? true,
     toolUseMode: assistant?.settings?.toolUseMode ?? 'prompt',
     defaultModel: assistant?.defaultModel ?? undefined,
+    reasoning_effort: assistant?.settings?.reasoning_effort ?? undefined,
     customParameters: assistant?.settings?.customParameters ?? []
   }
 }
@@ -202,10 +203,7 @@ export async function createAssistantFromAgent(agent: Agent) {
 
   store.dispatch(addAssistant(assistant))
 
-  window.message.success({
-    content: i18n.t('message.assistant.added.content'),
-    key: 'assistant-added'
-  })
+  window.toast.success(i18n.t('message.assistant.added.content'))
 
   return assistant
 }

@@ -838,6 +838,7 @@ const migrateConfig = {
 
       state.llm.providers.forEach((provider) => {
         if (provider.id === 'qwenlm') {
+          // @ts-ignore eslint-disable-next-line
           provider.type = 'qwenlm'
         }
       })
@@ -895,6 +896,7 @@ const migrateConfig = {
     try {
       state.llm.providers.forEach((provider) => {
         if (provider.id === 'qwenlm') {
+          // @ts-ignore eslint-disable-next-line
           provider.type = 'qwenlm'
         }
       })
@@ -1895,6 +1897,7 @@ const migrateConfig = {
       return state
     }
   },
+
   '123': (state: RootState) => {
     try {
       state.llm.providers.forEach((provider) => {
@@ -2353,11 +2356,14 @@ const migrateConfig = {
       if (state.settings && state.note) {
         const showWorkspaceValue = (state.settings as any)?.showWorkspace
         if (showWorkspaceValue !== undefined) {
+          // @ts-ignore eslint-disable-next-line
           state.note.settings.showWorkspace = showWorkspaceValue
           // Remove from settings
           delete (state.settings as any).showWorkspace
+          // @ts-ignore eslint-disable-next-line
         } else if (state.note.settings.showWorkspace === undefined) {
           // Set default value if not exists
+          // @ts-ignore eslint-disable-next-line
           state.note.settings.showWorkspace = true
         }
       }
@@ -2378,9 +2384,94 @@ const migrateConfig = {
           state.assistants.categorizedTags = {}
         }
       }
+
+      // Also apply knowledge base framework migration
+      state.knowledge.bases.forEach((base) => {
+        if (!base.framework) {
+          base.framework = 'embedjs'
+        }
+      })
       return state
     } catch (error) {
       logger.error('migrate 147 error', error as Error)
+      return state
+    }
+  },
+  '148': (state: RootState) => {
+    try {
+      addOcrProvider(state, BUILTIN_OCR_PROVIDERS_MAP.paddleocr)
+      return state
+    } catch (error) {
+      logger.error('migrate 148 error', error as Error)
+      return state
+    }
+  },
+  '149': (state: RootState) => {
+    try {
+      state.knowledge.bases.forEach((base) => {
+        if (!base.framework) {
+          base.framework = 'embedjs'
+        }
+      })
+      return state
+    } catch (error) {
+      logger.error('migrate 149 error', error as Error)
+      return state
+    }
+  },
+  '150': (state: RootState) => {
+    try {
+      addShortcuts(state, ['rename_topic'], 'new_topic')
+      addShortcuts(state, ['edit_last_user_message'], 'copy_last_message')
+      return state
+    } catch (error) {
+      logger.error('migrate 150 error', error as Error)
+      return state
+    }
+  },
+  '151': (state: RootState) => {
+    try {
+      if (state.settings) {
+        state.settings.codeFancyBlock = true
+      }
+      return state
+    } catch (error) {
+      logger.error('migrate 151 error', error as Error)
+      return state
+    }
+  },
+  '152': (state: RootState) => {
+    try {
+      state.translate.settings = {
+        autoCopy: false
+      }
+      return state
+    } catch (error) {
+      logger.error('migrate 152 error', error as Error)
+      return state
+    }
+  },
+  '153': (state: RootState) => {
+    try {
+      if (state.note.settings) {
+        state.note.settings.fontSize = notesInitialState.settings.fontSize
+        state.note.settings.showTableOfContents = notesInitialState.settings.showTableOfContents
+      }
+      return state
+    } catch (error) {
+      logger.error('migrate 153 error', error as Error)
+      return state
+    }
+  },
+  '154': (state: RootState) => {
+    try {
+      if (state.settings.userTheme) {
+        state.settings.userTheme.userFontFamily = settingsInitialState.userTheme.userFontFamily
+        state.settings.userTheme.userCodeFontFamily = settingsInitialState.userTheme.userCodeFontFamily
+      }
+      return state
+    } catch (error) {
+      logger.error('migrate 154 error', error as Error)
       return state
     }
   }

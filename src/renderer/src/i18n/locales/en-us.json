@@ -538,6 +538,10 @@
         "tip": "The run button will be displayed in the toolbar of executable code blocks, please do not execute dangerous code!",
         "title": "Code Execution"
       },
+      "code_fancy_block": {
+        "label": "Fancy code block",
+        "tip": "Enable fancy style for code block, e.g., html card"
+      },
       "code_image_tools": {
         "label": "Enable preview tools",
         "tip": "Enable preview tools for images rendered from code blocks such as mermaid"
@@ -782,6 +786,7 @@
     "delete": "Delete",
     "delete_confirm": "Are you sure you want to delete?",
     "description": "Description",
+    "detail": "Detail",
     "disabled": "Disabled",
     "docs": "Docs",
     "download": "Download",
@@ -807,6 +812,7 @@
     "more": "More",
     "name": "Name",
     "no_results": "No results",
+    "none": "None",
     "open": "Open",
     "paste": "Paste",
     "preview": "Preview",
@@ -852,6 +858,8 @@
     "openai-response": "OpenAI-Response"
   },
   "error": {
+    "availableProviders": "Available Providers",
+    "availableTools": "Available Tools",
     "backup": {
       "file_format": "Backup file format error"
     },
@@ -866,6 +874,7 @@
         "invalid": "Invalid MCP server"
       }
     },
+    "cause": "Error cause",
     "chat": {
       "chunk": {
         "non_json": "Returned an invalid data format"
@@ -875,6 +884,13 @@
       "quota_exceeded": "Your daily {{quota}} free quota has been exhausted. Please go to the <provider>{{provider}}</provider> to obtain an API key and configure the API key to continue using.",
       "response": "Something went wrong. Please check if you have set your API key in the Settings > Providers"
     },
+    "content": "Content",
+    "data": "Data",
+    "detail": "Error Details",
+    "details": "Details",
+    "errors": "Errors",
+    "finishReason": "Finish Reason",
+    "functionality": "Functionality",
     "http": {
       "400": "Request failed. Please check if the request parameters are correct. If you have changed the model settings, please reset them to the default settings",
       "401": "Authentication failed. Please check if your API key is correct",
@@ -886,20 +902,51 @@
       "503": "Service unavailable. Please try again later",
       "504": "Gateway timeout. Please try again later"
     },
+    "lastError": "Last Error",
+    "maxEmbeddingsPerCall": "Max Embeddings Per Call",
+    "message": "Error Message",
     "missing_user_message": "Cannot switch model response: The original user message has been deleted. Please send a new message to get a response with this model.",
     "model": {
       "exists": "Model already exists",
       "not_exists": "Model does not exist"
     },
+    "modelId": "Model ID",
+    "modelType": "Model Type",
+    "name": "Error name",
     "no_api_key": "API key is not configured",
+    "originalError": "Original Error",
+    "originalMessage": "Original Message",
+    "parameter": "Parameter",
     "pause_placeholder": "Paused",
+    "prompt": "Prompt",
+    "provider": "Provider",
+    "providerId": "Provider ID",
     "provider_disabled": "Model provider is not enabled",
+    "reason": "Reason",
     "render": {
       "description": "Failed to render message content. Please check if the message content format is correct",
       "title": "Render Error"
     },
+    "requestBody": "Request Body",
+    "requestBodyValues": "Request Body Values",
+    "requestUrl": "Request URL",
+    "response": "Response",
+    "responseBody": "Response Body",
+    "responseHeaders": "Response Header",
+    "responses": "Responses",
+    "role": "Role",
+    "stack": "Stack Trace",
+    "status": "Status Code",
+    "statusCode": "Status Code",
+    "statusText": "Status Text",
+    "text": "Text",
+    "toolInput": "Tool Input",
+    "toolName": "Tool Name",
     "unknown": "Unknown error",
-    "user_message_not_found": "Cannot find original user message to resend"
+    "usage": "Usage",
+    "user_message_not_found": "Cannot find original user message to resend",
+    "value": "Value",
+    "values": "Values"
   },
   "export": {
     "assistant": "Assistant",
@@ -936,6 +983,9 @@
     "image": "Image",
     "name": "Name",
     "open": "Open",
+    "preview": {
+      "error": "Failed to open file"
+    },
     "size": "Size",
     "text": "Text",
     "title": "Files",
@@ -984,9 +1034,11 @@
     },
     "add_directory": "Add Directory",
     "add_file": "Add File",
+    "add_image": "Add Image",
     "add_note": "Add Note",
     "add_sitemap": "Website Map",
     "add_url": "Add URL",
+    "add_video": "Add video",
     "cancel_index": "Cancel Indexing",
     "chunk_overlap": "Chunk Overlap",
     "chunk_overlap_placeholder": "Default (not recommended to change)",
@@ -1013,6 +1065,7 @@
     "document_count_default": "Default",
     "document_count_help": "The more document chunks requested, the more information is included, but the more tokens are consumed",
     "drag_file": "Drag file here",
+    "drag_image": "Drag image here",
     "edit_remark": "Edit Remark",
     "edit_remark_placeholder": "Please enter remark content",
     "embedding_model": "Embedding Model",
@@ -1021,9 +1074,15 @@
     "error": {
       "failed_to_create": "Knowledge base creation failed",
       "failed_to_edit": "Knowledge base editing failed",
-      "model_invalid": "No model selected"
+      "model_invalid": "No model selected",
+      "video": {
+        "local_file_missing": "Video file not found",
+        "youtube_url_missing": "YouTube video URL not found"
+      }
     },
     "file_hint": "Support {{file_types}}",
+    "image_hint": "Support {{image_types}}",
+    "images": "Images",
     "index_all": "Index All",
     "index_cancelled": "Indexing cancelled",
     "index_started": "Indexing started",
@@ -1039,6 +1098,10 @@
       },
       "error": {
         "failed": "Migration failed"
+      },
+      "migrate_to_langchain": {
+        "content": "The knowledge base migration does not delete the old knowledge base but creates a copy and reprocesses all entries, which may consume a significant number of tokens. Please proceed with caution.",
+        "info": "The knowledge base architecture has been updated. Click to migrate to the new architecture."
       },
       "source_dimensions": "Source Dimensions",
       "source_model": "Source Model",
@@ -1058,6 +1121,20 @@
     "quota": "{{name}} Left Quota: {{quota}}",
     "quota_infinity": "{{name}} Quota: Unlimited",
     "rename": "Rename",
+    "retriever": "Retrieve mode",
+    "retriever_bm25": "full-text search",
+    "retriever_bm25_desc": "Search for documents based on keyword relevance and frequency.",
+    "retriever_hybrid": "Hybrid Search (Recommended)",
+    "retriever_hybrid_desc": "Combine keyword search and semantic search to achieve optimal retrieval accuracy.",
+    "retriever_hybrid_weight": {
+      "bm25": "full text",
+      "recommended": "recommend",
+      "title": "Hybrid Search Weight Adjustment (Full-text/Vector)",
+      "vector": "vector"
+    },
+    "retriever_tooltip": "Using different retrieval methods to search the knowledge base",
+    "retriever_vector": "vector search",
+    "retriever_vector_desc": "Retrieve documents based on semantic similarity and meaning.",
     "search": "Search knowledge base",
     "search_placeholder": "Enter text to search",
     "settings": {
@@ -1079,6 +1156,7 @@
     "status_preprocess_completed": "Preprocessing Completed",
     "status_preprocess_failed": "Preprocessing Failed",
     "status_processing": "Processing",
+    "subtitle_file": "subtitle file",
     "threshold": "Matching threshold",
     "threshold_placeholder": "Not set",
     "threshold_too_large_or_small": "Threshold cannot be greater than 1 or less than 0",
@@ -1090,7 +1168,9 @@
     "topN_tooltip": "The number of matching results returned; the larger the value, the more matching results, but also the more tokens consumed.",
     "url_added": "URL added",
     "url_placeholder": "Enter URL, multiple URLs separated by Enter",
-    "urls": "URLs"
+    "urls": "URLs",
+    "videos": "video",
+    "videos_file": "video file"
   },
   "languages": {
     "arabic": "Arabic",
@@ -1416,6 +1496,13 @@
         "bubble": "Bubble",
         "label": "Message style",
         "plain": "Plain"
+      },
+      "video": {
+        "error": {
+          "local_file_missing": "Local video file path not found",
+          "unsupported_type": "Unsupported video type",
+          "youtube_url_missing": "YouTube video URL not found"
+        }
       }
     },
     "processing": "Processing...",
@@ -1503,7 +1590,7 @@
     },
     "websearch": {
       "cutoff": "Truncating search content...",
-      "fetch_complete": "Completed {{count}} searches...",
+      "fetch_complete": "{{count}} search result(s)",
       "rag": "Executing RAG...",
       "rag_complete": "Keeping {{countAfter}} out of {{countBefore}} results...",
       "rag_failed": "RAG failed, returning empty results..."
@@ -1656,7 +1743,13 @@
   "navbar": {
     "expand": "Expand Dialog",
     "hide_sidebar": "Hide Sidebar",
-    "show_sidebar": "Show Sidebar"
+    "show_sidebar": "Show Sidebar",
+    "window": {
+      "close": "Close",
+      "maximize": "Maximize",
+      "minimize": "Minimize",
+      "restore": "Restore"
+    }
   },
   "navigate": {
     "provider_settings": "Go to provider settings"
@@ -1670,7 +1763,7 @@
     "delete_confirm": "Are you sure you want to delete this {{type}}?",
     "delete_folder_confirm": "Are you sure you want to delete the folder \"{{name}}\" and all of its contents?",
     "delete_note_confirm": "Are you sure you want to delete the note \"{{name}}\"?",
-    "drop_markdown_hint": "Drop markdown files here to import",
+    "drop_markdown_hint": "Drop .md files or folders here to import",
     "empty": "No notes available yet",
     "expand": "unfold",
     "export_failed": "Failed to export to knowledge base",
@@ -1681,8 +1774,7 @@
     "new_note": "Create a new note",
     "no_content_to_copy": "No content to copy",
     "no_file_selected": "Please select the file to upload",
-    "only_markdown": "Only Markdown files are supported",
-    "only_one_file_allowed": "Only one file can be uploaded",
+    "no_valid_files": "No valid file was uploaded",
     "open_folder": "Open an external folder",
     "open_outside": "Open from external",
     "rename": "Rename",
@@ -1708,8 +1800,15 @@
         "compress_content": "Content Compression",
         "compress_content_description": "When enabled, it will limit the number of characters per line, reducing the content displayed on the screen, but making longer paragraphs more readable.",
         "default_font": "Default font",
+        "font_size": "Font Size",
+        "font_size_description": "Adjust the font size for better reading experience (10-30px)",
+        "font_size_large": "Large",
+        "font_size_medium": "Medium",
+        "font_size_small": "Small",
         "font_title": "Font settings",
         "serif_font": "Serif font",
+        "show_table_of_contents": "Show Table of Contents",
+        "show_table_of_contents_description": "Display a table of contents sidebar for easy navigation within documents",
         "title": "Display Settings"
       },
       "editor": {
@@ -1737,7 +1836,7 @@
     "sort_updated_asc": "Update time (oldest first)",
     "sort_updated_desc": "Update time (newest first)",
     "sort_z2a": "File name (Z-A)",
-    "star": "Favorite",
+    "star": "Favorite note",
     "starred_notes": "Collected notes",
     "title": "Notes",
     "unsaved_changes": "You have unsaved content, are you sure you want to leave?",
@@ -2190,6 +2289,21 @@
       }
     },
     "dragHandle": "Drag to move",
+    "frontMatter": {
+      "addProperty": "Add a property",
+      "addTag": "Add tag",
+      "changeToBoolean": "Checkbox",
+      "changeToDate": "Date",
+      "changeToNumber": "Number",
+      "changeToTags": "Tags",
+      "changeToText": "Text",
+      "changeType": "Change type",
+      "deleteProperty": "Delete property",
+      "editValue": "Edit value",
+      "empty": "Empty",
+      "moreActions": "More actions",
+      "propertyName": "Property name"
+    },
     "image": {
       "placeholder": "Add a picture"
     },
@@ -2590,6 +2704,10 @@
         "token_placeholder": "Joplin Authorization Token",
         "url": "Joplin Web Clipper Service URL",
         "url_placeholder": "http://127.0.0.1:41184/"
+      },
+      "limit": {
+        "appDataDiskQuota": "Disk Space Warning",
+        "appDataDiskQuotaDescription": "Data directory space is almost full, please clear disk space, otherwise data will be lost"
       },
       "local": {
         "autoSync": {
@@ -3052,6 +3170,13 @@
           "label": "Custom CSS",
           "placeholder": "/* Put custom CSS here */"
         }
+      },
+      "font": {
+        "code": "Code Font",
+        "default": "Default",
+        "global": "Global Font",
+        "select": "Select Font",
+        "title": "Font Settings"
       },
       "navbar": {
         "position": {
@@ -3646,6 +3771,27 @@
         "title": "Add Provider",
         "type": "Provider Type"
       },
+      "anthropic": {
+        "apikey": "API key",
+        "auth_failed": "Anthropic authentication failed",
+        "auth_method": "Authentication method",
+        "auth_success": "Anthropic OAuth authentication successful",
+        "authenticated": "Verified",
+        "authenticating": "Authenticating",
+        "cancel": "Cancel",
+        "code_error": "Invalid authorization code, please try again",
+        "code_placeholder": "Please enter the authorization code displayed in your browser",
+        "code_required": "Authorization code cannot be empty",
+        "description": "OAuth authentication",
+        "description_detail": "You need to subscribe to Claude Pro or a higher version to use this authentication method",
+        "enter_auth_code": "Authorization code",
+        "logout": "Log out",
+        "logout_failed": "Logout failed, please try again",
+        "logout_success": "Successfully logged out of Anthropic",
+        "oauth": "Web OAuth",
+        "start_auth": "Start authorization",
+        "submit_code": "Complete login"
+      },
       "api": {
         "key": {
           "check": {
@@ -3868,12 +4014,14 @@
       "clear_shortcut": "Clear Shortcut",
       "clear_topic": "Clear Messages",
       "copy_last_message": "Copy Last Message",
+      "edit_last_user_message": "Edit Last User Message",
       "enabled": "Enable",
       "exit_fullscreen": "Exit Fullscreen",
       "label": "Key",
       "mini_window": "Quick Assistant",
       "new_topic": "New Topic",
       "press_shortcut": "Press Shortcut",
+      "rename_topic": "Rename Topic",
       "reset_defaults": "Reset Defaults",
       "reset_defaults_confirm": "Are you sure you want to reset all shortcuts?",
       "reset_to_default": "Reset to Default",
@@ -3924,6 +4072,13 @@
           "title": "Image"
         },
         "image_provider": "OCR service provider",
+        "paddleocr": {
+          "aistudio_access_token": "Access token of AI Studio Community",
+          "aistudio_url_label": "AI Studio Community",
+          "api_url": "API URL",
+          "serving_doc_url_label": "PaddleOCR Serving Documentation",
+          "tip": "You can refer to the official PaddleOCR documentation to deploy a local service, or deploy a cloud service on the PaddlePaddle AI Studio Community. For the latter case, please provide the access token of the AI Studio Community."
+        },
         "system": {
           "win": {
             "langs_tooltip": "Dependent on Windows to provide services, you need to download language packs in the system to support the relevant languages."
@@ -4221,6 +4376,7 @@
     },
     "processing": "Translation in progress...",
     "settings": {
+      "autoCopy": "Copy after translation ",
       "bidirectional": "Bidirectional Translation Settings",
       "bidirectional_tip": "When enabled, only bidirectional translation between source and target languages is supported",
       "model": "Model Settings",

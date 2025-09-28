@@ -46,6 +46,7 @@ import {
   getTextFromDropEvent,
   isSendMessageKeyPressed
 } from '@renderer/utils/input'
+import { isPromptToolUse, isSupportedToolUse } from '@renderer/utils/mcp-tools'
 import { documentExts, imageExts, textExts } from '@shared/config/constant'
 import { IpcChannel } from '@shared/IpcChannel'
 import { Button, Tooltip } from 'antd'
@@ -60,6 +61,8 @@ import styled from 'styled-components'
 import NarrowLayout from '../Messages/NarrowLayout'
 import AttachmentPreview from './AttachmentPreview'
 import InputbarTools, { InputbarToolsRef } from './InputbarTools'
+import KnowledgeBaseInput from './KnowledgeBaseInput'
+import MentionModelsInput from './MentionModelsInput'
 import SendMessageButton from './SendMessageButton'
 import TokenCount from './TokenCount'
 
@@ -230,7 +233,6 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
       const uploadedFiles = await FileManager.uploadFiles(files)
 
       const baseUserMessage: MessageInputBaseParams = { assistant, topic, content: text }
-      logger.info('baseUserMessage', baseUserMessage)
 
       // getUserMessage()
       if (uploadedFiles) {
@@ -601,12 +603,11 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
         const supportedFiles = await filterSupportedFiles(droppedFiles, supportedExts)
         supportedFiles.length > 0 && setFiles((prevFiles) => [...prevFiles, ...supportedFiles])
         if (droppedFiles.length > 0 && supportedFiles.length !== droppedFiles.length) {
-          window.message.info({
-            key: 'file_not_supported',
-            content: t('chat.input.file_not_supported_count', {
+          window.toast.info(
+            t('chat.input.file_not_supported_count', {
               count: droppedFiles.length - supportedFiles.length
             })
-          })
+          )
         }
       }
     },
@@ -766,6 +767,19 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
     setSelectedKnowledgeBases(bases ?? [])
   }
 
+  const handleRemoveModel = (model: Model) => {
+    setMentionedModels(mentionedModels.filter((m) => m.id !== model.id))
+  }
+
+  const handleRemoveKnowledgeBase = (knowledgeBase: KnowledgeBase) => {
+    const newKnowledgeBases = assistant.knowledge_bases?.filter((kb) => kb.id !== knowledgeBase.id)
+    updateAssistant({
+      ...assistant,
+      knowledge_bases: newKnowledgeBases
+    })
+    setSelectedKnowledgeBases(newKnowledgeBases ?? [])
+  }
+
   const onEnableGenerateImage = () => {
     updateAssistant({ ...assistant, enableGenerateImage: !assistant.enableGenerateImage })
   }
@@ -780,11 +794,12 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
     ) {
       updateAssistant({ ...assistant, webSearchProviderId: undefined })
     }
-    if (!isGenerateImageModel(model) && assistant.enableGenerateImage) {
+    if (isGenerateImageModel(model)) {
+      if (isAutoEnableImageGenerationModel(model) && !assistant.enableGenerateImage) {
+        updateAssistant({ ...assistant, enableGenerateImage: true })
+      }
+    } else if (assistant.enableGenerateImage) {
       updateAssistant({ ...assistant, enableGenerateImage: false })
-    }
-    if (isAutoEnableImageGenerationModel(model) && !assistant.enableGenerateImage) {
-      updateAssistant({ ...assistant, enableGenerateImage: true })
     }
   }, [assistant, model, updateAssistant])
 
@@ -831,6 +846,7 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
 
   const isExpanded = expanded || !!textareaHeight
   const showThinkingButton = isSupportedThinkingTokenModel(model) || isSupportedReasoningEffortModel(model)
+  const showMcpTools = isSupportedToolUse(assistant) || isPromptToolUse(assistant)
 
   if (isMultiSelectMode) {
     return null
@@ -850,6 +866,15 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
           className={classNames('inputbar-container', inputFocus && 'focus', isFileDragging && 'file-dragging')}
           ref={containerRef}>
           {files.length > 0 && <AttachmentPreview files={files} setFiles={setFiles} />}
+          {selectedKnowledgeBases.length > 0 && (
+            <KnowledgeBaseInput
+              selectedKnowledgeBases={selectedKnowledgeBases}
+              onRemoveKnowledgeBase={handleRemoveKnowledgeBase}
+            />
+          )}
+          {mentionedModels.length > 0 && (
+            <MentionModelsInput selectedModels={mentionedModels} onRemoveModel={handleRemoveModel} />
+          )}
           <Textarea
             value={text}
             onChange={onChange}
@@ -899,7 +924,8 @@ const Inputbar: FC<Props> = ({ assistant: _assistant, setActiveTopic, topic }) =
               extensions={supportedExts}
               setFiles={setFiles}
               showThinkingButton={showThinkingButton}
-              showKnowledgeIcon={showKnowledgeIcon}
+              showKnowledgeIcon={showKnowledgeIcon && showMcpTools}
+              showMcpTools={showMcpTools}
               selectedKnowledgeBases={selectedKnowledgeBases}
               handleKnowledgeBaseSelect={handleKnowledgeBaseSelect}
               setText={setText}

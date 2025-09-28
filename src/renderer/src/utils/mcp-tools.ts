@@ -85,7 +85,7 @@ export function openAIToolsToMcpTool(
     }
   } catch (error) {
     logger.error(`Error parsing tool call: ${toolCall}`, error as Error)
-    window.message.error(t('chat.mcp.error.parse_tool_call', { toolCall: toolCall }))
+    window.toast.error(t('chat.mcp.error.parse_tool_call', { toolCall: toolCall }))
     return undefined
   }
   const tools = mcpTools.filter((mcpTool) => {
@@ -93,12 +93,12 @@ export function openAIToolsToMcpTool(
   })
   if (tools.length > 1) {
     logger.warn(`Multiple MCP Tools found for tool call: ${toolName}`)
-    window.message.warning(t('chat.mcp.warning.multiple_tools', { tool: tools[0].name }))
+    window.toast.warning(t('chat.mcp.warning.multiple_tools', { tool: tools[0].name }))
   }
 
   if (tools.length === 0) {
     logger.warn(`No MCP Tool found for tool call: ${toolName}`)
-    window.message.warning(t('chat.mcp.warning.no_tool', { tool: toolName }))
+    window.toast.warning(t('chat.mcp.warning.no_tool', { tool: toolName }))
     return undefined
   }
 
@@ -197,12 +197,12 @@ export function anthropicToolUseToMcpTool(mcpTools: MCPTool[] | undefined, toolU
   const tools = mcpTools.filter((tool) => tool.id === toolUse.name)
   if (tools.length === 0) {
     logger.warn(`No MCP Tool found for tool call: ${toolUse.name}`)
-    window.message.warning(t('chat.mcp.warning.no_tool', { tool: toolUse.name }))
+    window.toast.warning(t('chat.mcp.warning.no_tool', { tool: toolUse.name }))
     return undefined
   }
   if (tools.length > 1) {
     logger.warn(`Multiple MCP Tools found for tool call: ${toolUse.name}`)
-    window.message.warning(t('chat.mcp.warning.multiple_tools', { tool: tools[0].name }))
+    window.toast.warning(t('chat.mcp.warning.multiple_tools', { tool: tools[0].name }))
   }
   return tools[0]
 }
@@ -243,12 +243,12 @@ export function geminiFunctionCallToMcpTool(
   const tools = mcpTools.filter((tool) => tool.id.includes(toolName) || tool.name.includes(toolName))
   if (tools.length > 1) {
     logger.warn(`Multiple MCP Tools found for tool call: ${toolName}`)
-    window.message.warning(t('chat.mcp.warning.multiple_tools', { tool: tools[0].name }))
+    window.toast.warning(t('chat.mcp.warning.multiple_tools', { tool: tools[0].name }))
   }
 
   if (tools.length === 0) {
     logger.warn(`No MCP Tool found for tool call: ${toolName}`)
-    window.message.warning(t('chat.mcp.warning.no_tool', { tool: toolName }))
+    window.toast.warning(t('chat.mcp.warning.no_tool', { tool: toolName }))
     return undefined
   }
 
@@ -326,7 +326,11 @@ export function isToolAutoApproved(tool: MCPTool, server?: MCPServer): boolean {
   return effectiveServer ? !effectiveServer.disabledAutoApproveTools?.includes(tool.name) : false
 }
 
-export function parseToolUse(content: string, mcpTools: MCPTool[], startIdx: number = 0): ToolUseResponse[] {
+export function parseToolUse(
+  content: string,
+  mcpTools: MCPTool[],
+  startIdx: number = 0
+): (Omit<ToolUseResponse, 'tool'> & { tool: MCPTool })[] {
   if (!content || !mcpTools || mcpTools.length === 0) {
     return []
   }
@@ -344,7 +348,7 @@ export function parseToolUse(content: string, mcpTools: MCPTool[], startIdx: num
 
   const toolUsePattern =
     /<tool_use>([\s\S]*?)<name>([\s\S]*?)<\/name>([\s\S]*?)<arguments>([\s\S]*?)<\/arguments>([\s\S]*?)<\/tool_use>/g
-  const tools: ToolUseResponse[] = []
+  const tools: (Omit<ToolUseResponse, 'tool'> & { tool: MCPTool })[] = []
   let match
   let idx = startIdx
   // Find all tool use blocks
@@ -365,7 +369,7 @@ export function parseToolUse(content: string, mcpTools: MCPTool[], startIdx: num
     const mcpTool = mcpTools.find((tool) => tool.id === toolName || tool.name === toolName)
     if (!mcpTool) {
       logger.error(`Tool "${toolName}" not found in MCP tools`)
-      window.message.error(i18n.t('settings.mcp.errors.toolNotFound', { name: toolName }))
+      window.toast.error(i18n.t('settings.mcp.errors.toolNotFound', { name: toolName }))
       continue
     }
 
@@ -821,10 +825,24 @@ export function mcpToolCallResponseToAwsBedrockMessage(
   return message
 }
 
-export function isEnabledToolUse(assistant: Assistant) {
+/**
+ * 是否启用工具使用(function call)
+ * @param assistant
+ * @returns 是否启用工具使用
+ */
+export function isSupportedToolUse(assistant: Assistant) {
   if (assistant.model) {
     return isFunctionCallingModel(assistant.model) && isToolUseModeFunction(assistant)
   }
 
   return false
+}
+
+/**
+ * 是否使用提示词工具使用
+ * @param assistant
+ * @returns 是否使用提示词工具使用
+ */
+export function isPromptToolUse(assistant: Assistant) {
+  return assistant.settings?.toolUseMode === 'prompt'
 }

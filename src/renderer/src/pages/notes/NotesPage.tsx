@@ -12,7 +12,7 @@ import {
   moveNode,
   renameNode,
   sortAllLevels,
-  uploadNote
+  uploadFiles
 } from '@renderer/services/NotesService'
 import { getNotesTree, isParentNode, updateNodeInTree } from '@renderer/services/NotesTreeService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
@@ -20,8 +20,8 @@ import { selectActiveFilePath, selectSortType, setActiveFilePath, setSortType } 
 import { NotesSortType, NotesTreeNode } from '@renderer/types/note'
 import { FileChangeEvent } from '@shared/config/types'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AnimatePresence, motion } from 'framer-motion'
 import { debounce } from 'lodash'
+import { AnimatePresence, motion } from 'motion/react'
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -507,7 +507,7 @@ const NotesPage: FC = () => {
           }
           await sortAllLevels(sortType)
           if (renamedNode.name !== newName) {
-            window.message.info(t('notes.rename_changed', { original: newName, final: renamedNode.name }))
+            window.toast.info(t('notes.rename_changed', { original: newName, final: renamedNode.name }))
           }
         }
       } catch (error) {
@@ -525,38 +525,36 @@ const NotesPage: FC = () => {
   const handleUploadFiles = useCallback(
     async (files: File[]) => {
       try {
-        const fileToUpload = files[0]
-
-        if (!fileToUpload) {
-          window.message.warning(t('notes.no_file_selected'))
-          return
-        }
-        // 暂时这么处理
-        if (files.length > 1) {
-          window.message.warning(t('notes.only_one_file_allowed'))
-        }
-
-        if (!fileToUpload.name.toLowerCase().endsWith('.md')) {
-          window.message.warning(t('notes.only_markdown'))
+        if (!files || files.length === 0) {
+          window.toast.warning(t('notes.no_file_selected'))
           return
         }
 
-        try {
-          if (!notesPath) {
-            throw new Error('No folder path selected')
-          }
-          await uploadNote(fileToUpload, notesPath)
-          window.message.success(t('notes.upload_success', { count: 1 }))
-        } catch (error) {
-          logger.error(`Failed to upload note file ${fileToUpload.name}:`, error as Error)
-          window.message.error(t('notes.upload_failed', { name: fileToUpload.name }))
+        const targetFolderPath = getTargetFolderPath()
+        if (!targetFolderPath) {
+          throw new Error('No folder path selected')
         }
+
+        const result = await uploadFiles(files, targetFolderPath)
+
+        // 检查上传结果
+        if (result.fileCount === 0) {
+          window.toast.warning(t('notes.no_valid_files'))
+          return
+        }
+
+        // 排序并显示成功信息
+        await sortAllLevels(sortType)
+
+        const successMessage = t('notes.upload_success')
+
+        window.toast.success(successMessage)
       } catch (error) {
         logger.error('Failed to handle file upload:', error as Error)
-        window.message.error(t('notes.upload_failed'))
+        window.toast.error(t('notes.upload_failed'))
       }
     },
-    [notesPath, t]
+    [getTargetFolderPath, sortType, t]
   )
 
   // 处理节点移动
@@ -629,7 +627,11 @@ const NotesPage: FC = () => {
           )}
         </AnimatePresence>
         <EditorWrapper>
-          <HeaderNavbar notesTree={notesTree} getCurrentNoteContent={getCurrentNoteContent} />
+          <HeaderNavbar
+            notesTree={notesTree}
+            getCurrentNoteContent={getCurrentNoteContent}
+            onToggleStar={handleToggleStar}
+          />
           <NotesEditor
             activeNodeId={activeNode?.id}
             currentContent={currentContent}

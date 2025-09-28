@@ -538,6 +538,10 @@
         "tip": "Une bouton d'exécution s'affichera dans la barre d'outils des blocs de code exécutables. Attention à ne pas exécuter de code dangereux !",
         "title": "Exécution de code"
       },
+      "code_fancy_block": {
+        "label": "bloc de code fantaisie",
+        "tip": "Utiliser un style de bloc de code plus esthétique, comme une carte HTML"
+      },
       "code_image_tools": {
         "label": "Activer l'outil d'aperçu",
         "tip": "Activer les outils de prévisualisation pour les images rendues des blocs de code tels que mermaid"
@@ -748,6 +752,7 @@
     "delete": "Supprimer",
     "delete_confirm": "Êtes-vous sûr de vouloir supprimer ?",
     "description": "Description",
+    "detail": "détails",
     "disabled": "Désactivé",
     "docs": "Documents",
     "download": "Télécharger",
@@ -773,6 +778,7 @@
     "more": "Plus",
     "name": "Nom",
     "no_results": "Aucun résultat",
+    "none": "Aucun",
     "open": "Ouvrir",
     "paste": "Coller",
     "preview": "Aperçu",
@@ -818,6 +824,8 @@
     "openai-response": "Réponse OpenAI"
   },
   "error": {
+    "availableProviders": "Fournisseurs disponibles",
+    "availableTools": "Outils disponibles",
     "backup": {
       "file_format": "Le format du fichier de sauvegarde est incorrect"
     },
@@ -832,6 +840,7 @@
         "invalid": "Serveur MCP invalide"
       }
     },
+    "cause": "Erreur causée par",
     "chat": {
       "chunk": {
         "non_json": "a renvoyé un format de données invalide"
@@ -841,6 +850,13 @@
       "quota_exceeded": "Votre quota gratuit quotidien de {{quota}} tokens a été épuisé. Veuillez vous rendre sur <provider>{{provider}}</provider> pour obtenir une clé API et configurer la clé API pour continuer à utiliser.",
       "response": "Une erreur s'est produite, si l'API n'est pas configurée, veuillez aller dans Paramètres > Fournisseurs de modèles pour configurer la clé"
     },
+    "content": "suivre l'instruction du système",
+    "data": "données",
+    "detail": "Détails de l'erreur",
+    "details": "Informations détaillées",
+    "errors": "erreur",
+    "finishReason": "Raison de la fin",
+    "functionality": "fonction",
     "http": {
       "400": "Erreur de requête, veuillez vérifier si les paramètres de la requête sont corrects. Si vous avez modifié les paramètres du modèle, réinitialisez-les aux paramètres par défaut.",
       "401": "Échec de l'authentification, veuillez vérifier que votre clé API est correcte.",
@@ -852,20 +868,51 @@
       "503": "Service indisponible, veuillez réessayer plus tard.",
       "504": "Délai d'expiration de la passerelle, veuillez réessayer plus tard."
     },
+    "lastError": "Dernière erreur",
+    "maxEmbeddingsPerCall": "Maximum d’intégrations par appel",
+    "message": "Erreur message",
     "missing_user_message": "Impossible de changer de modèle de réponse : le message utilisateur d'origine a été supprimé. Veuillez envoyer un nouveau message pour obtenir une réponse de ce modèle.",
     "model": {
       "exists": "Le modèle existe déjà",
       "not_exists": "Le modèle n'existe pas"
     },
+    "modelId": "ID du modèle",
+    "modelType": "Type de modèle",
+    "name": "Nom d'erreur",
     "no_api_key": "La clé API n'est pas configurée",
+    "originalError": "Erreur d'origine",
+    "originalMessage": "message original",
+    "parameter": "paramètre",
     "pause_placeholder": "Прервано",
+    "prompt": "mot-clé",
+    "provider": "fournisseur",
+    "providerId": "ID du fournisseur",
     "provider_disabled": "Le fournisseur de modèles n'est pas activé",
+    "reason": "raison",
     "render": {
       "description": "La formule n'a pas été rendue avec succès, veuillez vérifier si le format de la formule est correct",
       "title": "Erreur de rendu"
     },
+    "requestBody": "Contenu de la demande",
+    "requestBodyValues": "Corps de la requête",
+    "requestUrl": "Chemin de la requête",
+    "response": "réponse",
+    "responseBody": "Contenu de la réponse",
+    "responseHeaders": "En-têtes de réponse",
+    "responses": "réponse",
+    "role": "rôle",
+    "stack": "Informations de la pile",
+    "status": "Code d'état",
+    "statusCode": "Code d'état",
+    "statusText": "Texte d'état",
+    "text": "texte",
+    "toolInput": "entrée de l'outil",
+    "toolName": "Nom de l'outil",
     "unknown": "Неизвестная ошибка",
-    "user_message_not_found": "Impossible de trouver le message d'utilisateur original"
+    "usage": "Quantité",
+    "user_message_not_found": "Impossible de trouver le message d'utilisateur original",
+    "value": "valeur",
+    "values": "valeur"
   },
   "export": {
     "assistant": "Assistant",
@@ -902,6 +949,9 @@
     "image": "Image",
     "name": "Nom du fichier",
     "open": "Ouvrir",
+    "preview": {
+      "error": "Échec de l’ouverture du fichier"
+    },
     "size": "Taille",
     "text": "Texte",
     "title": "Fichier",
@@ -950,9 +1000,11 @@
     },
     "add_directory": "Ajouter un répertoire",
     "add_file": "Ajouter un fichier",
+    "add_image": "Ajouter une image",
     "add_note": "Ajouter une note",
     "add_sitemap": "Plan du site",
     "add_url": "Ajouter une URL",
+    "add_video": "Ajouter une vidéo",
     "cancel_index": "Annuler l'indexation",
     "chunk_overlap": "Chevauchement de blocs",
     "chunk_overlap_placeholder": "Valeur par défaut (ne pas modifier)",
@@ -979,6 +1031,7 @@
     "document_count_default": "Par défaut",
     "document_count_help": "Plus vous demandez de fragments de documents, plus d'informations sont fournies, mais plus de jetons sont consommés",
     "drag_file": "Glissez-déposez un fichier ici",
+    "drag_image": "Faites glisser l'image ici",
     "edit_remark": "Modifier la remarque",
     "edit_remark_placeholder": "Entrez le contenu de la remarque",
     "embedding_model": "Modèle d'intégration",
@@ -987,9 +1040,15 @@
     "error": {
       "failed_to_create": "Erreur lors de la création de la base de connaissances",
       "failed_to_edit": "Erreur lors de la modification de la base de connaissances",
-      "model_invalid": "Aucun modèle sélectionné ou modèle supprimé"
+      "model_invalid": "Aucun modèle sélectionné ou modèle supprimé",
+      "video": {
+        "local_file_missing": "Le fichier vidéo n'existe pas.",
+        "youtube_url_missing": "Le lien de la vidéo YouTube n'existe pas."
+      }
     },
     "file_hint": "Format supporté : {{file_types}}",
+    "image_hint": "Prise en charge des formats {{image_types}}",
+    "images": "Image",
     "index_all": "Indexer tout",
     "index_cancelled": "L'indexation a été annulée",
     "index_started": "L'indexation a commencé",
@@ -1005,6 +1064,10 @@
       },
       "error": {
         "failed": "Erreur lors de la migration"
+      },
+      "migrate_to_langchain": {
+        "content": "La migration de la base de connaissances ne supprime pas l'ancienne base, mais crée une copie avant de retraiter tous les éléments, ce qui peut consommer un grand nombre de tokens. Veuillez agir avec prudence.",
+        "info": "L'architecture de la base de connaissances a été mise à jour, cliquez pour migrer vers la nouvelle architecture."
       },
       "source_dimensions": "Dimensions source",
       "source_model": "Modèle source",
@@ -1024,6 +1087,20 @@
     "quota": "Quota restant pour {{name}} : {{quota}}",
     "quota_infinity": "Quota restant pour {{name}} : illimité",
     "rename": "Renommer",
+    "retriever": "Mode de recherche",
+    "retriever_bm25": "Recherche plein texte",
+    "retriever_bm25_desc": "Rechercher des documents en fonction de la pertinence et de la fréquence des mots-clés.",
+    "retriever_hybrid": "Recherche hybride (recommandé)",
+    "retriever_hybrid_desc": "Associez la recherche par mots-clés et la recherche sémantique pour une précision de recherche optimale.",
+    "retriever_hybrid_weight": {
+      "bm25": "texte intégral",
+      "recommended": "Recommandé",
+      "title": "Ajustement des pondérations de recherche hybride (texte intégral/vecteur)",
+      "vector": "vecteur"
+    },
+    "retriever_tooltip": "Utiliser différentes méthodes de recherche pour interroger la base de connaissances",
+    "retriever_vector": "Recherche vectorielle",
+    "retriever_vector_desc": "Rechercher des documents selon la similarité sémantique et le sens.",
     "search": "Rechercher dans la base de connaissances",
     "search_placeholder": "Entrez votre requête",
     "settings": {
@@ -1045,6 +1122,7 @@
     "status_preprocess_completed": "Prétraitement terminé",
     "status_preprocess_failed": "Échec du prétraitement",
     "status_processing": "En cours de traitement",
+    "subtitle_file": "Fichier de sous-titres",
     "threshold": "Seuil de similarité",
     "threshold_placeholder": "Non défini",
     "threshold_too_large_or_small": "Le seuil ne peut pas être supérieur à 1 ou inférieur à 0",
@@ -1056,7 +1134,9 @@
     "topN_tooltip": "Nombre de résultats de correspondance retournés, plus le chiffre est élevé, plus il y a de résultats de correspondance, mais plus de jetons sont consommés",
     "url_added": "URL ajoutée",
     "url_placeholder": "Entrez l'URL, plusieurs URLs séparées par des sauts de ligne",
-    "urls": "URLs"
+    "urls": "URLs",
+    "videos": "vidéo",
+    "videos_file": "Fichier vidéo"
   },
   "languages": {
     "arabic": "Arabe",
@@ -1363,6 +1443,13 @@
         "bubble": "Bulles",
         "label": "Style du message",
         "plain": "Simplifié"
+      },
+      "video": {
+        "error": {
+          "local_file_missing": "Chemin du fichier vidéo local introuvable",
+          "unsupported_type": "Type de vidéo non supporté",
+          "youtube_url_missing": "URL de la vidéo YouTube introuvable"
+        }
       }
     },
     "processing": "En cours de traitement...",
@@ -1450,7 +1537,7 @@
     },
     "websearch": {
       "cutoff": "Troncature du contenu de recherche en cours...",
-      "fetch_complete": "{{count}} recherches terminées...",
+      "fetch_complete": "{{count}} résultats de recherche",
       "rag": "Exécution de la RAG en cours...",
       "rag_complete": "Conserver {{countAfter}} résultats sur {{countBefore}}...",
       "rag_failed": "Échec de la RAG, retour d'un résultat vide..."
@@ -1603,7 +1690,13 @@
   "navbar": {
     "expand": "Agrandir la boîte de dialogue",
     "hide_sidebar": "Cacher la barre latérale",
-    "show_sidebar": "Afficher la barre latérale"
+    "show_sidebar": "Afficher la barre latérale",
+    "window": {
+      "close": "Fermer",
+      "maximize": "Agrandir",
+      "minimize": "Réduire",
+      "restore": "Restaurer"
+    }
   },
   "navigate": {
     "provider_settings": "Aller aux paramètres du fournisseur"
@@ -1617,7 +1710,7 @@
     "delete_confirm": "Êtes-vous sûr de vouloir supprimer ce {{type}} ?",
     "delete_folder_confirm": "Êtes-vous sûr de vouloir supprimer le dossier \"{{name}}\" et tout son contenu ?",
     "delete_note_confirm": "Êtes-vous sûr de vouloir supprimer la note \"{{name}}\" ?",
-    "drop_markdown_hint": "Glissez-déposez le fichier Markdown ici pour l'importer",
+    "drop_markdown_hint": "Déposez ici des fichiers ou dossiers .md pour les importer",
     "empty": "Aucune note pour le moment",
     "expand": "développer",
     "export_failed": "Échec de l'exportation vers la base de connaissances",
@@ -1628,8 +1721,7 @@
     "new_note": "Nouvelle note",
     "no_content_to_copy": "Aucun contenu à copier",
     "no_file_selected": "Veuillez sélectionner le fichier à télécharger",
-    "only_markdown": "uniquement le format Markdown est pris en charge",
-    "only_one_file_allowed": "On ne peut télécharger qu'un seul fichier",
+    "no_valid_files": "Aucun fichier valide n’a été téléversé",
     "open_folder": "ouvrir le dossier externe",
     "open_outside": "Ouvrir depuis l'extérieur",
     "rename": "renommer",
@@ -1655,8 +1747,15 @@
         "compress_content": "réduire la largeur des colonnes",
         "compress_content_description": "L'activation limitera le nombre de caractères par ligne, réduisant ainsi le contenu affiché à l'écran.",
         "default_font": "police par défaut",
+        "font_size": "Taille de police",
+        "font_size_description": "Ajuster la taille de la police pour une meilleure expérience de lecture (10-30px)",
+        "font_size_large": "Grand",
+        "font_size_medium": "中",
+        "font_size_small": "petit",
         "font_title": "paramétrage des polices",
         "serif_font": "police à empattements",
+        "show_table_of_contents": "Afficher le plan du sommaire",
+        "show_table_of_contents_description": "Afficher la barre latérale de la table des matières pour faciliter la navigation dans le document",
         "title": "Paramètres d'affichage"
       },
       "editor": {
@@ -1684,7 +1783,7 @@
     "sort_updated_asc": "Heure de mise à jour (du plus ancien au plus récent)",
     "sort_updated_desc": "Date de mise à jour (du plus récent au plus ancien)",
     "sort_z2a": "Nom de fichier (Z-A)",
-    "star": "Favori",
+    "star": "Notes enregistrées",
     "starred_notes": "notes de collection",
     "title": "notes",
     "unsaved_changes": "Vous avez des modifications non enregistrées, êtes-vous sûr de vouloir quitter ?",
@@ -2137,6 +2236,21 @@
       }
     },
     "dragHandle": "bloc de glisser-déposer",
+    "frontMatter": {
+      "addProperty": "Ajouter un attribut",
+      "addTag": "Ajouter une étiquette",
+      "changeToBoolean": "Case à cocher",
+      "changeToDate": "fecha",
+      "changeToNumber": "numérique",
+      "changeToTags": "étiquette",
+      "changeToText": "texte",
+      "changeType": "Modifier le type",
+      "deleteProperty": "Supprimer l'attribut",
+      "editValue": "valeur d'édition",
+      "empty": "vacío",
+      "moreActions": "Plus d'actions",
+      "propertyName": "Nom de l'attribut"
+    },
     "image": {
       "placeholder": "ajouter une image"
     },
@@ -2537,6 +2651,10 @@
         "token_placeholder": "Veuillez entrer le jeton d'autorisation de Joplin",
         "url": "URL surveillée par le service de découpage de Joplin",
         "url_placeholder": "http://127.0.0.1:41184/"
+      },
+      "limit": {
+        "appDataDiskQuota": "Avertissement d'espace sur le disque",
+        "appDataDiskQuotaDescription": "L'espace de stockage des données est presque plein, veuillez nettoyer l'espace sur le disque, sinon les données seront perdues"
       },
       "local": {
         "autoSync": {
@@ -2999,6 +3117,13 @@
           "label": "CSS personnalisé",
           "placeholder": "/* Écrire votre CSS personnalisé ici */"
         }
+      },
+      "font": {
+        "code": "police de code",
+        "default": "Par défaut",
+        "global": "Police de caractère globale",
+        "select": "Sélectionner la police",
+        "title": "Paramètres de police"
       },
       "navbar": {
         "position": {
@@ -3593,6 +3718,27 @@
         "title": "Ajouter un fournisseur",
         "type": "Type de fournisseur"
       },
+      "anthropic": {
+        "apikey": "Clé API",
+        "auth_failed": "Échec de l'authentification Anthropic",
+        "auth_method": "Mode d'authentification",
+        "auth_success": "Authentification OAuth Anthropic réussie",
+        "authenticated": "Certifié",
+        "authenticating": "Authentification en cours",
+        "cancel": "Annuler",
+        "code_error": "Code d'autorisation invalide, veuillez réessayer",
+        "code_placeholder": "Veuillez saisir le code d'autorisation affiché dans le navigateur",
+        "code_required": "Le code d'autorisation ne peut pas être vide",
+        "description": "Authentification OAuth",
+        "description_detail": "Vous devez souscrire à Claude Pro ou à une version supérieure pour pouvoir utiliser cette méthode d'authentification.",
+        "enter_auth_code": "code d'autorisation",
+        "logout": "Déconnexion",
+        "logout_failed": "Échec de la déconnexion, veuillez réessayer",
+        "logout_success": "Déconnexion réussie d'Anthropic",
+        "oauth": "Authentification OAuth web",
+        "start_auth": "Commencer l'autorisation",
+        "submit_code": "Terminer la connexion"
+      },
       "api": {
         "key": {
           "check": {
@@ -3815,12 +3961,14 @@
       "clear_shortcut": "Effacer raccourci clavier",
       "clear_topic": "Vider les messages",
       "copy_last_message": "Copier le dernier message",
+      "edit_last_user_message": "Éditer le dernier message utilisateur",
       "enabled": "activer",
       "exit_fullscreen": "Quitter le plein écran",
       "label": "Touche",
       "mini_window": "Assistant rapide",
       "new_topic": "Nouveau sujet",
       "press_shortcut": "Appuyer sur raccourci clavier",
+      "rename_topic": "Renommer le sujet",
       "reset_defaults": "Réinitialiser raccourcis par défaut",
       "reset_defaults_confirm": "Êtes-vous sûr de vouloir réinitialiser tous les raccourcis clavier ?",
       "reset_to_default": "Réinitialiser aux valeurs par défaut",
@@ -3871,6 +4019,13 @@
           "title": "Image"
         },
         "image_provider": "Fournisseur de service OCR",
+        "paddleocr": {
+          "aistudio_access_token": "Jeton d’accès de la communauté AI Studio",
+          "aistudio_url_label": "Communauté AI Studio",
+          "api_url": "URL de l’API",
+          "serving_doc_url_label": "Documentation de PaddleOCR Serving",
+          "tip": "Vous pouvez consulter la documentation officielle de PaddleOCR pour déployer un service local, ou déployer un service cloud sur la Communauté PaddlePaddle AI Studio. Dans ce dernier cas, veuillez fournir le jeton d’accès de la Communauté AI Studio."
+        },
         "system": {
           "win": {
             "langs_tooltip": "Dépendre de Windows pour fournir des services, vous devez télécharger des packs linguistiques dans le système afin de prendre en charge les langues concernées."
@@ -4168,6 +4323,7 @@
     },
     "processing": "en cours de traduction...",
     "settings": {
+      "autoCopy": "Copié automatiquement après la traduction",
       "bidirectional": "Paramètres de traduction bidirectionnelle",
       "bidirectional_tip": "Une fois activé, seul la traduction bidirectionnelle entre la langue source et la langue cible est prise en charge",
       "model": "Paramètres du modèle",

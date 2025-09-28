@@ -105,8 +105,7 @@ export class MemoryProcessor {
     if (!memoryConfig.llmApiClient) {
       throw new Error('No LLM model configured for memory processing')
     }
-
-    const existingMemoriesResult = window.keyv.get(`memory-search-${lastMessageId}`) as MemoryItem[] | []
+    const existingMemoriesResult = (window.keyv.get(`memory-search-${lastMessageId}`) as MemoryItem[]) || []
 
     const existingMemories = existingMemoriesResult.map((memory) => ({
       id: memory.id,

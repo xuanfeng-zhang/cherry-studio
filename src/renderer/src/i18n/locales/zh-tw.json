@@ -538,6 +538,10 @@
         "tip": "可執行的程式碼塊工具欄中會顯示運行按鈕，注意不要執行危險程式碼！",
         "title": "程式碼執行"
       },
+      "code_fancy_block": {
+        "label": "花式程式碼區塊",
+        "tip": "使用更美觀的程式碼區塊樣式，例如 HTML 卡片"
+      },
       "code_image_tools": {
         "label": "啟用預覽工具",
         "tip": "為 mermaid 等程式碼區塊渲染後的圖像啟用預覽工具"
@@ -763,6 +767,7 @@
     "delete": "刪除",
     "delete_confirm": "確定要刪除嗎？",
     "description": "描述",
+    "detail": "詳情",
     "disabled": "已停用",
     "docs": "文件",
     "download": "下載",
@@ -788,6 +793,7 @@
     "more": "更多",
     "name": "名稱",
     "no_results": "沒有結果",
+    "none": "無",
     "open": "開啟",
     "paste": "貼上",
     "preview": "預覽",
@@ -833,6 +839,8 @@
     "openai-response": "OpenAI-Response"
   },
   "error": {
+    "availableProviders": "可用提供商",
+    "availableTools": "可用工具",
     "backup": {
       "file_format": "備份檔案格式錯誤"
     },
@@ -847,6 +855,7 @@
         "invalid": "無效的MCP伺服器"
       }
     },
+    "cause": "錯誤原因",
     "chat": {
       "chunk": {
         "non_json": "返回了無效的資料格式"
@@ -856,6 +865,13 @@
       "quota_exceeded": "您今日{{quota}}免费配额已用尽，请前往 <provider>{{provider}}</provider> 获取API密钥，配置API密钥后继续使用",
       "response": "出現錯誤。如果尚未設定 API 金鑰，請前往設定 > 模型提供者中設定金鑰"
     },
+    "content": "內容",
+    "data": "数据",
+    "detail": "錯誤詳情",
+    "details": "詳細信息",
+    "errors": "錯誤",
+    "finishReason": "結束原因",
+    "functionality": "功能",
     "http": {
       "400": "請求錯誤，請檢查請求參數是否正確。如果修改了模型設定，請重設到預設設定",
       "401": "身份驗證失敗，請檢查 API 金鑰是否正確",
@@ -867,20 +883,51 @@
       "503": "服務無法使用，請稍後再試",
       "504": "閘道器超時，請稍後再試"
     },
+    "lastError": "最後錯誤",
+    "maxEmbeddingsPerCall": "每次調用的最大嵌入",
+    "message": "錯誤訊息",
     "missing_user_message": "無法切換模型回應：原始用戶訊息已被刪除。請發送新訊息以獲得此模型回應。",
     "model": {
       "exists": "模型已存在",
       "not_exists": "模型不存在"
     },
+    "modelId": "模型 ID",
+    "modelType": "模型類型",
+    "name": "錯誤名稱",
     "no_api_key": "API 金鑰未設定",
+    "originalError": "原錯誤",
+    "originalMessage": "原消息",
+    "parameter": "參數",
     "pause_placeholder": "回應已暫停",
+    "prompt": "提示詞",
+    "provider": "提供商",
+    "providerId": "提供者 ID",
     "provider_disabled": "模型供應商未啟用",
+    "reason": "原因",
     "render": {
       "description": "消息內容渲染失敗，請檢查消息內容格式是否正確",
       "title": "渲染錯誤"
     },
+    "requestBody": "請求內容",
+    "requestBodyValues": "请求体",
+    "requestUrl": "請求路徑",
+    "response": "響應",
+    "responseBody": "响应内容",
+    "responseHeaders": "响应首部",
+    "responses": "響應",
+    "role": "角色",
+    "stack": "堆棧信息",
+    "status": "狀態碼",
+    "statusCode": "狀態碼",
+    "statusText": "狀態文本",
+    "text": "文本",
+    "toolInput": "工具輸入",
+    "toolName": "工具名",
     "unknown": "未知錯誤",
-    "user_message_not_found": "無法找到原始用戶訊息"
+    "usage": "用量",
+    "user_message_not_found": "無法找到原始用戶訊息",
+    "value": "值",
+    "values": "值"
   },
   "export": {
     "assistant": "助手",
@@ -917,6 +964,9 @@
     "image": "圖片",
     "name": "名稱",
     "open": "開啟",
+    "preview": {
+      "error": "開啟檔案失敗"
+    },
     "size": "大小",
     "text": "文字",
     "title": "檔案",
@@ -965,9 +1015,11 @@
     },
     "add_directory": "新增目錄",
     "add_file": "新增檔案",
+    "add_image": "新增圖片",
     "add_note": "新增筆記",
     "add_sitemap": "網站地圖",
     "add_url": "新增網址",
+    "add_video": "新增影片",
     "cancel_index": "取消索引",
     "chunk_overlap": "重疊大小",
     "chunk_overlap_placeholder": "預設值（不建議修改）",
@@ -994,6 +1046,7 @@
     "document_count_default": "預設",
     "document_count_help": "請求文件片段數量越多，附帶的資訊越多，但需要消耗的 Token 也越多",
     "drag_file": "拖拽檔案到這裡",
+    "drag_image": "拖曳圖片到這裡",
     "edit_remark": "修改備註",
     "edit_remark_placeholder": "請輸入備註內容",
     "embedding_model": "嵌入模型",
@@ -1002,9 +1055,15 @@
     "error": {
       "failed_to_create": "知識庫創建失敗",
       "failed_to_edit": "知識庫編輯失敗",
-      "model_invalid": "未選擇模型"
+      "model_invalid": "未選擇模型",
+      "video": {
+        "local_file_missing": "影片檔案不存在",
+        "youtube_url_missing": "YouTube 影片連結不存在"
+      }
     },
     "file_hint": "支援 {{file_types}} 格式",
+    "image_hint": "支援 {{image_types}} 格式",
+    "images": "圖片",
     "index_all": "索引全部",
     "index_cancelled": "索引已取消",
     "index_started": "索引開始",
@@ -1020,6 +1079,10 @@
       },
       "error": {
         "failed": "遷移失敗"
+      },
+      "migrate_to_langchain": {
+        "content": "知識庫遷移不會刪除舊知識庫，而是建立一個副本後重新處理所有知識庫條目，可能消耗大量 tokens，請謹慎操作。",
+        "info": "知識庫架構已更新，點擊遷移到新架構"
       },
       "source_dimensions": "源維度",
       "source_model": "源模型",
@@ -1039,6 +1102,20 @@
     "quota": "{{name}} 剩餘配額：{{quota}}",
     "quota_infinity": "{{name}} 配額：無限制",
     "rename": "重新命名",
+    "retriever": "搜尋模式",
+    "retriever_bm25": "全文搜尋",
+    "retriever_bm25_desc": "根據關鍵字的相關性和頻率查找文件。",
+    "retriever_hybrid": "混合搜尋（推薦）",
+    "retriever_hybrid_desc": "結合關鍵字搜索和語義搜索，以實現最佳檢索準確性。",
+    "retriever_hybrid_weight": {
+      "bm25": "全文",
+      "recommended": "推薦",
+      "title": "混合搜尋權重調整 (全文/向量)",
+      "vector": "向量"
+    },
+    "retriever_tooltip": "使用不同的檢索方式檢索知識庫",
+    "retriever_vector": "向量搜尋",
+    "retriever_vector_desc": "根據語意相似性和含義查找文件。",
     "search": "搜尋知識庫",
     "search_placeholder": "輸入查詢內容",
     "settings": {
@@ -1060,6 +1137,7 @@
     "status_preprocess_completed": "預處理完成",
     "status_preprocess_failed": "預處理失敗",
     "status_processing": "處理中",
+    "subtitle_file": "字幕檔案",
     "threshold": "匹配度閾值",
     "threshold_placeholder": "未設定",
     "threshold_too_large_or_small": "閾值不能大於 1 或小於 0",
@@ -1071,7 +1149,9 @@
     "topN_tooltip": "返回的匹配結果數量，數值越大，匹配結果越多，但消耗的 Token 也越多",
     "url_added": "網址已新增",
     "url_placeholder": "請輸入網址，多個網址用換行符號分隔",
-    "urls": "網址"
+    "urls": "網址",
+    "videos": "影片",
+    "videos_file": "影片檔案"
   },
   "languages": {
     "arabic": "阿拉伯文",
@@ -1378,6 +1458,13 @@
         "bubble": "氣泡",
         "label": "訊息樣式",
         "plain": "簡潔"
+      },
+      "video": {
+        "error": {
+          "local_file_missing": "本地視頻檔案路徑不存在",
+          "unsupported_type": "不支援的視頻類型",
+          "youtube_url_missing": "YouTube 視頻連結不存在"
+        }
       }
     },
     "processing": "正在處理...",
@@ -1465,7 +1552,7 @@
     },
     "websearch": {
       "cutoff": "正在截斷搜尋內容...",
-      "fetch_complete": "已完成 {{count}} 次搜尋...",
+      "fetch_complete": "{{count}} 個搜尋結果",
       "rag": "正在執行 RAG...",
       "rag_complete": "保留 {{countBefore}} 個結果中的 {{countAfter}} 個...",
       "rag_failed": "RAG 失敗，返回空結果..."
@@ -1618,7 +1705,13 @@
   "navbar": {
     "expand": "伸縮對話框",
     "hide_sidebar": "隱藏側邊欄",
-    "show_sidebar": "顯示側邊欄"
+    "show_sidebar": "顯示側邊欄",
+    "window": {
+      "close": "關閉",
+      "maximize": "最大化",
+      "minimize": "最小化",
+      "restore": "還原"
+    }
   },
   "navigate": {
     "provider_settings": "跳轉到服務商設置界面"
@@ -1632,7 +1725,7 @@
     "delete_confirm": "確定要刪除此 {{type}} 嗎？",
     "delete_folder_confirm": "確定要刪除資料夾 \"{{name}}\" 及其所有內容嗎？",
     "delete_note_confirm": "確定要刪除筆記 \"{{name}}\" 嗎？",
-    "drop_markdown_hint": "拖拽 Markdown 文件到此處導入",
+    "drop_markdown_hint": "拖拽 .md 文件或資料夾到此處導入",
     "empty": "暫無筆記",
     "expand": "展開",
     "export_failed": "匯出至知識庫失敗",
@@ -1643,8 +1736,7 @@
     "new_note": "新建筆記",
     "no_content_to_copy": "沒有內容可複制",
     "no_file_selected": "請選擇要上傳的文件",
-    "only_markdown": "僅支援 Markdown 格式",
-    "only_one_file_allowed": "只能上傳一個文件",
+    "no_valid_files": "沒有上傳有效的檔案",
     "open_folder": "打開外部文件夾",
     "open_outside": "從外部打開",
     "rename": "重命名",
@@ -1670,8 +1762,15 @@
         "compress_content": "縮減欄寬",
         "compress_content_description": "開啟後將限制每行字數，使屏幕顯示的內容減少",
         "default_font": "默認字體",
+        "font_size": "字體大小",
+        "font_size_description": "調整字體大小以獲得更好的閱讀體驗 (10-30px)",
+        "font_size_large": "大",
+        "font_size_medium": "中",
+        "font_size_small": "小",
         "font_title": "字體設置",
         "serif_font": "襯線字體",
+        "show_table_of_contents": "顯示目錄大綱",
+        "show_table_of_contents_description": "顯示目錄大綱側邊欄，方便文檔內導航",
         "title": "顯示"
       },
       "editor": {
@@ -1699,7 +1798,7 @@
     "sort_updated_asc": "更新時間（從舊到新）",
     "sort_updated_desc": "更新時間（從新到舊）",
     "sort_z2a": "文件名（Z-A）",
-    "star": "收藏",
+    "star": "收藏筆記",
     "starred_notes": "收藏的筆記",
     "title": "筆記",
     "unsaved_changes": "你有未儲存的內容，確定要離開嗎？",
@@ -2152,6 +2251,21 @@
       }
     },
     "dragHandle": "拖拽塊",
+    "frontMatter": {
+      "addProperty": "新增屬性",
+      "addTag": "新增標籤",
+      "changeToBoolean": "核取方塊",
+      "changeToDate": "日期",
+      "changeToNumber": "數字",
+      "changeToTags": "標籤",
+      "changeToText": "文字",
+      "changeType": "更改類型",
+      "deleteProperty": "刪除屬性",
+      "editValue": "編輯值",
+      "empty": "空",
+      "moreActions": "更多操作",
+      "propertyName": "屬性名稱"
+    },
     "image": {
       "placeholder": "添加圖片"
     },
@@ -2552,6 +2666,10 @@
         "token_placeholder": "請輸入 Joplin 授權 Token",
         "url": "Joplin 剪輯服務 URL",
         "url_placeholder": "http://127.0.0.1:41184/"
+      },
+      "limit": {
+        "appDataDiskQuota": "磁碟空間警告",
+        "appDataDiskQuotaDescription": "資料目錄空間即將用盡, 請清理磁碟空間, 否則會丟失數據"
       },
       "local": {
         "autoSync": {
@@ -3014,6 +3132,13 @@
           "label": "自訂 CSS",
           "placeholder": "/* 這裡寫自訂 CSS */"
         }
+      },
+      "font": {
+        "code": "程式碼字型",
+        "default": "預設",
+        "global": "全域字型",
+        "select": "選擇字體",
+        "title": "字型設定"
       },
       "navbar": {
         "position": {
@@ -3608,6 +3733,27 @@
         "title": "新增提供者",
         "type": "供應商類型"
       },
+      "anthropic": {
+        "apikey": "API 密鑰",
+        "auth_failed": "Anthropic 身份驗證失敗",
+        "auth_method": "认证方式",
+        "auth_success": "Anthropic OAuth 認證成功",
+        "authenticated": "已認證",
+        "authenticating": "正在認證",
+        "cancel": "取消",
+        "code_error": "無效的授權碼，請重試",
+        "code_placeholder": "請輸入瀏覽器中顯示的授權碼",
+        "code_required": "授權碼不能為空",
+        "description": "OAuth 身份認證",
+        "description_detail": "您需要訂閱 Claude Pro 或更高版本才能使用此認證方式",
+        "enter_auth_code": "授權碼",
+        "logout": "登出",
+        "logout_failed": "登出失敗，請重試",
+        "logout_success": "成功登出 Anthropic",
+        "oauth": "網頁 OAuth",
+        "start_auth": "開始授權",
+        "submit_code": "完成登錄"
+      },
       "api": {
         "key": {
           "check": {
@@ -3830,12 +3976,14 @@
       "clear_shortcut": "清除快捷鍵",
       "clear_topic": "清除所有訊息",
       "copy_last_message": "複製上一則訊息",
+      "edit_last_user_message": "編輯最後一則使用者訊息",
       "enabled": "啟用",
       "exit_fullscreen": "退出螢幕",
       "label": "按鍵",
       "mini_window": "快捷助手",
       "new_topic": "新增話題",
       "press_shortcut": "按下快捷鍵",
+      "rename_topic": "重新命名話題",
       "reset_defaults": "重設預設快捷鍵",
       "reset_defaults_confirm": "確定要重設所有快捷鍵嗎？",
       "reset_to_default": "重設為預設",
@@ -3886,6 +4034,13 @@
           "title": "圖片"
         },
         "image_provider": "OCR 服務提供商",
+        "paddleocr": {
+          "aistudio_access_token": "星河社群存取權杖",
+          "aistudio_url_label": "星河社群",
+          "api_url": "API 網址",
+          "serving_doc_url_label": "PaddleOCR 服務化部署文件",
+          "tip": "您可以參考 PaddleOCR 官方文件來部署本機服務，或是在飛槳星河社群部署雲端服務。對於後者，請提供星河社群的存取權杖。"
+        },
         "system": {
           "win": {
             "langs_tooltip": "依賴 Windows 提供服務，您需要在系統中下載語言包來支援相關語言。"
@@ -4183,6 +4338,7 @@
     },
     "processing": "翻譯中...",
     "settings": {
+      "autoCopy": "翻譯完成後自動複製",
       "bidirectional": "雙向翻譯設定",
       "bidirectional_tip": "開啟後，僅支援在源語言和目標語言之間進行雙向翻譯",
       "model": "模型設定",

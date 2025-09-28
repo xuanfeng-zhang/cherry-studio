@@ -183,10 +183,7 @@ const MessageBlockEditor: FC<Props> = ({ message, topicId, onSave, onResend, onC
 
       // 如果有文件，但都不支持
       if (files.length > 0 && supportedFiles === 0) {
-        window.message.info({
-          key: 'file_not_supported',
-          content: t('chat.input.file_not_supported')
-        })
+        window.toast.info(t('chat.input.file_not_supported'))
       }
     }
   }
@@ -225,6 +222,12 @@ const MessageBlockEditor: FC<Props> = ({ message, topicId, onSave, onResend, onC
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>, blockId: string) => {
     if (message.role !== 'user') {
+      return
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      onCancel()
       return
     }
 
