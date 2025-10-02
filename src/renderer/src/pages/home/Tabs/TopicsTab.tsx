@@ -11,6 +11,7 @@ import { useInPlaceEdit } from '@renderer/hooks/useInPlaceEdit'
 import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
+import { useTagCategories } from '@renderer/hooks/useTagCategories'
 import { finishTopicRenaming, startTopicRenaming, TopicManager } from '@renderer/hooks/useTopic'
 import { useTopicTags } from '@renderer/hooks/useTopicTags'
 import { fetchMessagesSummary } from '@renderer/services/ApiService'
@@ -74,6 +75,7 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
   const { assistant, removeTopic, moveTopic, updateTopic, updateTopics } = useAssistant(_assistant.id)
   const { showTopicTime, pinTopicsToTop, setTopicPosition, topicPosition } = useSettings()
   const { allTags } = useTopicTags()
+  const { categoriesWithTags } = useTagCategories()
 
   const renamingTopics = useSelector((state: RootState) => state.runtime.chat.renamingTopics)
   const topicLoadingQuery = useSelector((state: RootState) => state.messages.loadingByTopic)
@@ -333,45 +335,60 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
         children: (() => {
           const items: MenuProps['items'] = []
 
-          // 添加已有标签选项
-          if (allTags.length > 0) {
-            allTags.forEach((tag) => {
-              const isSelected = (topic.tags || []).includes(tag)
-              items.push({
-                key: `tag-${tag}`,
-                label: (
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      minWidth: '120px'
-                    }}
-                    onMouseDown={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                    }}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      onTagToggle(topic, tag)
-                      // 保持菜单打开
-                      setDropdownVisible((prev) => ({ ...prev, [topic.id]: true }))
-                    }}>
-                    <span
+          // 按分类添加标签选项
+          if (categoriesWithTags.length > 0) {
+            categoriesWithTags.forEach((category) => {
+              const categoryItems: MenuProps['items'] = []
+              
+              category.tags.forEach((tag) => {
+                const isSelected = (topic.tags || []).includes(tag.name)
+                categoryItems.push({
+                  key: `tag-${category.id}-${tag.name}`,
+                  label: (
+                    <div
                       style={{
-                        color: isSelected ? 'var(--color-primary)' : 'var(--color-text-1)',
-                        fontWeight: isSelected ? 500 : 400
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        minWidth: '120px'
+                      }}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        onTagToggle(topic, tag.name)
+                        // 保持菜单打开
+                        setDropdownVisible((prev) => ({ ...prev, [topic.id]: true }))
                       }}>
-                      {tag}
-                    </span>
-                    {isSelected && <Check size={14} />}
-                  </div>
-                )
+                      <span
+                        style={{
+                          color: isSelected ? 'var(--color-primary)' : 'var(--color-text-1)',
+                          fontWeight: isSelected ? 500 : 400
+                        }}>
+                        {tag.name}
+                      </span>
+                      {isSelected && <Check size={14} />}
+                    </div>
+                  )
+                })
               })
+
+              // 只有当分类下有标签时才添加该分类
+              if (categoryItems.length > 0) {
+                items.push({
+                  key: `category-${category.id}`,
+                  label: category.name,
+                  children: categoryItems
+                })
+              }
             })
 
-            items.push({ type: 'divider' })
+            if (items.length > 0) {
+              items.push({ type: 'divider' })
+            }
           }
 
           // 添加标签管理选项
