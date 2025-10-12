@@ -673,7 +673,10 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
 
           return (
             <Dropdown
-              menu={{ items: getTopicMenuItems }}
+              menu={{ 
+                items: getTopicMenuItems,
+                style: { maxHeight: '500px', overflowY: 'auto' }
+              }}
               trigger={['contextMenu']}
               open={dropdownVisible[topic.id] || false}
               onOpenChange={(visible) => {
@@ -681,7 +684,9 @@ const Topics: FC<Props> = ({ assistant: _assistant, activeTopic, setActiveTopic,
                 if (visible) {
                   setTargetTopic(topic)
                 }
-              }}>
+              }}
+              overlayClassName="topic-dropdown-menu"
+              autoAdjustOverflow={true}>
               <TopicListItem
                 onContextMenu={() => {
                   setTargetTopic(topic)
