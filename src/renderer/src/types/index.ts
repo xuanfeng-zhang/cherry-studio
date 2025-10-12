@@ -78,6 +78,7 @@ const ThinkModelTypes = [
   'default',
   'o',
   'gpt5',
+  'gpt5_codex',
   'grok',
   'gemini',
   'gemini_pro',
@@ -295,9 +296,10 @@ export type Provider = {
 }
 
 export const SystemProviderIds = {
-  // cherryin: 'cherryin',
+  cherryin: 'cherryin',
   silicon: 'silicon',
   aihubmix: 'aihubmix',
+  ovms: 'ovms',
   ocoolai: 'ocoolai',
   deepseek: 'deepseek',
   ppio: 'ppio',
@@ -348,7 +350,8 @@ export const SystemProviderIds = {
   voyageai: 'voyageai',
   'aws-bedrock': 'aws-bedrock',
   poe: 'poe',
-  aionly: 'aionly'
+  aionly: 'aionly',
+  longcat: 'longcat'
 } as const
 
 export type SystemProviderId = keyof typeof SystemProviderIds

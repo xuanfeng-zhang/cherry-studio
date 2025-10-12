@@ -251,6 +251,7 @@
     "added": "已新增",
     "case_sensitive": "區分大小寫",
     "collapse": "折疊",
+    "download": "下載",
     "includes_user_questions": "包含使用者提問",
     "manage": "管理",
     "select_model": "選擇模型",
@@ -1599,13 +1600,13 @@
     "nami-ai-search": "納米AI搜索",
     "qwen": "通義千問",
     "sensechat": "商量",
+    "stepfun": "階躍AI",
     "tencent-yuanbao": "騰訊元寶",
     "tiangong-ai": "天工AI",
     "wanzhi": "萬知",
     "wenxin": "文心一言",
     "wps-copilot": "WPS靈犀",
     "xiaoyi": "小藝",
-    "yuewen": "躍問",
     "zhihu": "知乎直答"
   },
   "miniwindow": {
@@ -1713,6 +1714,12 @@
     "provider_settings": "跳轉到服務商設置界面"
   },
   "notes": {
+    "auto_rename": {
+      "empty_note": "筆記為空，無法生成名稱",
+      "failed": "生成筆記名稱失敗",
+      "label": "生成筆記名稱",
+      "success": "筆記名稱生成成功"
+    },
     "characters": "字符",
     "collapse": "收起",
     "content_placeholder": "請輸入筆記內容...",
@@ -1794,6 +1801,8 @@
     "sort_updated_asc": "更新時間（從舊到新）",
     "sort_updated_desc": "更新時間（從新到舊）",
     "sort_z2a": "文件名（Z-A）",
+    "spell_check": "拼寫檢查",
+    "spell_check_tooltip": "啟用/禁用拼寫檢查",
     "star": "收藏筆記",
     "starred_notes": "收藏的筆記",
     "title": "筆記",
@@ -1842,6 +1851,57 @@
       "title": "保持活躍時間"
     },
     "title": "Ollama"
+  },
+  "ovms": {
+    "action": {
+      "install": "安裝",
+      "installing": "正在安裝",
+      "reinstall": "重新安裝",
+      "run": "執行 OVMS",
+      "starting": "啟動中",
+      "stop": "停止 OVMS",
+      "stopping": "停止中"
+    },
+    "description": "<div><p>1. 下載 OV 模型。</p><p>2. 在 'Manager' 中新增模型。</p><p>僅支援 Windows！</p><p>OVMS 安裝路徑: '%USERPROFILE%\\.cherrystudio\\ovms' 。</p><p>請參考 <a href=https://github.com/openvinotoolkit/model_server/blob/c55551763d02825829337b62c2dcef9339706f79/docs/deploying_server_baremetal.md>Intel OVMS 指南</a></p></dev>",
+    "download": {
+      "button": "下載",
+      "error": "選擇失敗",
+      "model_id": {
+        "label": "模型 ID",
+        "model_id_pattern": "模型 ID 必須以 OpenVINO/ 開頭",
+        "placeholder": "必填，例如 OpenVINO/Qwen3-8B-int4-ov",
+        "required": "請輸入模型 ID"
+      },
+      "model_name": {
+        "label": "模型名稱",
+        "placeholder": "必填，例如 Qwen3-8B-int4-ov",
+        "required": "請輸入模型名稱"
+      },
+      "model_source": "模型來源:",
+      "model_task": "模型任務:",
+      "success": "下載成功",
+      "success_desc": "模型\"{{modelName}}\"-\"{{modelId}}\"下載成功，請前往 OVMS 管理界面添加模型",
+      "tip": "模型正在下載，有時需要幾個小時。請耐心等候...",
+      "title": "下載 Intel OpenVINO 模型"
+    },
+    "failed": {
+      "install": "安裝 OVMS 失敗:",
+      "install_code_100": "未知錯誤",
+      "install_code_101": "僅支援 Intel(R) Core(TM) Ultra CPU",
+      "install_code_102": "僅支援 Windows",
+      "install_code_103": "下載 OVMS runtime 失敗",
+      "install_code_104": "解壓 OVMS runtime 失敗",
+      "install_code_105": "清理 OVMS runtime 失敗",
+      "run": "執行 OVMS 失敗:",
+      "stop": "停止 OVMS 失敗:"
+    },
+    "status": {
+      "not_installed": "OVMS 未安裝",
+      "not_running": "OVMS 未執行",
+      "running": "OVMS 正在執行",
+      "unknown": "OVMS 狀態未知"
+    },
+    "title": "Intel OVMS"
   },
   "paintings": {
     "aspect_ratio": "畫幅比例",
@@ -2074,6 +2134,7 @@
     "ollama": "Ollama",
     "openai": "OpenAI",
     "openrouter": "OpenRouter",
+    "ovms": "Intel OVMS",
     "perplexity": "Perplexity",
     "ph8": "PH8 大模型開放平台",
     "poe": "Poe",
@@ -4368,6 +4429,7 @@
     "later": "稍後",
     "message": "新版本 {{version}} 已準備就緒，是否立即安裝？",
     "noReleaseNotes": "暫無更新日誌",
+    "saveDataError": "保存數據失敗，請重試",
     "title": "更新提示"
   },
   "warning": {

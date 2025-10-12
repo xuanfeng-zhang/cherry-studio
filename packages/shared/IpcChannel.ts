@@ -5,8 +5,8 @@ export enum IpcChannel {
   App_SetLanguage = 'app:set-language',
   App_SetEnableSpellCheck = 'app:set-enable-spell-check',
   App_SetSpellCheckLanguages = 'app:set-spell-check-languages',
-  App_ShowUpdateDialog = 'app:show-update-dialog',
   App_CheckForUpdate = 'app:check-for-update',
+  App_QuitAndInstall = 'app:quit-and-install',
   App_Reload = 'app:reload',
   App_Quit = 'app:quit',
   App_Info = 'app:info',
@@ -34,6 +34,7 @@ export enum IpcChannel {
   App_GetBinaryPath = 'app:get-binary-path',
   App_InstallUvBinary = 'app:install-uv-binary',
   App_InstallBunBinary = 'app:install-bun-binary',
+  App_InstallOvmsBinary = 'app:install-ovms-binary',
   App_LogToMain = 'app:log-to-main',
   App_SaveData = 'app:save-data',
   App_GetDiskInfo = 'app:get-disk-info',
@@ -220,6 +221,7 @@ export enum IpcChannel {
   // system
   System_GetDeviceType = 'system:getDeviceType',
   System_GetHostname = 'system:getHostname',
+  System_GetCpuName = 'system:getCpuName',
 
   // DevTools
   System_ToggleDevTools = 'system:toggleDevTools',
@@ -227,7 +229,6 @@ export enum IpcChannel {
   // events
   BackupProgress = 'backup-progress',
   ThemeUpdated = 'theme:updated',
-  UpdateDownloadedCancelled = 'update-downloaded-cancelled',
   RestoreProgress = 'restore-progress',
   UpdateError = 'update-error',
   UpdateAvailable = 'update-available',
@@ -329,6 +330,15 @@ export enum IpcChannel {
 
   // OCR
   OCR_ocr = 'ocr:ocr',
+
+  // OVMS
+  Ovms_AddModel = 'ovms:add-model',
+  Ovms_StopAddModel = 'ovms:stop-addmodel',
+  Ovms_GetModels = 'ovms:get-models',
+  Ovms_IsRunning = 'ovms:is-running',
+  Ovms_GetStatus = 'ovms:get-status',
+  Ovms_RunOVMS = 'ovms:run-ovms',
+  Ovms_StopOVMS = 'ovms:stop-ovms',
 
   // CherryAI
   Cherryai_GetSignature = 'cherryai:get-signature'

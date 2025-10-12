@@ -59,6 +59,7 @@ function removeMiniAppIconsFromState(state: RootState) {
 
 function removeMiniAppFromState(state: RootState, id: string) {
   if (state.minapps) {
+    state.minapps.pinned = state.minapps.pinned.filter((app) => app.id !== id)
     state.minapps.enabled = state.minapps.enabled.filter((app) => app.id !== id)
     state.minapps.disabled = state.minapps.disabled.filter((app) => app.id !== id)
   }
@@ -83,6 +84,15 @@ function addProvider(state: RootState, id: string) {
       state.llm.providers.push(_provider)
     }
   }
+}
+
+// Fix missing provider
+function fixMissingProvider(state: RootState) {
+  SYSTEM_PROVIDERS.forEach((p) => {
+    if (!state.llm.providers.find((provider) => provider.id === p.id)) {
+      state.llm.providers.push(p)
+    }
+  })
 }
 
 // add ocr provider
@@ -2554,9 +2564,33 @@ const migrateConfig = {
   '158': (state: RootState) => {
     try {
       state.llm.providers = state.llm.providers.filter((provider) => provider.id !== 'cherryin')
+      addProvider(state, 'longcat')
       return state
     } catch (error) {
       logger.error('migrate 158 error', error as Error)
+      return state
+    }
+  },
+  '159': (state: RootState) => {
+    try {
+      addProvider(state, 'ovms')
+      fixMissingProvider(state)
+      return state
+    } catch (error) {
+      logger.error('migrate 159 error', error as Error)
+      return state
+    }
+  },
+  '161': (state: RootState) => {
+    try {
+      removeMiniAppFromState(state, 'nm-search')
+      removeMiniAppFromState(state, 'hika')
+      removeMiniAppFromState(state, 'hugging-chat')
+      addProvider(state, 'cherryin')
+      state.llm.providers = moveProvider(state.llm.providers, 'cherryin', 1)
+      return state
+    } catch (error) {
+      logger.error('migrate 161 error', error as Error)
       return state
     }
   }

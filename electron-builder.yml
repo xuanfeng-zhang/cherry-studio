@@ -125,32 +125,18 @@ afterSign: scripts/notarize.js
 artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
-    ✨ 新功能：
-    - 重构知识库模块，提升文档处理能力和搜索性能
-    - 新增 PaddleOCR 支持，增强文档识别能力
-    - 支持自定义窗口控制按钮样式
-    - 新增 AI SDK 包，扩展 AI 能力集成
-    - 支持标签页拖拽重排序功能
-    - 增强笔记编辑器的同步和日志功能
-    - Top navigation bar mode will display the mini-program using tabs
-    - Fixed the issue with Google mini-program login
-    - Notes support drag and drop sorting
+    What's New in v1.6.4
 
-    🔧 性能优化：
-    - 优化 MCP 服务的日志记录和错误处理
-    - 改进 WebView 服务的 User-Agent 处理
-    - 优化迷你应用的标题栏样式和状态栏适配
-    - 重构依赖管理，清理和优化 package.json
+    Features:
+    - Providers: add CherryIN provider
+    - Notes: Add right-click context menu to create notes and folders
+    - Mini App: Add search functionality in mini app page
+    - Update Dialog: Add updating dialog in renderer process
+    - Mini App: Remove some mini apps
 
-    🐛 问题修复：
-    - 修复输入栏无限状态更新循环问题
-    - 修复窗口控制提示框的鼠标悬停延迟
-    - 修复翻译输入框粘贴多内容源的处理
-    - 修复导航服务初始化时序问题
-    - 修复 MCP 通过 JSON 添加时的参数转换
-    - 修复模型作用域服务器同步时的 URL 格式
-    - 标准化工具提示图标样式
-    Optimized note-taking feature, now able to quickly rename by modifying the title
-    Fixed issue where CherryAI free model could not be used
-    Fixed issue where VertexAI proxy address could not be called normally
-    Fixed issue where built-in tools from service providers could not be called normally
+    Bug Fixes:
+    - Fix reasoning block insertion order - now inserts before content block
+    - Fix knowledge base deletion and web search RAG errors
+    - Fix Qwen model URL configuration
+    - Fix topic tags dropdown menu overflow issue
+

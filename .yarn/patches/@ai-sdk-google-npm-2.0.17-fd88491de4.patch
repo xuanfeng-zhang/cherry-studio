@@ -1,13 +1,13 @@
 diff --git a/dist/index.mjs b/dist/index.mjs
-index 110f37ec18c98b1d55ae2b73cc716194e6f9094d..3ea0fadd783f334db71266e45babdcce11076974 100644
+index b957cb824faa79cf01ba3a504f221870bd8e306a..4d71d30f655775d61537d9d8b73f6e17d41fa67e 100644
 --- a/dist/index.mjs
 +++ b/dist/index.mjs
-@@ -448,7 +448,7 @@ function convertToGoogleGenerativeAIMessages(prompt, options) {
+@@ -452,7 +452,7 @@ function convertToGoogleGenerativeAIMessages(prompt, options) {
  
  // src/get-model-path.ts
  function getModelPath(modelId) {
 -  return modelId.includes("/") ? modelId : `models/${modelId}`;
-+  return `models/${modelId}`;
++  return modelId?.includes("models/") ? modelId : `models/${modelId}`;
  }
  
  // src/google-generative-ai-options.ts
