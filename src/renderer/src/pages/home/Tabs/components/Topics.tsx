@@ -4,6 +4,7 @@ import { CopyIcon, DeleteIcon, EditIcon } from '@renderer/components/Icons'
 import ObsidianExportPopup from '@renderer/components/Popups/ObsidianExportPopup'
 import PromptPopup from '@renderer/components/Popups/PromptPopup'
 import SaveToKnowledgePopup from '@renderer/components/Popups/SaveToKnowledgePopup'
+import TagManagementPopup from '@renderer/components/Popups/TagManagementPopup'
 import { isMac } from '@renderer/config/constant'
 import { db } from '@renderer/databases'
 import { useAssistant, useAssistants } from '@renderer/hooks/useAssistant'
@@ -12,6 +13,7 @@ import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { modelGenerating } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { finishTopicRenaming, startTopicRenaming, TopicManager } from '@renderer/hooks/useTopic'
+import { useTopicTags } from '@renderer/hooks/useTopicTags'
 import { fetchMessagesSummary } from '@renderer/services/ApiService'
 import { getDefaultTopic } from '@renderer/services/AssistantService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
@@ -50,6 +52,7 @@ import {
   Save,
   Sparkles,
   Square,
+  Tag,
   UploadIcon,
   XIcon
 } from 'lucide-react'
@@ -85,6 +88,10 @@ export const Topics: React.FC<Props> = ({ assistant: _assistant, activeTopic, se
   const [deletingTopicId, setDeletingTopicId] = useState<string | null>(null)
   const deleteTimerRef = useRef<NodeJS.Timeout>(null)
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null)
+  const [tagManagementTopic, setTagManagementTopic] = useState<Topic | null>(null)
+
+  // 标签管理相关
+  const { allTags } = useTopicTags()
 
   // 管理模式状态
   const manageState = useTopicManageMode()
@@ -293,6 +300,14 @@ export const Topics: React.FC<Props> = ({ assistant: _assistant, activeTopic, se
         }
       },
       {
+        label: t('chat.topics.tags.manage.title'),
+        key: 'manage-tags',
+        icon: <Tag size={14} />,
+        onClick() {
+          setTagManagementTopic(topic)
+        }
+      },
+      {
         label: t('notes.save'),
         key: 'notes',
         icon: <NotebookPen size={14} />,
@@ -487,7 +502,8 @@ export const Topics: React.FC<Props> = ({ assistant: _assistant, activeTopic, se
     onClearMessages,
     setTopicPosition,
     onMoveTopic,
-    onDeleteTopic
+    onDeleteTopic,
+    setTagManagementTopic
   ])
 
   // Sort topics based on pinned status if pinTopicsToTop is enabled
@@ -682,6 +698,26 @@ export const Topics: React.FC<Props> = ({ assistant: _assistant, activeTopic, se
         manageState={manageState}
         filteredTopics={filteredTopics}
       />
+
+      {/* 标签管理弹窗 */}
+      {tagManagementTopic && (
+        <TagManagementPopup
+          topic={tagManagementTopic}
+          availableTags={allTags}
+          onConfirm={(tags) => {
+            const updatedTopic = { ...tagManagementTopic, tags }
+            updateTopic(updatedTopic)
+            if (tagManagementTopic.id === activeTopic.id) {
+              setActiveTopic(updatedTopic)
+            }
+            setTagManagementTopic(null)
+            window.toast.success(t('common.saved'))
+          }}
+          onCancel={() => {
+            setTagManagementTopic(null)
+          }}
+        />
+      )}
     </>
   )
 }

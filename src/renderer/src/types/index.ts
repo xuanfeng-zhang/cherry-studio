@@ -249,6 +249,7 @@ export type Topic = {
   pinned?: boolean
   prompt?: string
   isNameManuallyEdited?: boolean
+  tags?: string[] // 话题标签
 }
 
 export type User = {

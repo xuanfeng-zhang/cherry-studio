@@ -1,12 +1,10 @@
-import { FolderOutlined, PlusOutlined, SettingOutlined } from '@ant-design/icons'
-import { useTagCategories } from '@renderer/hooks/useTagCategories'
-import { Button, Collapse, Divider, Input, Modal, Tag, Tooltip } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
+import { Divider, Input, Modal, Tag } from 'antd'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
 import { Topic } from '../../types'
-import TagCategoryManagementPopup from './TagCategoryManagementPopup'
 
 interface TagManagementPopupProps {
   topic: Topic
@@ -17,11 +15,9 @@ interface TagManagementPopupProps {
 
 const TagManagementPopup: React.FC<TagManagementPopupProps> = ({ topic, availableTags, onConfirm, onCancel }) => {
   const { t } = useTranslation()
-  const { categoriesWithTags } = useTagCategories()
   const [selectedTags, setSelectedTags] = React.useState<string[]>(topic.tags || [])
   const [inputValue, setInputValue] = React.useState('')
   const [inputVisible, setInputVisible] = React.useState(false)
-  const [showCategoryManagement, setShowCategoryManagement] = React.useState(false)
   const inputRef = React.useRef<any>(null)
 
   React.useEffect(() => {
@@ -66,19 +62,7 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({ topic, availabl
   return (
     <>
       <Modal
-        title={
-          <ModalTitle>
-            {t('chat.topics.tags.manage.title')}
-            <Tooltip title={t('chat.topics.tags.manage_categories')}>
-              <Button
-                type="text"
-                size="small"
-                icon={<SettingOutlined />}
-                onClick={() => setShowCategoryManagement(true)}
-              />
-            </Tooltip>
-          </ModalTitle>
-        }
+        title={t('chat.topics.tags.manage.title')}
         open={true}
         onOk={onOk}
         onCancel={onCancel}
@@ -115,65 +99,28 @@ const TagManagementPopup: React.FC<TagManagementPopupProps> = ({ topic, availabl
           <Divider />
 
           <Section>
-            <SectionTitle>{t('chat.topics.tags.available_by_category')}</SectionTitle>
-            <CategorizedTagsContainer>
-              {categoriesWithTags.length > 0 ? (
-                <Collapse size="small" ghost>
-                  {categoriesWithTags.map((category) => (
-                    <Collapse.Panel
-                      key={category.id}
-                      header={
-                        <CategoryHeader>
-                          <FolderOutlined style={{ color: category.color || 'var(--color-text-2)' }} />
-                          <span>{category.name}</span>
-                          <span style={{ color: 'var(--color-text-3)', fontSize: '12px' }}>
-                            ({category.tags.length})
-                          </span>
-                        </CategoryHeader>
-                      }>
-                      <TagContainer>
-                        {category.tags.map((tag) => (
-                          <Tag
-                            key={tag.name}
-                            onClick={() => handleTagClick(tag.name)}
-                            style={{
-                              cursor: 'pointer',
-                              backgroundColor: selectedTags.includes(tag.name) ? 'var(--color-primary)' : undefined,
-                              color: selectedTags.includes(tag.name) ? 'white' : undefined
-                            }}>
-                            {tag.name}
-                            <span style={{ opacity: 0.7, marginLeft: 4, fontSize: '10px' }}>({tag.usage})</span>
-                          </Tag>
-                        ))}
-                        {category.tags.length === 0 && (
-                          <EmptyMessage>{t('chat.topics.tags.no_tags_in_category')}</EmptyMessage>
-                        )}
-                      </TagContainer>
-                    </Collapse.Panel>
-                  ))}
-                </Collapse>
+            <SectionTitle>{t('chat.topics.tags.available_tags', { defaultValue: '可用标签' })}</SectionTitle>
+            <TagContainer>
+              {availableTags.length > 0 ? (
+                availableTags.map((tag) => (
+                  <Tag
+                    key={tag}
+                    onClick={() => handleTagClick(tag)}
+                    style={{
+                      cursor: 'pointer',
+                      backgroundColor: selectedTags.includes(tag) ? 'var(--color-primary)' : undefined,
+                      color: selectedTags.includes(tag) ? 'white' : undefined
+                    }}>
+                    {tag}
+                  </Tag>
+                ))
               ) : (
-                <TagContainer>
-                  {availableTags.map((tag) => (
-                    <Tag
-                      key={tag}
-                      onClick={() => handleTagClick(tag)}
-                      style={{
-                        cursor: 'pointer',
-                        backgroundColor: selectedTags.includes(tag) ? 'var(--color-primary)' : undefined,
-                        color: selectedTags.includes(tag) ? 'white' : undefined
-                      }}>
-                      {tag}
-                    </Tag>
-                  ))}
-                </TagContainer>
+                <EmptyMessage>{t('chat.topics.tags.no_tags', { defaultValue: '暂无可用标签' })}</EmptyMessage>
               )}
-            </CategorizedTagsContainer>
+            </TagContainer>
           </Section>
         </Container>
       </Modal>
-
-      <TagCategoryManagementPopup open={showCategoryManagement} onClose={() => setShowCategoryManagement(false)} />
     </>
   )
 }
@@ -202,17 +149,6 @@ const TagContainer = styled.div`
 `
 
 const ModalTitle = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`
-
-const CategorizedTagsContainer = styled.div`
-  max-height: 300px;
-  overflow-y: auto;
-`
-
-const CategoryHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;

@@ -1098,6 +1098,18 @@
         "placeholder": "搜索话题...",
         "title": "搜索"
       },
+      "tags": {
+        "add": "添加标签",
+        "manage": {
+          "title": "管理标签"
+        },
+        "manage_categories": "管理标签分类",
+        "selected": "已选标签",
+        "available_by_category": "按分类浏览可用标签",
+        "available_tags": "可用标签",
+        "no_tags_in_category": "该分类暂无标签",
+        "no_tags": "暂无可用标签"
+      },
       "title": "话题",
       "unpin": "取消固定"
     },

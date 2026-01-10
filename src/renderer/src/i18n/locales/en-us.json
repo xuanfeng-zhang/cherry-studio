@@ -1098,6 +1098,18 @@
         "placeholder": "Search topics...",
         "title": "Search"
       },
+      "tags": {
+        "add": "Add Tag",
+        "manage": {
+          "title": "Manage Tags"
+        },
+        "manage_categories": "Manage Tag Categories",
+        "selected": "Selected Tags",
+        "available_by_category": "Available Tags by Category",
+        "available_tags": "Available Tags",
+        "no_tags_in_category": "No tags in this category",
+        "no_tags": "No available tags"
+      },
       "title": "Topics",
       "unpin": "Unpin Topic"
     },
