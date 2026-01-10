@@ -1,7 +1,7 @@
 import { loggerService } from '@logger'
 import ThreeMinTopAppLogo from '@renderer/assets/images/apps/3mintop.png?url'
 import AbacusLogo from '@renderer/assets/images/apps/abacus.webp?url'
-import AIStudioLogo from '@renderer/assets/images/apps/aistudio.svg?url'
+import AIStudioLogo from '@renderer/assets/images/apps/aistudio.png?url'
 import ApplicationLogo from '@renderer/assets/images/apps/application.png?url'
 import BaiduAiAppLogo from '@renderer/assets/images/apps/baidu-ai.png?url'
 import BaiduAiSearchLogo from '@renderer/assets/images/apps/baidu-ai-search.webp?url'
@@ -22,9 +22,11 @@ import GithubCopilotLogo from '@renderer/assets/images/apps/github-copilot.webp?
 import GoogleAppLogo from '@renderer/assets/images/apps/google.svg?url'
 import GrokAppLogo from '@renderer/assets/images/apps/grok.png?url'
 import GrokXAppLogo from '@renderer/assets/images/apps/grok-x.png?url'
+import HuggingChatLogo from '@renderer/assets/images/apps/huggingchat.svg?url'
 import KimiAppLogo from '@renderer/assets/images/apps/kimi.webp?url'
 import LambdaChatLogo from '@renderer/assets/images/apps/lambdachat.webp?url'
 import LeChatLogo from '@renderer/assets/images/apps/lechat.png?url'
+import LingAppLogo from '@renderer/assets/images/apps/ling.png?url'
 import LongCatAppLogo from '@renderer/assets/images/apps/longcat.svg?url'
 import MetasoAppLogo from '@renderer/assets/images/apps/metaso.webp?url'
 import MonicaLogo from '@renderer/assets/images/apps/monica.webp?url'
@@ -55,7 +57,7 @@ import OpenAiProviderLogo from '@renderer/assets/images/providers/openai.png?url
 import SiliconFlowProviderLogo from '@renderer/assets/images/providers/silicon.png?url'
 import ZhipuProviderLogo from '@renderer/assets/images/providers/zhipu.png?url'
 import i18n from '@renderer/i18n'
-import { MinAppType } from '@renderer/types'
+import type { MinAppType } from '@renderer/types'
 
 const logger = loggerService.withContext('Config:minapps')
 
@@ -99,7 +101,8 @@ const ORIGIN_DEFAULT_MIN_APPS: MinAppType[] = [
     id: 'gemini',
     name: 'Gemini',
     url: 'https://gemini.google.com/',
-    logo: GeminiAppLogo
+    logo: GeminiAppLogo,
+    bodered: true
   },
   {
     id: 'silicon',
@@ -460,6 +463,26 @@ const ORIGIN_DEFAULT_MIN_APPS: MinAppType[] = [
     logo: LongCatAppLogo,
     url: 'https://longcat.chat/',
     bodered: true
+  },
+  {
+    id: 'ling',
+    name: i18n.t('minapps.ant-ling'),
+    url: 'https://ling.tbox.cn/chat',
+    logo: LingAppLogo,
+    bodered: true,
+    style: {
+      padding: 6
+    }
+  },
+  {
+    id: 'huggingchat',
+    name: 'HuggingChat',
+    url: 'https://huggingface.co/chat/',
+    logo: HuggingChatLogo,
+    bodered: true,
+    style: {
+      padding: 6
+    }
   }
 ]
 

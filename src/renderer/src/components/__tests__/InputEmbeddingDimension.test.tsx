@@ -23,6 +23,16 @@ const mocks = vi.hoisted(() => ({
   }
 }))
 
+vi.mock('@renderer/store', () => ({
+  default: {
+    getState: () => ({
+      llm: {
+        settings: {}
+      }
+    })
+  }
+}))
+
 // Mock antd components to prevent flaky snapshot tests
 vi.mock('antd', () => {
   const MockSpaceCompact: React.FC<React.PropsWithChildren<{ style?: React.CSSProperties }>> = ({
@@ -69,7 +79,7 @@ vi.mock('antd', () => {
 })
 
 // Mock dependencies
-vi.mock('@renderer/aiCore', () => ({
+vi.mock('@renderer/aiCore/index_new', () => ({
   default: vi.fn().mockImplementation(() => ({
     getEmbeddingDimensions: mocks.aiCore.getEmbeddingDimensions
   }))

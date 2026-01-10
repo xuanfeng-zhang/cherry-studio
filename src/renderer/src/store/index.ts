@@ -1,3 +1,19 @@
+/**
+ * @deprecated Scheduled for removal in v2.0.0
+ * --------------------------------------------------------------------------
+ * ⚠️ NOTICE: V2 DATA&UI REFACTORING (by 0xfullex)
+ * --------------------------------------------------------------------------
+ * STOP: Feature PRs affecting this file are currently BLOCKED.
+ * Only critical bug fixes are accepted during this migration phase.
+ *
+ * This file is being refactored to v2 standards.
+ * Any non-critical changes will conflict with the ongoing work.
+ *
+ * 🔗 Context & Status:
+ * - Contribution Hold: https://github.com/CherryHQ/cherry-studio/issues/10954
+ * - v2 Refactor PR   : https://github.com/CherryHQ/cherry-studio/pull/10162
+ * --------------------------------------------------------------------------
+ */
 import { loggerService } from '@logger'
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { useDispatch, useSelector, useStore } from 'react-redux'
@@ -5,7 +21,6 @@ import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, R
 import storage from 'redux-persist/lib/storage'
 
 import storeSyncService from '../services/StoreSyncService'
-import agents from './agents'
 import assistants from './assistants'
 import backup from './backup'
 import codeTools from './codeTools'
@@ -30,6 +45,7 @@ import selectionStore from './selectionStore'
 import settings from './settings'
 import shortcuts from './shortcuts'
 import tabs from './tabs'
+import toolPermissions from './toolPermissions'
 import translate from './translate'
 import websearch from './websearch'
 
@@ -37,7 +53,6 @@ const logger = loggerService.withContext('Store')
 
 const rootReducer = combineReducers({
   assistants,
-  agents,
   backup,
   codeTools,
   nutstore,
@@ -60,15 +75,16 @@ const rootReducer = combineReducers({
   inputTools: inputToolsReducer,
   translate,
   ocr,
-  note
+  note,
+  toolPermissions
 })
 
 const persistedReducer = persistReducer(
   {
     key: 'cherry-studio',
     storage,
-    version: 161,
-    blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs'],
+    version: 192,
+    blacklist: ['runtime', 'messages', 'messageBlocks', 'tabs', 'toolPermissions'],
     migrate
   },
   rootReducer

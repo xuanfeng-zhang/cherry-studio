@@ -13,11 +13,15 @@ import { loggerService } from '@renderer/services/LoggerService'
 import { getModelUniqId } from '@renderer/services/ModelService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { setIsBunInstalled } from '@renderer/store/mcp'
-import { EndpointType, Model } from '@renderer/types'
-import { codeTools, terminalApps, TerminalConfig } from '@shared/config/constant'
+import type { EndpointType, Model } from '@renderer/types'
+import { getClaudeSupportedProviders } from '@renderer/utils/provider'
+import type { TerminalConfig } from '@shared/config/constant'
+import { codeTools, terminalApps } from '@shared/config/constant'
+import { isSiliconAnthropicCompatibleModel } from '@shared/config/providers'
 import { Alert, Avatar, Button, Checkbox, Input, Popover, Select, Space, Tooltip } from 'antd'
 import { ArrowUpRight, Download, FolderOpen, HelpCircle, Terminal, X } from 'lucide-react'
-import { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import type { FC } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -27,7 +31,6 @@ import {
   CLI_TOOL_PROVIDER_MAP,
   CLI_TOOLS,
   generateToolEnvironment,
-  getClaudeSupportedProviders,
   OPENAI_CODEX_SUPPORTED_PROVIDERS,
   parseEnvironmentVariables
 } from '.'
@@ -78,6 +81,10 @@ const CodeToolsPage: FC = () => {
       if (selectedCliTool === codeTools.claudeCode) {
         if (m.supported_endpoint_types) {
           return m.supported_endpoint_types.includes('anthropic')
+        }
+        // Special handling for silicon provider: only specific models support Anthropic API
+        if (m.provider === 'silicon') {
+          return isSiliconAnthropicCompatibleModel(m.id)
         }
         return m.id.includes('claude') || CLAUDE_OFFICIAL_SUPPORTED_PROVIDERS.includes(m.provider)
       }

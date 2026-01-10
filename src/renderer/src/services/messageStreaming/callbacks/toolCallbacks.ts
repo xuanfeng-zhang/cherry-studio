@@ -1,20 +1,24 @@
 import { loggerService } from '@logger'
+import type { AppDispatch } from '@renderer/store'
+import { toolPermissionsActions } from '@renderer/store/toolPermissions'
 import type { MCPToolResponse } from '@renderer/types'
 import { WebSearchSource } from '@renderer/types'
-import { MessageBlockStatus, MessageBlockType, ToolMessageBlock } from '@renderer/types/newMessage'
+import type { ToolMessageBlock } from '@renderer/types/newMessage'
+import { MessageBlockStatus, MessageBlockType } from '@renderer/types/newMessage'
 import { createCitationBlock, createToolBlock } from '@renderer/utils/messageUtils/create'
 
-import { BlockManager } from '../BlockManager'
+import type { BlockManager } from '../BlockManager'
 
 const logger = loggerService.withContext('ToolCallbacks')
 
 interface ToolCallbacksDependencies {
   blockManager: BlockManager
   assistantMsgId: string
+  dispatch: AppDispatch
 }
 
 export const createToolCallbacks = (deps: ToolCallbacksDependencies) => {
-  const { blockManager, assistantMsgId } = deps
+  const { blockManager, assistantMsgId, dispatch } = deps
 
   // 内部维护的状态
   const toolCallIdToBlockIdMap = new Map<string, string>()
@@ -52,6 +56,9 @@ export const createToolCallbacks = (deps: ToolCallbacksDependencies) => {
     },
 
     onToolCallComplete: (toolResponse: MCPToolResponse) => {
+      if (toolResponse?.id) {
+        dispatch(toolPermissionsActions.removeByToolCallId({ toolCallId: toolResponse.id }))
+      }
       const existingBlockId = toolCallIdToBlockIdMap.get(toolResponse.id)
       toolCallIdToBlockIdMap.delete(toolResponse.id)
 

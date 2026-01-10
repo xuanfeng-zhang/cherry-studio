@@ -1,10 +1,27 @@
-import { WebSearchResultBlock } from '@anthropic-ai/sdk/resources'
+/**
+ * @deprecated Scheduled for removal in v2.0.0
+ * --------------------------------------------------------------------------
+ * ⚠️ NOTICE: V2 DATA&UI REFACTORING (by 0xfullex)
+ * --------------------------------------------------------------------------
+ * STOP: Feature PRs affecting this file are currently BLOCKED.
+ * Only critical bug fixes are accepted during this migration phase.
+ *
+ * This file is being refactored to v2 standards.
+ * Any non-critical changes will conflict with the ongoing work.
+ *
+ * 🔗 Context & Status:
+ * - Contribution Hold: https://github.com/CherryHQ/cherry-studio/issues/10954
+ * - v2 Refactor PR   : https://github.com/CherryHQ/cherry-studio/pull/10162
+ * --------------------------------------------------------------------------
+ */
+import type { WebSearchResultBlock } from '@anthropic-ai/sdk/resources'
+import type OpenAI from '@cherrystudio/openai'
 import type { GroundingMetadata } from '@google/genai'
 import { createEntityAdapter, createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { AISDKWebSearchResult, Citation, WebSearchProviderResponse, WebSearchSource } from '@renderer/types'
+import type { AISDKWebSearchResult, Citation, WebSearchProviderResponse } from '@renderer/types'
+import { WebSearchSource } from '@renderer/types'
 import type { CitationMessageBlock, MessageBlock } from '@renderer/types/newMessage'
 import { MessageBlockType } from '@renderer/types/newMessage'
-import type OpenAI from 'openai'
 
 import type { RootState } from './index' // 确认 RootState 从 store/index.ts 导出
 
@@ -242,7 +259,7 @@ export const formatCitationsFromBlock = (block: CitationMessageBlock | undefined
     }
   }
   // 3. Handle Knowledge Base References
-  if (block.knowledge && block.knowledge.length > 0) {
+  if (block.knowledge && Array.isArray(block.knowledge) && block.knowledge.length > 0) {
     formattedCitations.push(
       ...block.knowledge.map((result, index) => {
         const filePattern = /\[(.*?)]\(http:\/\/file\/(.*?)\)/
@@ -270,7 +287,7 @@ export const formatCitationsFromBlock = (block: CitationMessageBlock | undefined
     )
   }
 
-  if (block.memories && block.memories.length > 0) {
+  if (block.memories && Array.isArray(block.memories) && block.memories.length > 0) {
     // 5. Handle Memory References
     formattedCitations.push(
       ...block.memories.map((memory, index) => ({

@@ -1,14 +1,9 @@
-import {
+import type {
   Content,
-  createPartFromUri,
   File,
   FunctionCall,
   GenerateContentConfig,
   GenerateImagesConfig,
-  GoogleGenAI,
-  HarmBlockThreshold,
-  HarmCategory,
-  Modality,
   Model as GeminiModel,
   Part,
   SafetySetting,
@@ -16,6 +11,7 @@ import {
   ThinkingConfig,
   Tool
 } from '@google/genai'
+import { createPartFromUri, GoogleGenAI, HarmBlockThreshold, HarmCategory, Modality } from '@google/genai'
 import { loggerService } from '@logger'
 import { nanoid } from '@reduxjs/toolkit'
 import {
@@ -26,11 +22,9 @@ import {
   isVisionModel
 } from '@renderer/config/models'
 import { estimateTextTokens } from '@renderer/services/TokenService'
-import {
+import type {
   Assistant,
-  EFFORT_RATIO,
   FileMetadata,
-  FileTypes,
   FileUploadResponse,
   GenerateImageParams,
   MCPCallToolResponse,
@@ -38,12 +32,13 @@ import {
   MCPToolResponse,
   Model,
   Provider,
-  ToolCallResponse,
-  WebSearchSource
+  ToolCallResponse
 } from '@renderer/types'
-import { ChunkType, LLMWebSearchCompleteChunk, TextStartChunk, ThinkingStartChunk } from '@renderer/types/chunk'
-import { Message } from '@renderer/types/newMessage'
-import {
+import { EFFORT_RATIO, FileTypes, WebSearchSource } from '@renderer/types'
+import type { LLMWebSearchCompleteChunk, TextStartChunk, ThinkingStartChunk } from '@renderer/types/chunk'
+import { ChunkType } from '@renderer/types/chunk'
+import type { Message } from '@renderer/types/newMessage'
+import type {
   GeminiOptions,
   GeminiSdkMessageParam,
   GeminiSdkParams,
@@ -60,11 +55,12 @@ import {
 } from '@renderer/utils/mcp-tools'
 import { findFileBlocks, findImageBlocks, getMainTextContent } from '@renderer/utils/messageUtils/find'
 import { defaultTimeout, MB } from '@shared/config/constant'
+import { getTrailingApiVersion, withoutTrailingApiVersion } from '@shared/utils'
 import { t } from 'i18next'
 
-import { GenericChunk } from '../../middleware/schemas'
+import type { GenericChunk } from '../../middleware/schemas'
 import { BaseApiClient } from '../BaseApiClient'
-import { RequestTransformer, ResponseChunkTransformer } from '../types'
+import type { RequestTransformer, ResponseChunkTransformer } from '../types'
 
 const logger = loggerService.withContext('GeminiAPIClient')
 
@@ -168,18 +164,24 @@ export class GeminiAPIClient extends BaseApiClient<
     return models
   }
 
+  override getBaseURL(): string {
+    return withoutTrailingApiVersion(super.getBaseURL())
+  }
+
   override async getSdkInstance() {
     if (this.sdkInstance) {
       return this.sdkInstance
     }
 
+    const apiVersion = this.getApiVersion()
+
     this.sdkInstance = new GoogleGenAI({
       vertexai: false,
       apiKey: this.apiKey,
-      apiVersion: this.getApiVersion(),
+      apiVersion,
       httpOptions: {
         baseUrl: this.getBaseURL(),
-        apiVersion: this.getApiVersion(),
+        apiVersion,
         headers: {
           ...this.provider.extra_headers
         }
@@ -193,7 +195,14 @@ export class GeminiAPIClient extends BaseApiClient<
     if (this.provider.isVertex) {
       return 'v1'
     }
-    return 'v1beta'
+
+    // Extract trailing API version from the URL
+    const trailingVersion = getTrailingApiVersion(this.provider.apiHost || '')
+    if (trailingVersion) {
+      return trailingVersion
+    }
+
+    return ''
   }
 
   /**

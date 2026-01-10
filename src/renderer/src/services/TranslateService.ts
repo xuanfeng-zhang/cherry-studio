@@ -1,13 +1,16 @@
 import { loggerService } from '@logger'
 import { db } from '@renderer/databases'
-import {
+import type {
+  AssistantSettings,
   CustomTranslateLanguage,
-  FetchChatCompletionOptions,
+  FetchChatCompletionRequestOptions,
+  ReasoningEffortOption,
   TranslateHistory,
   TranslateLanguage,
   TranslateLanguageCode
 } from '@renderer/types'
-import { Chunk, ChunkType } from '@renderer/types/chunk'
+import type { Chunk } from '@renderer/types/chunk'
+import { ChunkType } from '@renderer/types/chunk'
 import { uuid } from '@renderer/utils'
 import { readyToAbort } from '@renderer/utils/abortController'
 import { isAbortError } from '@renderer/utils/error'
@@ -18,6 +21,10 @@ import { fetchChatCompletion } from './ApiService'
 import { getDefaultTranslateAssistant } from './AssistantService'
 
 const logger = loggerService.withContext('TranslateService')
+
+type TranslateOptions = {
+  reasoningEffort: ReasoningEffortOption
+}
 
 /**
  * 翻译文本到目标语言
@@ -32,10 +39,14 @@ export const translateText = async (
   text: string,
   targetLanguage: TranslateLanguage,
   onResponse?: (text: string, isComplete: boolean) => void,
-  abortKey?: string
+  abortKey?: string,
+  options?: TranslateOptions
 ) => {
-  let abortError
-  const assistant = getDefaultTranslateAssistant(targetLanguage, text)
+  let error
+  const assistantSettings: Partial<AssistantSettings> | undefined = options
+    ? { reasoning_effort: options?.reasoningEffort }
+    : undefined
+  const assistant = getDefaultTranslateAssistant(targetLanguage, text, assistantSettings)
 
   const signal = abortKey ? readyToAbort(abortKey) : undefined
 
@@ -47,23 +58,23 @@ export const translateText = async (
     } else if (chunk.type === ChunkType.TEXT_COMPLETE) {
       completed = true
     } else if (chunk.type === ChunkType.ERROR) {
+      error = chunk.error
       if (isAbortError(chunk.error)) {
-        abortError = chunk.error
         completed = true
       }
     }
     onResponse?.(translatedText, completed)
   }
 
-  const options = {
+  const requestOptions = {
     signal
-  } satisfies FetchChatCompletionOptions
+  } satisfies FetchChatCompletionRequestOptions
 
   try {
     await fetchChatCompletion({
       prompt: assistant.content,
       assistant,
-      options,
+      requestOptions,
       onChunkReceived: onChunk
     })
   } catch (e) {
@@ -73,8 +84,8 @@ export const translateText = async (
     }
   }
 
-  if (abortError) {
-    throw abortError
+  if (error !== undefined && !isAbortError(error)) {
+    throw error
   }
 
   const trimmedText = translatedText.trim()

@@ -13,14 +13,14 @@ import tabsService from '@renderer/services/TabsService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import type { Tab } from '@renderer/store/tabs'
 import { addTab, removeTab, setActiveTab, setTabs } from '@renderer/store/tabs'
-import { MinAppType, ThemeMode } from '@renderer/types'
+import type { MinAppType } from '@renderer/types'
+import { ThemeMode } from '@renderer/types'
 import { classNames } from '@renderer/utils'
 import { Tooltip } from 'antd'
-import { LRUCache } from 'lru-cache'
+import type { LRUCache } from 'lru-cache'
 import {
   FileSearch,
   Folder,
-  Hammer,
   Home,
   Languages,
   LayoutGrid,
@@ -86,7 +86,7 @@ const getTabIcon = (
   switch (tabId) {
     case 'home':
       return <Home size={14} />
-    case 'agents':
+    case 'store':
       return <Sparkle size={14} />
     case 'translate':
       return <Languages size={14} />
@@ -98,8 +98,6 @@ const getTabIcon = (
       return <NotepadText size={14} />
     case 'knowledge':
       return <FileSearch size={14} />
-    case 'mcp':
-      return <Hammer size={14} />
     case 'files':
       return <Folder size={14} />
     case 'settings':

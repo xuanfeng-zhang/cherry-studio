@@ -1,7 +1,7 @@
 import store from '@renderer/store'
 import { selectCurrentUserId, selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
 import { type InferToolInput, type InferToolOutput, tool } from 'ai'
-import { z } from 'zod'
+import * as z from 'zod'
 
 import { MemoryProcessor } from '../../services/MemoryProcessor'
 
@@ -24,7 +24,8 @@ export const memorySearchTool = () => {
       }
 
       const memoryConfig = selectMemoryConfig(store.getState())
-      if (!memoryConfig.llmApiClient || !memoryConfig.embedderApiClient) {
+
+      if (!memoryConfig.llmModel || !memoryConfig.embeddingModel) {
         return []
       }
 

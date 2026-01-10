@@ -3,18 +3,20 @@ import ModelAvatar from '@renderer/components/Avatar/ModelAvatar'
 import EditableNumber from '@renderer/components/EditableNumber'
 import { DeleteIcon, ResetIcon } from '@renderer/components/Icons'
 import { HStack } from '@renderer/components/Layout'
-import SelectModelPopup from '@renderer/components/Popups/SelectModelPopup'
+import { SelectModelPopup } from '@renderer/components/Popups/SelectModelPopup'
 import Selector from '@renderer/components/Selector'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE, MAX_CONTEXT_COUNT } from '@renderer/config/constant'
 import { isEmbeddingModel, isRerankModel } from '@renderer/config/models'
 import { useTimer } from '@renderer/hooks/useTimer'
 import { SettingRow } from '@renderer/pages/settings'
-import { Assistant, AssistantSettingCustomParameters, AssistantSettings, Model } from '@renderer/types'
+import { DEFAULT_ASSISTANT_SETTINGS } from '@renderer/services/AssistantService'
+import type { Assistant, AssistantSettingCustomParameters, AssistantSettings, Model } from '@renderer/types'
 import { modalConfirm } from '@renderer/utils'
 import { Button, Col, Divider, Input, InputNumber, Row, Select, Slider, Switch, Tooltip } from 'antd'
 import { isNull } from 'lodash'
 import { PlusIcon } from 'lucide-react'
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import type { FC } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -30,14 +32,16 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
   const [enableMaxTokens, setEnableMaxTokens] = useState(assistant?.settings?.enableMaxTokens ?? false)
   const [maxTokens, setMaxTokens] = useState(assistant?.settings?.maxTokens ?? 0)
   const [streamOutput, setStreamOutput] = useState(assistant?.settings?.streamOutput)
-  const [toolUseMode, setToolUseMode] = useState(assistant?.settings?.toolUseMode ?? 'prompt')
+  const [toolUseMode, setToolUseMode] = useState<AssistantSettings['toolUseMode']>(
+    assistant?.settings?.toolUseMode ?? 'function'
+  )
   const [defaultModel, setDefaultModel] = useState(assistant?.defaultModel)
   const [topP, setTopP] = useState(assistant?.settings?.topP ?? 1)
-  const [enableTopP, setEnableTopP] = useState(assistant?.settings?.enableTopP ?? true)
+  const [enableTopP, setEnableTopP] = useState(assistant?.settings?.enableTopP ?? false)
   const [customParameters, setCustomParameters] = useState<AssistantSettingCustomParameters[]>(
     assistant?.settings?.customParameters ?? []
   )
-  const [enableTemperature, setEnableTemperature] = useState(assistant?.settings?.enableTemperature ?? true)
+  const [enableTemperature, setEnableTemperature] = useState(assistant?.settings?.enableTemperature ?? false)
 
   const customParametersRef = useRef(customParameters)
 
@@ -131,12 +135,18 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
           <Input
             value={typeof param.value === 'string' ? param.value : JSON.stringify(param.value, null, 2)}
             onChange={(e) => {
-              try {
-                const jsonValue = JSON.parse(e.target.value)
-                onUpdateCustomParameter(index, 'value', jsonValue)
-              } catch {
-                onUpdateCustomParameter(index, 'value', e.target.value)
-              }
+              // For JSON type parameters, always store the value as a STRING
+              //
+              // Data Flow:
+              // 1. UI stores: { name: "config", value: '{"key":"value"}', type: "json" } ← STRING format
+              // 2. API parses: getCustomParameters() in src/renderer/src/aiCore/utils/reasoning.ts:687-696
+              //                calls JSON.parse() to convert string to object
+              // 3. Request sends: The parsed object is sent to the AI provider
+              //
+              // Previously this code was parsing JSON here and storing
+              // the object directly, which caused getCustomParameters() to fail when trying
+              // to JSON.parse() an already-parsed object.
+              onUpdateCustomParameter(index, 'value', e.target.value)
             }}
           />
         )
@@ -157,28 +167,17 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
   }
 
   const onReset = () => {
-    setTemperature(DEFAULT_TEMPERATURE)
-    setEnableTemperature(true)
-    setContextCount(DEFAULT_CONTEXTCOUNT)
-    setEnableMaxTokens(false)
-    setMaxTokens(0)
-    setStreamOutput(true)
-    setTopP(1)
-    setEnableTopP(true)
-    setCustomParameters([])
-    setToolUseMode('prompt')
-    updateAssistantSettings({
-      temperature: DEFAULT_TEMPERATURE,
-      enableTemperature: true,
-      contextCount: DEFAULT_CONTEXTCOUNT,
-      enableMaxTokens: false,
-      maxTokens: 0,
-      streamOutput: true,
-      topP: 1,
-      enableTopP: true,
-      customParameters: [],
-      toolUseMode: 'prompt'
-    })
+    setTemperature(DEFAULT_ASSISTANT_SETTINGS.temperature)
+    setEnableTemperature(DEFAULT_ASSISTANT_SETTINGS.enableTemperature ?? false)
+    setContextCount(DEFAULT_ASSISTANT_SETTINGS.contextCount)
+    setEnableMaxTokens(DEFAULT_ASSISTANT_SETTINGS.enableMaxTokens ?? false)
+    setMaxTokens(DEFAULT_ASSISTANT_SETTINGS.maxTokens ?? 0)
+    setStreamOutput(DEFAULT_ASSISTANT_SETTINGS.streamOutput)
+    setTopP(DEFAULT_ASSISTANT_SETTINGS.topP)
+    setEnableTopP(DEFAULT_ASSISTANT_SETTINGS.enableTopP ?? false)
+    setCustomParameters(DEFAULT_ASSISTANT_SETTINGS.customParameters ?? [])
+    setToolUseMode(DEFAULT_ASSISTANT_SETTINGS.toolUseMode)
+    updateAssistantSettings(DEFAULT_ASSISTANT_SETTINGS)
   }
   const modelFilter = (model: Model) => !isEmbeddingModel(model) && !isRerankModel(model)
 
@@ -221,7 +220,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
           <ModelSelectButton
             icon={defaultModel ? <ModelAvatar model={defaultModel} size={20} /> : <PlusIcon size={18} />}
             onClick={onSelectModel}>
-            <ModelName>{defaultModel ? defaultModel.name : t('agents.edit.model.select.title')}</ModelName>
+            <ModelName>{defaultModel ? defaultModel.name : t('assistants.presets.edit.model.select.title')}</ModelName>
           </ModelSelectButton>
           {defaultModel && (
             <Button
@@ -359,6 +358,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
                 setTimeoutTimer('contextCount_onChange', () => updateAssistantSettings({ contextCount: value }), 500)
               }
             }}
+            formatter={(value) => (value === MAX_CONTEXT_COUNT ? t('chat.settings.max') : (value ?? ''))}
             style={{ width: '100%' }}
           />
         </Col>
@@ -373,7 +373,7 @@ const AssistantModelSettings: FC<Props> = ({ assistant, updateAssistant, updateA
             value={typeof contextCount === 'number' ? contextCount : 0}
             marks={{ 0: '0', 25: '25', 50: '50', 75: '75', 100: t('chat.settings.max') }}
             step={1}
-            tooltip={{ formatter: formatSliderTooltip }}
+            tooltip={{ formatter: formatSliderTooltip, open: false }}
           />
         </Col>
       </Row>

@@ -1,20 +1,27 @@
-import { McpError } from '@modelcontextprotocol/sdk/types.js'
-import {
+import { loggerService } from '@logger'
+import type { McpError } from '@modelcontextprotocol/sdk/types.js'
+import type { AgentServerError } from '@renderer/types'
+import { AgentServerErrorSchema } from '@renderer/types'
+import type {
   AiSdkErrorUnion,
-  isSerializedAiSdkAPICallError,
   SerializedAiSdkError,
   SerializedAiSdkInvalidToolInputError,
   SerializedAiSdkNoSuchToolError,
   SerializedError
 } from '@renderer/types/error'
-import { InvalidToolInputError, NoSuchToolError } from 'ai'
+import { isSerializedAiSdkAPICallError } from '@renderer/types/error'
+import type { NoSuchToolError } from 'ai'
+import { InvalidToolInputError } from 'ai'
+import type { AxiosError } from 'axios'
+import { isAxiosError } from 'axios'
 import { t } from 'i18next'
-import { z } from 'zod'
+import type * as z from 'zod'
+import { ZodError } from 'zod'
 
 import { parseJSON } from './json'
 import { safeSerialize } from './serialize'
 
-// const logger = loggerService.withContext('Utils:error')
+const logger = loggerService.withContext('Utils:error')
 
 export function getErrorDetails(err: any, seen = new WeakSet()): any {
   // Handle circular references
@@ -44,16 +51,44 @@ export function getErrorDetails(err: any, seen = new WeakSet()): any {
 }
 
 export function formatErrorMessage(error: unknown): string {
+  if (error instanceof ZodError) {
+    return formatZodError(error)
+  }
+  if (isAxiosError(error)) {
+    return formatAxiosError(error)
+  }
+  const parseResult = AgentServerErrorSchema.safeParse(error)
+  if (parseResult.success) {
+    return formatAgentServerError(parseResult.data)
+  }
   const detailedError = getErrorDetails(error)
   delete detailedError?.headers
   delete detailedError?.stack
   delete detailedError?.request_id
 
-  const formattedJson = JSON.stringify(detailedError, null, 2)
-    .split('\n')
-    .map((line) => `  ${line}`)
-    .join('\n')
-  return `Error Details:\n${formattedJson}`
+  if (detailedError) {
+    const formattedJson = JSON.stringify(detailedError, null, 2)
+      .split('\n')
+      .map((line) => `  ${line}`)
+      .join('\n')
+    return detailedError.message ? detailedError.message : `Error Details:\n${formattedJson}`
+  } else {
+    logger.warn('Get detailed error failed.')
+    return ''
+  }
+}
+
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
+  } else {
+    return t('error.unknown')
+  }
+}
+
+export function formatErrorMessageWithPrefix(error: unknown, prefix: string): string {
+  const msg = getErrorMessage(error)
+  return `${prefix}: ${msg}`
 }
 
 export const isAbortError = (error: any): boolean => {
@@ -173,6 +208,7 @@ export const serializeError = (error: AiSdkErrorUnion): SerializedError => {
       ? serializeInvalidToolInputError(error.originalError)
       : serializeNoSuchToolError(error.originalError)
   if ('functionality' in error) serializedError.functionality = error.functionality
+  if ('provider' in error) serializedError.provider = error.provider
 
   return serializedError
 }
@@ -285,4 +321,15 @@ export function formatAiSdkError(error: SerializedAiSdkError): string {
   }
 
   return text.trim()
+}
+export const formatAgentServerError = (error: AgentServerError) =>
+  `${t('common.error')}: ${error.error.code} ${error.error.message}`
+export const formatAxiosError = (error: AxiosError) => {
+  if (!error.response) {
+    return `${t('common.error')}: ${t('error.no_response')}`
+  }
+
+  const { status, statusText } = error.response
+
+  return `${t('common.error')}: ${status} ${statusText}`
 }

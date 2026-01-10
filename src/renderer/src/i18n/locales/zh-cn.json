@@ -1,80 +1,321 @@
 {
-  "agents": {
+  "agent": {
     "add": {
-      "button": "添加到助手",
-      "knowledge_base": {
-        "label": "知识库",
-        "placeholder": "选择知识库"
+      "description": "调用各种工具处理复杂任务",
+      "error": {
+        "failed": "添加 Agent 失败",
+        "invalid_agent": "无效的 Agent"
       },
-      "name": {
-        "label": "名称",
-        "placeholder": "输入名称"
+      "model": {
+        "tooltip": "目前，只有支持 Anthropic 端点的模型可用于 Agent 功能。"
       },
-      "prompt": {
-        "label": "提示词",
-        "placeholder": "输入提示词",
-        "variables": {
-          "tip": {
-            "content": "{{date}}:\t日期\n{{time}}:\t时间\n{{datetime}}:\t日期和时间\n{{system}}:\t操作系统\n{{arch}}:\tCPU 架构\n{{language}}:\t语言\n{{model_name}}:\t模型名称\n{{username}}:\t用户名",
-            "title": "可用的变量"
-          }
-        }
-      },
-      "title": "创建智能体",
-      "unsaved_changes_warning": "你有未保存的内容，确定要关闭吗？"
-    },
-    "delete": {
-      "popup": {
-        "content": "确定要删除此智能体吗？"
+      "title": "添加 Agent",
+      "type": {
+        "placeholder": "选择 Agent 类型"
       }
     },
+    "delete": {
+      "content": "删除该 Agent 将强制终止并删除该 Agent 下的所有会话。您确定吗？",
+      "error": {
+        "failed": "删除 Agent 失败"
+      },
+      "title": "删除 Agent"
+    },
     "edit": {
-      "model": {
-        "select": {
-          "title": "选择模型"
+      "title": "编辑 Agent"
+    },
+    "get": {
+      "error": {
+        "failed": "获取智能体失败",
+        "null_id": "智能体 ID 为空。"
+      }
+    },
+    "gitBash": {
+      "autoDetected": "使用自动检测的 Git Bash",
+      "autoDiscoveredHint": "自动发现",
+      "clear": {
+        "button": "清除自定义路径"
+      },
+      "customPath": "使用自定义路径：{{path}}",
+      "error": {
+        "description": "在 Windows 上运行智能体需要 Git Bash。没有它智能体无法运行。请从以下地址安装 Git for Windows",
+        "recheck": "重新检测 Git Bash 安装",
+        "required": "在 Windows 上需要配置 Git Bash 路径",
+        "title": "需要 Git Bash"
+      },
+      "found": {
+        "title": "已配置 Git Bash"
+      },
+      "notFound": "未找到 Git Bash。请先安装。",
+      "pick": {
+        "button": "选择 Git Bash 路径",
+        "failed": "设置 Git Bash 路径失败",
+        "invalidPath": "选择的文件不是有效的 Git Bash 可执行文件（bash.exe）。",
+        "title": "选择 Git Bash 可执行文件"
+      },
+      "placeholder": "选择 bash.exe 路径",
+      "success": "成功检测到 Git Bash！",
+      "tooltip": "在 Windows 上运行智能体需要 Git Bash。如果未安装，请从 git-scm.com 下载安装。"
+    },
+    "input": {
+      "placeholder": "在这里输入消息，按 {{key}} 发送 - @ 选择路径， / 选择命令"
+    },
+    "list": {
+      "error": {
+        "failed": "获取智能体列表失败"
+      }
+    },
+    "server": {
+      "error": {
+        "not_running": "API 服务器已启用但未正常运行。"
+      }
+    },
+    "session": {
+      "accessible_paths": {
+        "add": "添加目录",
+        "duplicate": "该目录已添加。",
+        "empty": "请选择至少一个智能体可访问的目录。",
+        "error": {
+          "at_least_one": "请至少选择一个可访问的目录"
+        },
+        "label": "工作目录",
+        "select_failed": "选择目录失败"
+      },
+      "add": {
+        "title": "添加会话"
+      },
+      "allowed_tools": {
+        "empty": "当前智能体暂无可用工具。",
+        "helper": "选择预先授权的工具，未选中的工具在使用时需要手动审批。",
+        "label": "预先授权工具",
+        "placeholder": "选择预先授权的工具"
+      },
+      "create": {
+        "error": {
+          "failed": "添加会话失败"
         }
       },
-      "title": "编辑智能体"
-    },
-    "export": {
-      "agent": "导出智能体"
-    },
-    "import": {
-      "button": "导入",
-      "error": {
-        "fetch_failed": "从 URL 获取数据失败",
-        "invalid_format": "无效的代理格式：缺少必填字段",
-        "url_required": "请输入 URL"
+      "delete": {
+        "content": "确定要删除此会话吗？",
+        "error": {
+          "failed": "删除会话失败",
+          "last": "至少需要保留一个会话"
+        },
+        "title": "删除会话"
       },
-      "file_filter": "JSON 文件",
-      "select_file": "选择文件",
-      "title": "从外部导入",
-      "type": {
-        "file": "文件",
-        "url": "URL"
+      "edit": {
+        "title": "编辑会话"
       },
-      "url_placeholder": "输入 JSON URL"
-    },
-    "manage": {
-      "title": "管理智能体"
-    },
-    "my_agents": "我的智能体",
-    "search": {
-      "no_results": "没有找到相关智能体"
+      "get": {
+        "error": {
+          "failed": "获取会话失败",
+          "null_id": "会话 ID 为空"
+        }
+      },
+      "label_one": "会话",
+      "label_other": "会话",
+      "update": {
+        "error": {
+          "failed": "更新会话失败"
+        }
+      }
     },
     "settings": {
-      "title": "智能体配置"
+      "advance": {
+        "maxTurns": {
+          "description": "设定代理自动执行的请求/回复轮次数。",
+          "helper": "数值越高可自主运行越久；数值越低更易控制。",
+          "label": "会话轮次数上限"
+        },
+        "permissionMode": {
+          "description": "控制代理在需要授权时的处理方式。",
+          "label": "权限模式",
+          "options": {
+            "acceptEdits": "自动接受编辑",
+            "bypassPermissions": "跳过权限检查",
+            "default": "默认（继续前询问）",
+            "plan": "规划模式（需审批计划）"
+          },
+          "placeholder": "选择权限模式"
+        },
+        "title": "高级设置"
+      },
+      "essential": "基础设置",
+      "plugins": {
+        "available": {
+          "title": "可用插件"
+        },
+        "confirm": {
+          "uninstall": "确定要卸载此插件吗？"
+        },
+        "empty": {
+          "available": "未找到匹配的插件。请尝试调整搜索或类别筛选。"
+        },
+        "error": {
+          "install": "安装插件失败",
+          "load": "加载插件失败",
+          "uninstall": "卸载插件失败"
+        },
+        "filter": {
+          "all": "所有类别"
+        },
+        "install": "安装",
+        "installed": {
+          "empty": "尚未安装任何插件。浏览可用插件以开始使用。",
+          "title": "已安装插件"
+        },
+        "installing": "安装中...",
+        "results": "找到 {{count}} 个插件",
+        "search": {
+          "placeholder": "搜索插件..."
+        },
+        "success": {
+          "install": "插件安装成功",
+          "uninstall": "插件卸载成功"
+        },
+        "tab": "插件",
+        "type": {
+          "agent": "代理",
+          "agents": "代理",
+          "all": "全部",
+          "command": "命令",
+          "commands": "命令",
+          "skills": "技能"
+        },
+        "uninstall": "卸载",
+        "uninstalling": "卸载中..."
+      },
+      "prompt": "提示词设置",
+      "tooling": {
+        "mcp": {
+          "description": "连接 MCP 服务器即可解锁更多可在上方预先授权的工具。",
+          "empty": "未检测到 MCP 服务器，请前往 MCP 设置页添加。",
+          "manageHint": "需要更多配置？前往 设置 → MCP 服务器。",
+          "toggle": "切换 {{name}}"
+        },
+        "permissionMode": {
+          "acceptEdits": {
+            "behavior": "预先授权受信任的文件系统工具，允许即时执行。",
+            "description": "文件编辑和文件系统操作将自动通过审批。",
+            "title": "自动接受文件编辑"
+          },
+          "bypassPermissions": {
+            "behavior": "所有工具都会被自动预先授权。",
+            "description": "所有权限提示都会被跳过，请谨慎使用。",
+            "title": "跳过所有权限检查",
+            "warning": "危险：所有工具都会在无审批情况下执行。"
+          },
+          "confirmChange": {
+            "description": "切换模式会更新自动预先授权的工具。",
+            "title": "确认切换权限模式？"
+          },
+          "default": {
+            "behavior": "只读工具会自动预先授权。",
+            "description": "只读工具会自动预先授权，其它操作仍需权限。",
+            "title": "默认（继续前询问）"
+          },
+          "helper": "指定智能体如何处理工具使用授权",
+          "placeholder": "选择权限模式",
+          "plan": {
+            "behavior": "默认的只读工具会自动预先授权，但执行仍被禁用。",
+            "description": "继承默认的只读工具集，并会在执行前先呈现计划。",
+            "title": "规划模式"
+          },
+          "title": "权限模式"
+        },
+        "preapproved": {
+          "autoBadge": "模式自动添加",
+          "autoDescription": "该工具由当前权限模式自动预先授权。",
+          "empty": "没有符合筛选条件的工具。",
+          "mcpBadge": "MCP 工具",
+          "requiresApproval": "禁用时需要人工审批",
+          "search": "搜索工具",
+          "toggle": "切换 {{name}}",
+          "warning": {
+            "description": "仅启用你信任的工具。模式默认值会自动标注。",
+            "title": "预先授权的工具将在无人工审核时运行。"
+          }
+        },
+        "review": {
+          "autoTools": "自动：{{count}}",
+          "customTools": "自定义：{{count}}",
+          "helper": "设置会自动保存，可随时返回上方步骤进行调整。",
+          "mcp": "MCP：{{count}}",
+          "mode": "模式：{{mode}}"
+        },
+        "steps": {
+          "mcp": {
+            "title": "MCP 服务器"
+          },
+          "permissionMode": {
+            "title": "步骤 1 · 权限模式"
+          },
+          "preapproved": {
+            "title": "步骤 2 · 预先授权工具"
+          },
+          "review": {
+            "title": "步骤 3 · 总览"
+          }
+        },
+        "tab": "工具与权限"
+      },
+      "tools": {
+        "approved": "已授权",
+        "caution": "预先授权的工具会跳过人工审核，请仅启用可信的工具。",
+        "description": "选择哪些工具可以在无需人工审批的情况下执行。",
+        "requiresPermission": "未预先授权时需要人工审批。",
+        "tab": "预先授权工具",
+        "title": "预先授权工具",
+        "toggle": "{{defaultValue}}"
+      }
     },
-    "sorting": {
-      "title": "排序"
+    "toolPermission": {
+      "aria": {
+        "allowRequest": "允许工具请求",
+        "denyRequest": "拒绝工具请求",
+        "hideDetails": "隐藏工具详情",
+        "runWithOptions": "带选项运行",
+        "showDetails": "显示工具详情"
+      },
+      "button": {
+        "cancel": "取消",
+        "run": "运行"
+      },
+      "confirmation": "确定要运行此 Claude 工具吗?",
+      "defaultDenyMessage": "用户拒绝了该工具的权限。",
+      "defaultDescription": "在您的环境中执行代码或系统操作。运行前请确保命令安全。",
+      "error": {
+        "sendFailed": "发送您的决定失败，请重试。"
+      },
+      "executing": "正在执行...",
+      "expired": "已过期",
+      "inputPreview": "工具输入预览",
+      "pending": "等待中 ({{seconds}}秒)",
+      "permissionExpired": "权限请求已过期。等待新指令...",
+      "requiresElevatedPermissions": "此工具需要更高权限。",
+      "suggestion": {
+        "permissionUpdateMultiple": "如果您选择总是允许此工具,批准可能会更新多个会话权限。",
+        "permissionUpdateSingle": "如果您选择总是允许此工具,批准可能会更新您的会话权限。"
+      },
+      "toast": {
+        "denied": "工具请求已被拒绝。",
+        "timeout": "工具请求在收到批准前超时。"
+      },
+      "toolPendingFallback": "工具",
+      "waiting": "等待工具权限决定..."
     },
-    "tag": {
-      "agent": "智能体",
-      "default": "默认",
-      "new": "新建",
-      "system": "系统"
+    "type": {
+      "label": "智能体类型",
+      "unknown": "未知类型"
     },
-    "title": "智能体"
+    "update": {
+      "error": {
+        "failed": "更新智能体失败"
+      }
+    },
+    "warning": {
+      "enable_server": "请启用 API 服务器以使用智能体功能"
+    }
   },
   "apiServer": {
     "actions": {
@@ -116,6 +357,7 @@
     "messages": {
       "apiKeyCopied": "API 密钥已复制到剪贴板",
       "apiKeyRegenerated": "API 密钥已重新生成",
+      "notEnabled": "API 服务器未启用。",
       "operationFailed": "API 服务器操作失败：",
       "restartError": "重启 API 服务器失败：",
       "restartFailed": "API 服务器重启失败：",
@@ -132,6 +374,41 @@
     },
     "title": "API 服务器"
   },
+  "appMenu": {
+    "about": "关于",
+    "close": "关闭窗口",
+    "copy": "复制",
+    "cut": "剪切",
+    "delete": "删除",
+    "documentation": "文档",
+    "edit": "编辑",
+    "feedback": "反馈",
+    "file": "文件",
+    "forceReload": "强制重新加载",
+    "front": "全部置于顶层",
+    "help": "帮助",
+    "hide": "隐藏",
+    "hideOthers": "隐藏其他",
+    "minimize": "最小化",
+    "paste": "粘贴",
+    "quit": "退出",
+    "redo": "重做",
+    "releases": "版本发布",
+    "reload": "重新加载",
+    "resetZoom": "实际大小",
+    "selectAll": "全选",
+    "services": "服务",
+    "toggleDevTools": "切换开发者工具",
+    "toggleFullscreen": "切换全屏",
+    "undo": "撤销",
+    "unhide": "全部显示",
+    "view": "视图",
+    "website": "网站",
+    "window": "窗口",
+    "zoom": "缩放",
+    "zoomIn": "放大",
+    "zoomOut": "缩小"
+  },
   "assistants": {
     "abbr": "助手",
     "clear": {
@@ -143,6 +420,9 @@
     },
     "delete": {
       "content": "删除助手会删除所有该助手下的话题和文件，确定要继续吗？",
+      "error": {
+        "remain_one": "不允许删除最后一个助手"
+      },
       "title": "删除助手"
     },
     "edit": {
@@ -155,9 +435,98 @@
       "showByList": "列表展示",
       "showByTags": "标签展示"
     },
+    "presets": {
+      "add": {
+        "button": "添加到助手",
+        "knowledge_base": {
+          "label": "知识库",
+          "placeholder": "选择知识库"
+        },
+        "name": {
+          "label": "名称",
+          "placeholder": "输入名称"
+        },
+        "prompt": {
+          "label": "提示词",
+          "placeholder": "输入提示词",
+          "variables": {
+            "tip": {
+              "content": "{{date}}:\t日期\n{{time}}:\t时间\n{{datetime}}:\t日期和时间\n{{system}}:\t操作系统\n{{arch}}:\tCPU 架构\n{{language}}:\t语言\n{{model_name}}:\t模型名称\n{{username}}:\t用户名",
+              "title": "可用的变量"
+            }
+          }
+        },
+        "title": "创建助手",
+        "unsaved_changes_warning": "你有未保存的内容，确定要关闭吗？"
+      },
+      "delete": {
+        "popup": {
+          "content": "确定要删除此助手吗？"
+        }
+      },
+      "edit": {
+        "model": {
+          "select": {
+            "title": "选择模型"
+          }
+        },
+        "title": "编辑助手"
+      },
+      "export": {
+        "agent": "导出助手"
+      },
+      "import": {
+        "button": "导入",
+        "error": {
+          "fetch_failed": "从 URL 获取数据失败",
+          "file_required": "请先选择文件",
+          "invalid_format": "无效的助手格式：缺少必填字段",
+          "url_required": "请输入 URL"
+        },
+        "file_filter": "JSON 文件",
+        "select_file": "选择文件",
+        "title": "从外部导入",
+        "type": {
+          "file": "文件",
+          "url": "URL"
+        },
+        "url_placeholder": "输入 JSON URL"
+      },
+      "manage": {
+        "batch_delete": {
+          "button": "删除",
+          "confirm": "确定要删除选中的 {{count}} 个助手吗？"
+        },
+        "batch_export": {
+          "button": "导出"
+        },
+        "mode": {
+          "manage": "管理",
+          "sort": "排序"
+        },
+        "title": "管理助手"
+      },
+      "my_agents": "我的助手",
+      "search": {
+        "no_results": "没有找到相关助手"
+      },
+      "settings": {
+        "title": "助手配置"
+      },
+      "sorting": {
+        "title": "排序"
+      },
+      "tag": {
+        "agent": "助手",
+        "default": "默认",
+        "new": "新建",
+        "system": "系统"
+      },
+      "title": "助手库"
+    },
     "save": {
       "success": "保存成功",
-      "title": "保存到智能体"
+      "title": "保存到助手库"
     },
     "search": "搜索助手",
     "settings": {
@@ -168,13 +537,27 @@
           "label": "调用知识库",
           "off": "强制检索",
           "on": "意图识别",
-          "tip": "智能体将调用大模型的意图识别能力，判断是否需要调用知识库进行回答，该功能将依赖模型的能力"
+          "tip": "助手将调用大模型的意图识别能力，判断是否需要调用知识库进行回答，该功能将依赖模型的能力"
         }
       },
       "mcp": {
         "description": "默认启用的 MCP 服务器",
         "enableFirst": "请先在 MCP 设置中启用此服务器",
         "label": "MCP 服务器",
+        "mode": {
+          "auto": {
+            "description": "AI 自动发现和使用工具",
+            "label": "自动"
+          },
+          "disabled": {
+            "description": "不使用 MCP 工具",
+            "label": "禁用"
+          },
+          "manual": {
+            "description": "选择特定的 MCP 服务器",
+            "label": "手动"
+          }
+        },
         "noServersAvailable": "无可用 MCP 服务器。请在设置中添加服务器",
         "title": "MCP 服务器"
       },
@@ -182,13 +565,23 @@
       "more": "助手设置",
       "prompt": "提示词设置",
       "reasoning_effort": {
+        "auto": "自动",
+        "auto_description": "灵活决定推理力度",
         "default": "默认",
+        "default_description": "依赖模型默认行为，不作任何配置",
         "high": "沉思",
+        "high_description": "高强度推理",
         "label": "思维链长度",
         "low": "浮想",
+        "low_description": "低强度推理",
         "medium": "斟酌",
+        "medium_description": "中强度推理",
         "minimal": "微念",
-        "off": "关闭"
+        "minimal_description": "最小程度的推理",
+        "off": "关闭",
+        "off_description": "禁用推理",
+        "xhigh": "穷究",
+        "xhigh_description": "超高强度推理"
       },
       "regular_phrases": {
         "add": "添加短语",
@@ -264,7 +657,11 @@
   "chat": {
     "add": {
       "assistant": {
+        "description": "日常对话和快速问答",
         "title": "添加助手"
+      },
+      "option": {
+        "title": "选择添加类型"
       },
       "topic": {
         "title": "新建话题"
@@ -308,6 +705,15 @@
       "view_full_content": "查看完整内容"
     },
     "input": {
+      "activity_directory": {
+        "description": "从活动目录中选择文件",
+        "loading": "正在加载文件...",
+        "no_file_found": {
+          "description": "可访问目录中没有可用文件",
+          "label": "未找到文件"
+        },
+        "title": "活动目录"
+      },
       "auto_resize": "自动调整高度",
       "clear": {
         "content": "确定要清除当前会话所有消息吗？",
@@ -331,12 +737,18 @@
       "new": {
         "context": "清除上下文 {{Command}}"
       },
+      "new_session": "新会话 {{Command}}",
       "new_topic": "新话题 {{Command}}",
+      "paste_text_file_confirm": "粘贴到输入框？",
       "pause": "暂停",
       "placeholder": "在这里输入消息，按 {{key}} 发送 - @ 选择模型， / 选择工具",
       "placeholder_without_triggers": "在这里输入消息，按 {{key}} 发送",
       "send": "发送",
       "settings": "设置",
+      "slash_commands": {
+        "description": "代理会话斜杠命令",
+        "title": "斜杠命令"
+      },
       "thinking": {
         "budget_exceeds_max": "思考预算超过最大 Token 数",
         "label": "思考",
@@ -566,7 +978,7 @@
       "show_line_numbers": "代码显示行号",
       "temperature": {
         "label": "模型温度",
-        "tip": "模型生成文本的随机程度。值越大，回复内容越赋有多样性、创造性、随机性；设为 0 根据事实回答。日常聊天建议设置为 0.7"
+        "tip": "模型生成文本的随机程度。值越大，回复内容越富有多样性、创造性、随机性；设为 0 根据事实回答。日常聊天建议设置为 0.7"
       },
       "thought_auto_collapse": {
         "label": "思考内容自动折叠",
@@ -649,6 +1061,29 @@
         "yuque": "导出到语雀"
       },
       "list": "话题列表",
+      "manage": {
+        "clear_selection": "取消选择",
+        "delete": {
+          "confirm": {
+            "content": "确定要删除选中的 {{count}} 个话题吗？此操作不可撤销。",
+            "title": "删除话题"
+          },
+          "success": "已删除 {{count}} 个话题"
+        },
+        "deselect_all": "取消全选",
+        "error": {
+          "at_least_one": "至少需要保留一个话题"
+        },
+        "move": {
+          "button": "移动",
+          "placeholder": "选择目标助手",
+          "success": "已移动 {{count}} 个话题"
+        },
+        "pinned": "已固定的话题",
+        "selected_count": "已选择 {{count}} 个",
+        "title": "管理话题",
+        "unpinned": "未固定的话题"
+      },
       "move_to": "移动到",
       "new": "开始新对话",
       "pin": "固定话题",
@@ -659,40 +1094,10 @@
         "label": "话题提示词",
         "tips": "话题提示词：针对当前话题提供额外的补充提示词"
       },
-      "tags": {
-        "add": "新建标签",
-        "add_first": "添加标签",
-        "available": "可用标签",
-        "available_by_category": "按分类显示标签",
-        "manage": {
-          "title": "标签管理"
-        },
-        "manage_categories": "管理分类",
-        "selected": "已选标签",
-        "category_management": "标签分类管理",
-        "create_category": "创建分类",
-        "category_name": "分类名称",
-        "category_name_required": "分类名称不能为空",
-        "enter_category_name": "请输入分类名称",
-        "category_color": "分类颜色",
-        "category_description": "分类描述",
-        "enter_category_description": "请输入分类描述",
-        "no_categories": "暂无分类",
-        "no_tags_in_category": "该分类下暂无标签",
-        "confirm_delete_category": "确认删除分类",
-        "delete_category_warning": "该分类下的所有标签将被移至未分类，确定要删除吗？",
-        "search_tags": "搜索标签",
-        "assign_selected_tags": "分配选中的标签",
-        "move_to_uncategorized": "移至未分类",
-        "move_to_category": "移入分类",
-        "no_matching_tags": "没有找到匹配的标签"
+      "search": {
+        "placeholder": "搜索话题...",
+        "title": "搜索"
       },
-      "filter": {
-        "by_tags": "按标签筛选",
-        "no_results": "没有找到匹配的话题",
-        "no_results_desc": "没有话题包含标签：{{tags}}"
-      },
-      "count": "个话题",
       "title": "话题",
       "unpin": "取消固定"
     },
@@ -779,10 +1184,16 @@
     }
   },
   "common": {
+    "about": "关于",
     "add": "添加",
+    "add_success": "添加成功",
     "advanced_settings": "高级设置",
+    "agent_one": "智能体",
+    "agent_other": "智能体",
     "and": "和",
-    "assistant": "智能体",
+    "assistant": "助手",
+    "assistant_one": "助手",
+    "assistant_other": "助手",
     "avatar": "头像",
     "back": "返回",
     "browse": "浏览",
@@ -791,15 +1202,18 @@
     "clear": "清除",
     "close": "关闭",
     "collapse": "折叠",
+    "completed": "完成",
     "confirm": "确认",
     "copied": "已复制",
     "copy": "复制",
     "copy_failed": "复制失败",
-    "create": "创建",
+    "current": "当前",
     "cut": "剪切",
     "default": "默认",
     "delete": "删除",
     "delete_confirm": "确定要删除吗？",
+    "delete_failed": "删除失败",
+    "delete_success": "删除成功",
     "description": "描述",
     "detail": "详情",
     "disabled": "已禁用",
@@ -809,6 +1223,10 @@
     "edit": "编辑",
     "enabled": "已启用",
     "error": "错误",
+    "errors": {
+      "create_message": "创建消息失败",
+      "validation": "验证失败"
+    },
     "expand": "展开",
     "file": {
       "not_supported": "不支持的文件类型 {{type}}"
@@ -818,7 +1236,9 @@
     "fullscreen": "已进入全屏模式，按 F11 退出",
     "go_to_settings": "前往设置",
     "i_know": "我知道了",
+    "ignore": "忽略",
     "inspect": "检查",
+    "invalid_value": "无效值",
     "knowledge_base": "知识库",
     "language": "语言",
     "loading": "加载中...",
@@ -828,8 +1248,15 @@
     "name": "名称",
     "no_results": "无结果",
     "none": "无",
+    "off": "关闭",
+    "on": "启用",
     "open": "打开",
     "paste": "粘贴",
+    "placeholders": {
+      "select": {
+        "model": "选择模型"
+      }
+    },
     "preview": "预览",
     "prompt": "提示词",
     "provider": "提供商",
@@ -842,6 +1269,8 @@
     "saved": "已保存",
     "search": "搜索",
     "select": "选择",
+    "select_all": "全选",
+    "selected": "已选择",
     "selectedItems": "已选择 {{count}} 项",
     "selectedMessages": "选中 {{count}} 条消息",
     "settings": "设置",
@@ -853,10 +1282,14 @@
       }
     },
     "stop": "停止",
+    "subscribe": "订阅",
     "success": "成功",
     "swap": "交换",
-    "update": "更新",
     "topics": "话题",
+    "unknown": "未知",
+    "unnamed": "未命名",
+    "unsubscribe": "退订",
+    "update_success": "更新成功",
     "upload_files": "上传文件",
     "warning": "警告",
     "you": "用户"
@@ -867,7 +1300,7 @@
   "endpoint_type": {
     "anthropic": "Anthropic",
     "gemini": "Gemini",
-    "image-generation": "图片生成",
+    "image-generation": "图像生成 (OpenAI)",
     "jina-rerank": "Jina 重排序",
     "openai": "OpenAI",
     "openai-response": "OpenAI-Response"
@@ -878,6 +1311,7 @@
     "backup": {
       "file_format": "备份文件格式错误"
     },
+    "base64DataTruncated": "Base64 图片数据已截断，大小",
     "boundary": {
       "default": {
         "devtools": "打开调试面板",
@@ -929,6 +1363,7 @@
     "modelType": "模型类型",
     "name": "错误名称",
     "no_api_key": "API 密钥未配置",
+    "no_response": "无响应",
     "originalError": "原错误",
     "originalMessage": "原消息",
     "parameter": "参数",
@@ -957,6 +1392,8 @@
     "text": "文本",
     "toolInput": "工具输入",
     "toolName": "工具名",
+    "truncated": "数据已截断，原始大小",
+    "truncatedBadge": "已截断",
     "unknown": "未知错误",
     "usage": "用量",
     "user_message_not_found": "无法找到原始用户消息",
@@ -994,6 +1431,9 @@
     },
     "document": "文档",
     "edit": "编辑",
+    "error": {
+      "open_path": "无法打开路径: {{path}}"
+    },
     "file": "文件",
     "image": "图片",
     "name": "文件名",
@@ -1042,6 +1482,36 @@
     "generating": "生成中",
     "preview": "预览",
     "split": "分屏"
+  },
+  "import": {
+    "chatgpt": {
+      "assistant_name": "ChatGPT 导入",
+      "button": "选择文件",
+      "description": "仅导入对话文字，不携带图片和附件",
+      "error": {
+        "invalid_json": "无效的 JSON 文件格式",
+        "no_conversations": "文件中未找到任何对话",
+        "no_valid_conversations": "没有可导入的有效对话",
+        "unknown": "导入失败，请检查文件格式"
+      },
+      "help": {
+        "step1": "1. 登录 ChatGPT，进入设置 > 数据控制 > 导出数据",
+        "step2": "2. 等待邮件接收导出文件",
+        "step3": "3. 解压下载的文件，找到 conversations.json",
+        "title": "如何导出 ChatGPT 对话？"
+      },
+      "importing": "正在导入对话...",
+      "selecting": "正在选择文件...",
+      "success": "成功导入 {{topics}} 个对话，共 {{messages}} 条消息",
+      "title": "导入 ChatGPT 对话",
+      "untitled_conversation": "未命名对话"
+    },
+    "confirm": {
+      "button": "选择导入文件",
+      "label": "确定要导入外部数据吗？"
+    },
+    "content": "选择要导入的外部应用对话文件，暂时仅支持ChatGPT的JSON格式文件",
+    "title": "导入外部对话"
   },
   "knowledge": {
     "add": {
@@ -1130,6 +1600,7 @@
     "notes_placeholder": "输入此知识库的附加信息或上下文...",
     "provider_not_found": "未找到服务商",
     "quota": "{{name}} 剩余额度：{{quota}}",
+    "quota_empty": "今日{{name}}额度不足，请前往官网申请",
     "quota_infinity": "{{name}} 剩余额度：无限制",
     "rename": "重命名",
     "search": "搜索知识库",
@@ -1217,11 +1688,7 @@
     "cannot_delete_default_user": "不能删除默认用户",
     "configure_memory_first": "请先配置记忆设置",
     "content": "内容",
-    "current_memory_role": "当前记忆角色",
     "current_user": "当前用户",
-    "memory_role_selector": "记忆角色",
-    "write_permission": "写入权限",
-    "write_permission_desc": "控制助手是否可以写入记忆内容。关闭后助手只能读取记忆，无法写入新的记忆",
     "custom": "自定义",
     "default": "默认",
     "default_user": "默认用户",
@@ -1312,29 +1779,14 @@
     "user_memories_reset": "{{user}} 的所有记忆已重置",
     "user_switch_failed": "切换用户失败",
     "user_switched": "用户上下文已切换到 {{user}}",
-    "users": "用户",
-    "confirm_title": "确认记忆存储",
-    "confirm_description": "请确认要添加到记忆中的内容，您可以编辑或取消选择不需要的项目",
-    "confirm_save": "保存 {{count}} 项记忆",
-    "action_add": "新增",
-    "action_update": "更新",
-    "action_delete": "删除",
-    "conversation_context": "对话上下文",
-    "old_content": "原内容",
-    "edit_content_placeholder": "编辑记忆内容...",
-    "select_all": "全选",
-    "no_pending_memories": "暂无待确认的记忆",
-    "auto_confirm_memories": "自动确认记忆",
-    "auto_confirm_memories_desc": "启用后将跳过用户确认步骤，直接存储提取的记忆",
-    "target_users": "目标用户",
-    "confirm_save_to_users": "保存 {{memoryCount}} 项记忆至 {{userCount}} 个用户"
+    "users": "用户"
   },
   "message": {
     "agents": {
       "import": {
         "error": "导入失败"
       },
-      "imported": "导入成功"
+      "imported": "成功导入 {{count}} 个助手"
     },
     "api": {
       "check": {
@@ -1349,7 +1801,7 @@
     },
     "assistant": {
       "added": {
-        "content": "智能体添加成功"
+        "content": "助手添加成功"
       }
     },
     "attachments": {
@@ -1474,6 +1926,9 @@
     },
     "message": {
       "code_style": "代码风格",
+      "compact": {
+        "title": "对话已压缩"
+      },
       "delete": {
         "content": "确定要删除此消息吗？",
         "title": "删除消息"
@@ -1627,6 +2082,7 @@
     "title": "小程序"
   },
   "minapps": {
+    "ant-ling": "蚂蚁百灵",
     "baichuan": "百小应",
     "baidu-ai-search": "百度AI搜索",
     "chatglm": "智谱清言",
@@ -1762,6 +2218,7 @@
     "collapse": "收起",
     "content_placeholder": "请输入笔记内容...",
     "copyContent": "复制内容",
+    "crossPlatformRestoreWarning": "检测到从其他设备恢复配置，但笔记目录为空。请将笔记文件复制到: {{path}}",
     "delete": "删除",
     "delete_confirm": "确定要删除这个{{type}}吗？",
     "delete_folder_confirm": "确定要删除文件夹 \"{{name}}\" 及其所有内容吗？",
@@ -1783,6 +2240,14 @@
     "rename": "重命名",
     "rename_changed": "由于安全策略，文件名已从 {{original}} 更改为 {{final}}",
     "save": "保存到笔记",
+    "search": {
+      "both": "名称+内容",
+      "content": "内容",
+      "found_results": "找到 {{count}} 个结果 (名称: {{nameCount}}, 内容: {{contentCount}})",
+      "more_matches": "个匹配",
+      "searching": "搜索中...",
+      "show_less": "收起"
+    },
     "settings": {
       "data": {
         "apply": "应用",
@@ -1849,7 +2314,10 @@
     "untitled_folder": "新文件夹",
     "untitled_note": "无标题笔记",
     "upload_failed": "笔记上传失败",
-    "upload_success": "笔记上传成功"
+    "upload_files": "上传文件",
+    "upload_folder": "上传文件夹",
+    "upload_success": "笔记上传成功",
+    "uploading_files": "正在上传 {{count}} 个文件..."
   },
   "notification": {
     "assistant": "助手响应",
@@ -1867,6 +2335,7 @@
       "provider": {
         "cannot_remove_builtin": "不能删除内置提供商",
         "existing": "提供商已存在",
+        "get_providers": "获取可用提供商失败",
         "not_found": "OCR 提供商不存在",
         "update_failed": "更新配置失败"
       },
@@ -1903,7 +2372,7 @@
     "description": "<div><p>1. 下载 OV 模型.</p><p>2. 在 'Manager' 中添加模型.</p><p>仅支持 Windows!</p><p>OVMS 安装路径: '%USERPROFILE%\\.cherrystudio\\ovms' .</p><p>请参考 <a href=https://github.com/openvinotoolkit/model_server/blob/c55551763d02825829337b62c2dcef9339706f79/docs/deploying_server_baremetal.md>Intel OVMS 指南</a></p></dev>",
     "download": {
       "button": "下载",
-      "error": "选择失败",
+      "error": "下载失败",
       "model_id": {
         "label": "模型 ID",
         "model_id_pattern": "模型 ID 必须以 OpenVINO/ 开头",
@@ -1925,11 +2394,13 @@
     "failed": {
       "install": "安装 OVMS 失败:",
       "install_code_100": "未知错误",
-      "install_code_101": "仅支持 Intel(R) Core(TM) Ultra CPU",
+      "install_code_101": "仅支持 Intel(R) CPU",
       "install_code_102": "仅支持 Windows",
       "install_code_103": "下载 OVMS runtime 失败",
-      "install_code_104": "解压 OVMS runtime 失败",
-      "install_code_105": "清理 OVMS runtime 失败",
+      "install_code_104": "安装 OVMS runtime 失败",
+      "install_code_105": "创建 ovdnd.exe 失败",
+      "install_code_106": "创建 run.bat 失败",
+      "install_code_110": "清理旧 OVMS runtime 失败",
       "run": "运行 OVMS 失败:",
       "stop": "停止 OVMS 失败:"
     },
@@ -2109,9 +2580,36 @@
       "seed_tip": "控制放大结果的随机性"
     }
   },
+  "plugins": {
+    "actions": "操作",
+    "agents": "代理",
+    "all_categories": "所有类别",
+    "all_types": "全部",
+    "category": "类别",
+    "commands": "命令",
+    "confirm_uninstall": "确定要卸载 {{name}} 吗？",
+    "install": "安装",
+    "install_plugins_from_browser": "浏览可用插件以开始使用",
+    "installing": "安装中...",
+    "name": "名称",
+    "no_description": "无描述",
+    "no_installed_plugins": "尚未安装任何插件",
+    "no_results": "未找到插件",
+    "search_placeholder": "搜索插件...",
+    "showing_results": "显示 {{count}} 个插件",
+    "showing_results_one": "显示 {{count}} 个插件",
+    "showing_results_other": "显示 {{count}} 个插件",
+    "showing_results_plural": "显示 {{count}} 个插件",
+    "skills": "技能",
+    "try_different_search": "请尝试调整搜索或类别筛选",
+    "type": "类型",
+    "uninstall": "卸载",
+    "uninstalling": "卸载中..."
+  },
   "preview": {
     "copy": {
-      "image": "复制为图片"
+      "image": "复制为图片",
+      "src": "复制图片源"
     },
     "dialog": "打开预览窗口",
     "label": "预览",
@@ -2132,6 +2630,7 @@
   },
   "provider": {
     "302ai": "302.AI",
+    "ai-gateway": "Vercel AI Gateway",
     "aihubmix": "AiHubMix",
     "aionly": "唯一AI (AiOnly)",
     "alayanew": "Alaya NeW",
@@ -2142,6 +2641,7 @@
     "baidu-cloud": "百度云千帆",
     "burncloud": "BurnCloud",
     "cephalon": "Cephalon",
+    "cerebras": "Cerebras AI",
     "cherryin": "CherryIN",
     "copilot": "GitHub Copilot",
     "dashscope": "阿里云百炼",
@@ -2155,12 +2655,15 @@
     "gpustack": "GPUStack",
     "grok": "Grok",
     "groq": "Groq",
+    "huggingface": "Hugging Face",
     "hunyuan": "腾讯混元",
     "hyperbolic": "Hyperbolic",
     "infini": "无问芯穹",
     "jina": "Jina",
     "lanyun": "蓝耘科技",
     "lmstudio": "LM Studio",
+    "longcat": "龙猫",
+    "mimo": "Xiaomi MiMo",
     "minimax": "MiniMax",
     "mistral": "Mistral",
     "modelscope": "ModelScope 魔搭",
@@ -2180,6 +2683,7 @@
     "qiniu": "七牛云 AI 推理",
     "qwenlm": "QwenLM",
     "silicon": "硅基流动",
+    "sophnet": "SophNet",
     "stepfun": "阶跃星辰",
     "tencent-cloud-ti": "腾讯云 TI",
     "together": "Together",
@@ -2488,11 +2992,11 @@
             "go_to_settings": "去设置",
             "open_accessibility_settings": "打开辅助功能设置"
           },
-          "description": [
-            "划词助手需「<strong>辅助功能权限</strong>」才能正常工作。",
-            "请点击「<strong>去设置</strong>」，并在稍后弹出的权限请求弹窗中点击 「<strong>打开系统设置</strong>」 按钮，然后在之后的应用列表中找到 「<strong>Cherry Studio</strong>」，并打开权限开关。",
-            "完成设置后，请再次开启划词助手。"
-          ],
+          "description": {
+            "0": "划词助手需「<strong>辅助功能权限</strong>」才能正常工作。",
+            "1": "请点击「<strong>去设置</strong>」，并在稍后弹出的权限请求弹窗中点击 「<strong>打开系统设置</strong>」 按钮，然后在之后的应用列表中找到 「<strong>Cherry Studio</strong>」，并打开权限开关。",
+            "2": "完成设置后，请再次开启划词助手。"
+          },
           "title": "辅助功能权限"
         },
         "title": "启用"
@@ -2626,15 +3130,14 @@
       },
       "description": "一款为创造者而生的 AI 助手",
       "downloading": "正在下载更新...",
+      "enterprise": {
+        "title": "企业版"
+      },
       "feedback": {
         "button": "反馈",
         "title": "意见反馈"
       },
       "label": "关于我们",
-      "license": {
-        "button": "查看",
-        "title": "许可证"
-      },
       "releases": {
         "button": "查看",
         "title": "更新日志"
@@ -2679,6 +3182,7 @@
         "label": "应用数据",
         "migration_title": "数据迁移",
         "new_path": "新路径",
+        "open": "打开目录",
         "original_path": "原始路径",
         "path_change_failed": "数据目录更改失败",
         "path_changed_without_copy": "路径已更改成功",
@@ -2726,6 +3230,7 @@
         "basic": "基础数据设置",
         "cloud_storage": "云备份设置",
         "export_settings": "导出设置",
+        "import_settings": "导入设置",
         "third_party": "第三方连接"
       },
       "export_menu": {
@@ -2742,8 +3247,74 @@
         "title": "导出菜单设置",
         "yuque": "导出到语雀"
       },
+      "export_to_phone": {
+        "confirm": {
+          "button": "选择备份文件"
+        },
+        "content": "导出部分数据，包括聊天记录、设置。请注意，备份过程可能需要一些时间，感谢您的耐心等待。",
+        "lan": {
+          "connected": "连接成功",
+          "connection_failed": "连接失败",
+          "content": "请确保电脑和手机处于同一网络以使用局域网传输。",
+          "device_list_title": "局域网设备列表",
+          "discovered_devices": "已发现的设备",
+          "error": {
+            "file_too_large": "文件过大，最大支持 500MB",
+            "init_failed": "初始化失败",
+            "invalid_file_type": "仅支持 ZIP 文件",
+            "no_file": "未选择文件",
+            "no_ip": "无法获取 IP 地址",
+            "not_connected": "请先完成握手连接",
+            "send_failed": "发送文件失败"
+          },
+          "file_transfer": {
+            "cancelled": "传输已取消",
+            "failed": "文件发送失败: {{message}}",
+            "progress": "发送中... {{progress}}%",
+            "success": "文件发送成功"
+          },
+          "handshake": {
+            "button": "握手测试",
+            "failed": "握手失败：{{message}}",
+            "in_progress": "正在握手...",
+            "success": "已与 {{device}} 建立握手",
+            "test_message_received": "已收到 {{device}} 的 pong 响应",
+            "test_message_sent": "已发送 hello world 测试数据"
+          },
+          "idle_hint": "扫描已暂停。开始扫描以发现局域网中的 Cherry Studio 设备。",
+          "ip_addresses": "IP 地址",
+          "last_seen": "最后活动：{{time}}",
+          "metadata": "元数据",
+          "no_connection_warning": "请在 Cherry Studio 移动端打开局域网传输",
+          "no_devices": "尚未发现局域网设备",
+          "scan_devices": "扫描设备",
+          "scanning_hint": "正在扫描局域网中的 Cherry Studio 设备...",
+          "send_file": "发送文件",
+          "status": {
+            "completed": "传输完成",
+            "connected": "连接成功",
+            "connecting": "正在连接中...",
+            "disconnected": "连接已断开",
+            "error": "连接出错",
+            "initializing": "正在初始化连接...",
+            "preparing": "准备传输中...",
+            "sending": "传输中 {{progress}}%"
+          },
+          "status_badge_idle": "空闲",
+          "status_badge_scanning": "扫描中",
+          "stop_scan": "停止扫描",
+          "title": "局域网传输",
+          "transfer_progress": "传输进度"
+        },
+        "title": "导出至手机"
+      },
       "hour_interval_one": "{{count}} 小时",
       "hour_interval_other": "{{count}} 小时",
+      "import_settings": {
+        "button": "导入文件",
+        "chatgpt": "导入 ChatGPT 数据",
+        "title": "导入外部应用数据"
+      },
       "joplin": {
         "check": {
           "button": "检测",
@@ -3325,6 +3896,9 @@
       },
       "view_webdav_settings": "查看 WebDAV 设置"
     },
+    "groq": {
+      "title": "Groq 设置"
+    },
     "hardware_acceleration": {
       "confirm": {
         "content": "禁用硬件加速需要重启应用才能生效，是否现在重启？",
@@ -3400,12 +3974,15 @@
       "builtinServers": "内置服务器",
       "builtinServersDescriptions": {
         "brave_search": "一个集成了Brave 搜索 API 的 MCP 服务器实现，提供网页与本地搜索双重功能。需要配置 BRAVE_API_KEY 环境变量",
+        "browser": "通过 Chrome DevTools 协议控制隐藏的 Electron 窗口，支持打开 URL、执行单行 JS、重置会话",
+        "didi_mcp": "一个集成了滴滴 MCP 服务器实现，提供网约车服务包括地图搜索、价格预估、订单管理和司机跟踪。仅支持中国大陆地区。需要配置 DIDI_API_KEY 环境变量",
         "dify_knowledge": "Dify 的 MCP 服务器实现，提供了一个简单的 API 来与 Dify 进行交互。需要配置 Dify Key",
         "fetch": "用于获取 URL 网页内容的 MCP 服务器",
         "filesystem": "实现文件系统操作的模型上下文协议（MCP）的 Node.js 服务器。需要配置允许访问的目录",
         "mcp_auto_install": "自动安装 MCP 服务（测试版）",
         "memory": "基于本地知识图谱的持久性记忆基础实现。这使得模型能够在不同对话间记住用户的相关信息。需要配置 MEMORY_FILE_PATH 环境变量。",
         "no": "无描述",
+        "nowledge_mem": "需要本地运行 Nowledge Mem 应用。将 AI 对话、工具、笔记、智能体和文件保存在本地计算机的私有记忆中。请从 https://mem.nowledge.co/ 下载",
         "python": "在安全的沙盒环境中执行 Python 代码。使用 Pyodide 运行 Python，支持大多数标准库和科学计算包",
         "sequentialthinking": "一个 MCP 服务器实现，提供了通过结构化思维过程进行动态和反思性问题解决的工具"
       },
@@ -3423,6 +4000,7 @@
         "description": "不启用 MCP 服务功能",
         "label": "不使用 MCP 服务器"
       },
+      "discover": "发现",
       "duplicateName": "已存在同名服务器",
       "editJson": "编辑 JSON",
       "editMcpJson": "编辑 MCP 配置",
@@ -3432,6 +4010,10 @@
       "errors": {
         "32000": "MCP 服务器启动失败，请根据教程检查参数是否填写完整",
         "toolNotFound": "未找到工具 {{name}}"
+      },
+      "fetch": {
+        "button": "获取服务器",
+        "success": "服务器获取成功"
       },
       "findMore": "更多 MCP",
       "headers": "请求头",
@@ -3446,8 +4028,10 @@
       "jsonSaveError": "保存 JSON 配置失败",
       "jsonSaveSuccess": "JSON 配置已保存",
       "logoUrl": "标志网址",
+      "logs": "日志",
       "longRunning": "长时间运行模式",
       "longRunningTooltip": "启用后，服务器支持长时间任务，接收到进度通知时会重置超时计时器，并延长最大超时时间至10分钟",
+      "marketplaces": "市场",
       "missingDependencies": "缺失，请安装它以继续",
       "more": {
         "awesome": "精选的 MCP 服务器列表",
@@ -3464,6 +4048,7 @@
       "name": "名称",
       "newServer": "MCP 服务器",
       "noDescriptionAvailable": "暂无描述",
+      "noLogs": "暂无日志",
       "noServers": "未配置服务器",
       "not_support": "模型不支持",
       "npx_list": {
@@ -3479,6 +4064,12 @@
         "usage": "用法",
         "version": "版本"
       },
+      "oauth": {
+        "callback": {
+          "message": "您可以关闭此页面并返回 Cherry Studio",
+          "title": "认证成功"
+        }
+      },
       "prompts": {
         "arguments": "参数",
         "availablePrompts": "可用提示",
@@ -3487,9 +4078,16 @@
         "noPromptsAvailable": "无可用提示",
         "requiredField": "必填字段"
       },
+      "protocolInstallWarning": {
+        "command": "启动命令",
+        "message": "该 MCP 是通过协议从外部来源安装的，运行来历不明的工具可能对您的计算机造成危害。",
+        "run": "运行",
+        "title": "运行外部 MCP？"
+      },
       "provider": "提供者",
       "providerPlaceholder": "提供者名称",
       "providerUrl": "提供者网址",
+      "providers": "提供商",
       "registry": "包管理源",
       "registryDefault": "默认",
       "registryTooltip": "选择用于安装包的源，以解决默认源的网络问题",
@@ -3512,6 +4110,7 @@
       "searchNpx": "搜索 MCP",
       "serverPlural": "服务器",
       "serverSingular": "服务器",
+      "servers": "MCP 服务器",
       "sse": "服务器发送事件 (sse)",
       "startError": "启动失败",
       "stdio": "标准输入 / 输出 (stdio)",
@@ -3544,7 +4143,7 @@
       "tagsPlaceholder": "输入标签",
       "timeout": "超时",
       "timeoutTooltip": "对该服务器请求的超时时间（秒），默认为 60 秒",
-      "title": "MCP",
+      "title": "MCP 服务器",
       "tools": {
         "autoApprove": {
           "label": "自动批准",
@@ -3794,10 +4393,15 @@
         "default": "默认",
         "flex": "灵活",
         "on_demand": "按需",
-        "performance": "性能",
         "priority": "优先",
         "tip": "指定用于处理请求的延迟层级",
         "title": "服务层级"
+      },
+      "stream_options": {
+        "include_usage": {
+          "tip": "是否请求 Tokens 用量（仅 OpenAI Chat Completions API 可用）",
+          "title": "包含用量"
+        }
       },
       "summary_text_mode": {
         "auto": "自动",
@@ -3850,6 +4454,9 @@
         "start_auth": "开始授权",
         "submit_code": "完成登录"
       },
+      "anthropic_api_host": "Anthropic API 地址",
+      "anthropic_api_host_preview": "Anthropic 预览：{{url}}",
+      "anthropic_api_host_tooltip": "仅当服务商提供 Claude 兼容的基础地址时填写。",
       "api": {
         "key": {
           "check": {
@@ -3888,23 +4495,36 @@
           "stream_options": {
             "help": "该提供商是否支持 stream_options 参数",
             "label": "支持 stream_options"
+          },
+          "verbosity": {
+            "help": "该提供商是否支持 verbosity 参数",
+            "label": "支持 verbosity"
           }
         },
         "url": {
           "preview": "预览: {{url}}",
           "reset": "重置",
-          "tip": "/ 结尾忽略 v1 版本，# 结尾强制使用输入地址"
+          "tip": "在末尾添加 # 以禁用自动附加的API版本。"
         }
       },
       "api_host": "API 地址",
+      "api_host_no_valid": "API 地址不合法",
+      "api_host_preview": "预览：{{url}}",
+      "api_host_tooltip": "仅在服务商需要自定义的 OpenAI 兼容地址时覆盖。",
       "api_key": {
         "label": "API 密钥",
-        "tip": "多个密钥使用逗号或空格分隔"
+        "tip": "多个密钥使用逗号分隔"
       },
       "api_version": "API 版本",
       "aws-bedrock": {
         "access_key_id": "AWS 访问密钥 ID",
         "access_key_id_help": "您的 AWS 访问密钥 ID，用于访问 AWS Bedrock 服务",
+        "api_key": "Bedrock API 密钥",
+        "api_key_help": "您的 AWS Bedrock API 密钥，用于身份验证",
+        "auth_type": "认证方式",
+        "auth_type_api_key": "Bedrock API 密钥",
+        "auth_type_help": "选择使用 IAM 凭证或 Bedrock API 密钥进行身份验证",
+        "auth_type_iam": "IAM 凭证",
         "description": "AWS Bedrock 是亚马逊提供的全托管基础模型服务，支持多种先进的大语言模型",
         "region": "AWS 区域",
         "region_help": "您的 AWS 服务区域，例如 us-east-1",
@@ -3914,7 +4534,7 @@
       },
       "azure": {
         "apiversion": {
-          "tip": "Azure OpenAI 的 API 版本，如果想要使用 Response API，请输入 preview 版本"
+          "tip": "Azure OpenAI 的 API 版本，如果想要使用 Response API，请输入 v1 版本"
         }
       },
       "basic_auth": {
@@ -4033,7 +4653,8 @@
         "none": "不使用代理",
         "system": "系统代理",
         "title": "代理模式"
-      }
+      },
+      "tip": "支持模糊匹配(*.test.com,192.168.0.0/16)"
     },
     "quickAssistant": {
       "click_tray_to_show": "点击托盘图标启动",
@@ -4048,6 +4669,7 @@
       "confirm": "确认",
       "forward": "前进",
       "multiple": "多选",
+      "noResult": "未找到结果",
       "page": "翻页",
       "select": "选择",
       "title": "快捷菜单"
@@ -4155,6 +4777,12 @@
       },
       "title": "其他设置",
       "websearch": {
+        "api_key_required": {
+          "content": "{{provider}} 需要 API 密钥才能使用。是否现在去配置？",
+          "ok": "去配置",
+          "title": "需要 API 密钥"
+        },
+        "api_providers": "API 服务商",
         "apikey": "API 密钥",
         "blacklist": "黑名单",
         "blacklist_description": "在搜索结果中不会出现以下网站的结果",
@@ -4196,7 +4824,15 @@
         },
         "content_limit": "内容长度限制",
         "content_limit_tooltip": "限制搜索结果的内容长度, 超过限制的内容将被截断",
+        "default_provider": "默认搜索引擎",
         "free": "免费",
+        "is_default": "默认搜索",
+        "local_provider": {
+          "hint": "登录网站可以获得更好的搜索结果，也可以对搜索进行个性化设置。",
+          "open_settings": "打开 {{provider}} 设置",
+          "settings": "本地搜索设置"
+        },
+        "local_providers": "本地搜索",
         "no_provider_selected": "请选择搜索服务商后再检测",
         "overwrite": "覆盖服务商搜索",
         "overwrite_tooltip": "强制使用搜索服务商而不是大语言模型进行搜索",
@@ -4207,6 +4843,7 @@
         "search_provider": "搜索服务商",
         "search_provider_placeholder": "选择一个搜索服务商",
         "search_with_time": "搜索包含日期",
+        "set_as_default": "设为默认",
         "subscribe": "黑名单订阅",
         "subscribe_add": "添加订阅",
         "subscribe_add_failed": "订阅源添加失败",
@@ -4300,7 +4937,6 @@
     }
   },
   "title": {
-    "agents": "智能体",
     "apps": "小程序",
     "code": "Code",
     "files": "文件",
@@ -4312,6 +4948,7 @@
     "notes": "笔记",
     "paintings": "绘画",
     "settings": "设置",
+    "store": "助手库",
     "translate": "翻译"
   },
   "trace": {

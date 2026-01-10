@@ -1,11 +1,10 @@
 import { InfoCircleOutlined } from '@ant-design/icons'
 import { loggerService } from '@logger'
 import { Box } from '@renderer/components/Layout'
-import MemoriesSettingsModal from '@renderer/pages/memory/settings-modal'
-import UserSelector from '@renderer/pages/settings/MemorySettings/UserSelector'
+import MemoriesSettingsModal from '@renderer/pages/settings/MemorySettings/MemorySettingsModal'
 import MemoryService from '@renderer/services/MemoryService'
-import { selectCurrentUserId, selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
-import { Assistant, AssistantSettings } from '@renderer/types'
+import { selectGlobalMemoryEnabled, selectMemoryConfig } from '@renderer/store/memory'
+import type { Assistant, AssistantSettings } from '@renderer/types'
 import { Alert, Button, Card, Space, Switch, Tooltip, Typography } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { Settings2 } from 'lucide-react'
@@ -29,74 +28,35 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
   const { t } = useTranslation()
   const memoryConfig = useSelector(selectMemoryConfig)
   const globalMemoryEnabled = useSelector(selectGlobalMemoryEnabled)
-  const currentUserId = useSelector(selectCurrentUserId)
   const [memoryStats, setMemoryStats] = useState<{ count: number; loading: boolean }>({
     count: 0,
     loading: true
   })
   const [settingsModalVisible, setSettingsModalVisible] = useState(false)
-  const [uniqueUsers, setUniqueUsers] = useState<string[]>([])
   const memoryService = MemoryService.getInstance()
   const form = useForm()
 
-  // Get the assistant's memory user ID, fallback to global current user
-  const assistantMemoryUserId = assistant.memoryUserId || currentUserId
-
-  // Load unique users from database
-  const loadUniqueUsers = useCallback(async () => {
-    try {
-      const usersList = await memoryService.getUsersList()
-      const users = usersList.map((user) => user.userId)
-      setUniqueUsers(users)
-    } catch (error) {
-      logger.error('Failed to load users list:', error as Error)
-    }
-  }, [memoryService])
-
-  // Load memory statistics for assistant's memory user
+  // Load memory statistics for this assistant
   const loadMemoryStats = useCallback(async () => {
     setMemoryStats((prev) => ({ ...prev, loading: true }))
     try {
-      // Temporarily set the memory service to use the assistant's memory user
-      const originalUserId = memoryService.getCurrentUser()
-      memoryService.setCurrentUser(assistantMemoryUserId)
-
       const result = await memoryService.list({
+        agentId: assistant.id,
         limit: 1000
       })
       setMemoryStats({ count: result.results.length, loading: false })
-
-      // Restore the original user
-      memoryService.setCurrentUser(originalUserId)
     } catch (error) {
       logger.error('Failed to load memory stats:', error as Error)
       setMemoryStats({ count: 0, loading: false })
     }
-  }, [memoryService, assistantMemoryUserId])
+  }, [assistant.id, memoryService])
 
   useEffect(() => {
-    loadUniqueUsers()
     loadMemoryStats()
-  }, [loadUniqueUsers, loadMemoryStats, assistantMemoryUserId])
+  }, [loadMemoryStats])
 
   const handleMemoryToggle = (enabled: boolean) => {
     updateAssistant({ ...assistant, enableMemory: enabled })
-  }
-
-  const handleMemoryUserChange = (userId: string) => {
-    updateAssistant({ ...assistant, memoryUserId: userId })
-  }
-
-  const handleMemoryWritePermissionToggle = (enabled: boolean) => {
-    updateAssistant({ ...assistant, memoryWritePermission: enabled })
-  }
-
-  const handleAddUser = () => {
-    // Navigate to memory settings to add new user
-    if (onClose) {
-      onClose()
-    }
-    window.location.hash = '#/settings/memory'
   }
 
   const handleNavigateToMemory = () => {
@@ -108,7 +68,7 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
     window.location.hash = '#/settings/memory'
   }
 
-  const isMemoryConfigured = memoryConfig.embedderApiClient && memoryConfig.llmApiClient
+  const isMemoryConfigured = memoryConfig.embeddingModel && memoryConfig.llmModel
   const isMemoryEnabled = globalMemoryEnabled && isMemoryConfigured
 
   return (
@@ -166,42 +126,20 @@ const AssistantMemorySettings: React.FC<Props> = ({ assistant, updateAssistant, 
 
       <Card size="small" style={{ marginBottom: 16 }}>
         <Space direction="vertical" style={{ width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text strong>{t('memory.memory_role_selector')}: </Text>
-            <UserSelector
-              currentUser={assistantMemoryUserId}
-              uniqueUsers={uniqueUsers}
-              onUserSwitch={handleMemoryUserChange}
-              onAddUser={handleAddUser}
-            />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Space>
-              <Text strong>{t('memory.write_permission')}: </Text>
-              <Tooltip title={t('memory.write_permission_desc')}>
-                <InfoIcon />
-              </Tooltip>
-            </Space>
-            <Switch
-              checked={assistant.memoryWritePermission !== false}
-              onChange={handleMemoryWritePermissionToggle}
-              disabled={!assistant.enableMemory || !isMemoryEnabled}
-            />
-          </div>
           <div>
             <Text strong>{t('memory.stored_memories')}: </Text>
             <Text>{memoryStats.loading ? t('common.loading') : memoryStats.count}</Text>
           </div>
-          {memoryConfig.embedderApiClient && (
+          {memoryConfig.embeddingModel && (
             <div>
               <Text strong>{t('memory.embedding_model')}: </Text>
-              <Text code>{memoryConfig.embedderApiClient.model}</Text>
+              <Text code>{memoryConfig.embeddingModel.id}</Text>
             </div>
           )}
-          {memoryConfig.llmApiClient && (
+          {memoryConfig.llmModel && (
             <div>
               <Text strong>{t('memory.llm_model')}: </Text>
-              <Text code>{memoryConfig.llmApiClient.model}</Text>
+              <Text code>{memoryConfig.llmModel.id}</Text>
             </div>
           )}
         </Space>

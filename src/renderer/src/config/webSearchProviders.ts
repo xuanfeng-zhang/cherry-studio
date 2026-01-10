@@ -1,4 +1,4 @@
-import { WebSearchProvider, WebSearchProviderId } from '@renderer/types'
+import type { WebSearchProvider, WebSearchProviderId } from '@renderer/types'
 
 type WebSearchProviderConfig = {
   websites: {
@@ -29,6 +29,11 @@ export const WEB_SEARCH_PROVIDER_CONFIG: Record<WebSearchProviderId, WebSearchPr
     websites: {
       official: 'https://exa.ai',
       apiKey: 'https://dashboard.exa.ai/api-keys'
+    }
+  },
+  'exa-mcp': {
+    websites: {
+      official: 'https://exa.ai'
     }
   },
   bocha: {
@@ -79,6 +84,11 @@ export const WEB_SEARCH_PROVIDERS: WebSearchProvider[] = [
     name: 'Exa',
     apiHost: 'https://api.exa.ai',
     apiKey: ''
+  },
+  {
+    id: 'exa-mcp',
+    name: 'ExaMCP',
+    apiHost: 'https://mcp.exa.ai/mcp'
   },
   {
     id: 'bocha',

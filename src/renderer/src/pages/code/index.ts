@@ -1,4 +1,4 @@
-import { EndpointType, Model, Provider } from '@renderer/types'
+import { type EndpointType, type Model, type Provider, SystemProviderIds } from '@renderer/types'
 import { codeTools } from '@shared/config/constant'
 
 export interface LaunchValidationResult {
@@ -25,12 +25,25 @@ export const CLI_TOOLS = [
 ]
 
 export const GEMINI_SUPPORTED_PROVIDERS = ['aihubmix', 'dmxapi', 'new-api', 'cherryin']
-export const CLAUDE_OFFICIAL_SUPPORTED_PROVIDERS = ['deepseek', 'moonshot', 'zhipu', 'dashscope', 'modelscope']
+export const CLAUDE_OFFICIAL_SUPPORTED_PROVIDERS = [
+  'deepseek',
+  'moonshot',
+  'zhipu',
+  'dashscope',
+  'modelscope',
+  'minimax',
+  'longcat',
+  SystemProviderIds.qiniu,
+  SystemProviderIds.silicon,
+  SystemProviderIds.mimo,
+  SystemProviderIds.openrouter
+]
 export const CLAUDE_SUPPORTED_PROVIDERS = [
   'aihubmix',
   'dmxapi',
   'new-api',
   'cherryin',
+  '302ai',
   ...CLAUDE_OFFICIAL_SUPPORTED_PROVIDERS
 ]
 export const OPENAI_CODEX_SUPPORTED_PROVIDERS = ['openai', 'openrouter', 'aihubmix', 'new-api', 'cherryin']
@@ -52,7 +65,7 @@ export const getCodeToolsApiBaseUrl = (model: Model, type: EndpointType) => {
   const CODE_TOOLS_API_ENDPOINTS = {
     aihubmix: {
       gemini: {
-        api_base_url: 'https://api.aihubmix.com/gemini'
+        api_base_url: 'https://aihubmix.com/gemini'
       }
     },
     deepseek: {
@@ -72,12 +85,22 @@ export const getCodeToolsApiBaseUrl = (model: Model, type: EndpointType) => {
     },
     dashscope: {
       anthropic: {
-        api_base_url: 'https://dashscope.aliyuncs.com/api/v2/apps/claude-code-proxy'
+        api_base_url: 'https://dashscope.aliyuncs.com/apps/anthropic'
       }
     },
     modelscope: {
       anthropic: {
         api_base_url: 'https://api-inference.modelscope.cn'
+      }
+    },
+    minimax: {
+      anthropic: {
+        api_base_url: 'https://api.minimaxi.com/anthropic'
+      }
+    },
+    '302ai': {
+      anthropic: {
+        api_base_url: 'https://api.302.ai'
       }
     }
   }
@@ -125,7 +148,8 @@ export const generateToolEnvironment = ({
 
   switch (tool) {
     case codeTools.claudeCode:
-      env.ANTHROPIC_BASE_URL = getCodeToolsApiBaseUrl(model, 'anthropic') || modelProvider.apiHost
+      env.ANTHROPIC_BASE_URL =
+        getCodeToolsApiBaseUrl(model, 'anthropic') || modelProvider.anthropicApiHost || modelProvider.apiHost
       env.ANTHROPIC_MODEL = model.id
       if (modelProvider.type === 'anthropic') {
         env.ANTHROPIC_API_KEY = apiKey
@@ -167,10 +191,6 @@ export const generateToolEnvironment = ({
   }
 
   return env
-}
-
-export const getClaudeSupportedProviders = (providers: Provider[]) => {
-  return providers.filter((p) => p.type === 'anthropic' || CLAUDE_SUPPORTED_PROVIDERS.includes(p.id))
 }
 
 export { default } from './CodeToolsPage'

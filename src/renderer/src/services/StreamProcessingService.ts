@@ -34,6 +34,10 @@ export interface StreamProcessorCallbacks {
   onLLMWebSearchInProgress?: () => void
   // LLM Web search complete
   onLLMWebSearchComplete?: (llmWebSearchResult: WebSearchResponse) => void
+  // Get citation block ID
+  getCitationBlockId?: () => string | null
+  // Set citation block ID
+  setCitationBlockId?: (blockId: string) => void
   // Image generation chunk received
   onImageCreated?: () => void
   onImageDelta?: (imageData: GenerateImageResponse) => void
@@ -46,6 +50,8 @@ export interface StreamProcessorCallbacks {
   onVideoSearched?: (video?: { type: 'url' | 'path'; content: string }, metadata?: Record<string, any>) => void
   // Called when a block is created
   onBlockCreated?: () => void
+  // Called when raw data is received (e.g., session_id updates from Agent SDK)
+  onRawData?: (content: unknown, metadata?: Record<string, any>) => void
 }
 
 // Function to create a stream processor instance
@@ -145,6 +151,10 @@ export function createStreamProcessor(callbacks: StreamProcessorCallbacks = {}) 
         }
         case ChunkType.BLOCK_CREATED: {
           if (callbacks.onBlockCreated) callbacks.onBlockCreated()
+          break
+        }
+        case ChunkType.RAW: {
+          if (callbacks.onRawData) callbacks.onRawData(data.content, data.metadata)
           break
         }
         default: {

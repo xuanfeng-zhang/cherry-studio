@@ -1,9 +1,11 @@
 import { loggerService } from '@logger'
 import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
-import { RichEditorRef } from '@renderer/components/RichEditor/types'
+import type { CodeEditorHandles } from '@renderer/components/CodeEditor'
+import type { RichEditorRef } from '@renderer/components/RichEditor/types'
 import { useActiveNode, useFileContent, useFileContentSync } from '@renderer/hooks/useNotesQuery'
 import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { useShowWorkspace } from '@renderer/hooks/useShowWorkspace'
+import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import {
   addDir,
   addNote,
@@ -35,11 +37,13 @@ import {
   setSortType,
   setStarredPaths
 } from '@renderer/store/note'
-import { NotesSortType, NotesTreeNode } from '@renderer/types/note'
-import { FileChangeEvent } from '@shared/config/types'
+import type { NotesSortType, NotesTreeNode } from '@renderer/types/note'
+import type { FileChangeEvent } from '@shared/config/types'
+import { message } from 'antd'
 import { debounce } from 'lodash'
 import { AnimatePresence, motion } from 'motion/react'
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { FC } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -51,6 +55,7 @@ const logger = loggerService.withContext('NotesPage')
 
 const NotesPage: FC = () => {
   const editorRef = useRef<RichEditorRef>(null)
+  const codeEditorRef = useRef<CodeEditorHandles>(null)
   const { t } = useTranslation()
   const { showWorkspace } = useShowWorkspace()
   const dispatch = useAppDispatch()
@@ -76,6 +81,7 @@ const NotesPage: FC = () => {
   const lastFilePathRef = useRef<string | undefined>(undefined)
   const isRenamingRef = useRef(false)
   const isCreatingNoteRef = useRef(false)
+  const pendingScrollRef = useRef<{ lineNumber: number; lineContent?: string } | null>(null)
 
   const activeFilePathRef = useRef<string | undefined>(activeFilePath)
   const currentContentRef = useRef(currentContent)
@@ -241,6 +247,43 @@ const NotesPage: FC = () => {
         updateNotesPath(defaultPath)
         return
       }
+
+      // 验证路径是否有效（处理跨平台恢复场景）
+      try {
+        // 获取当前平台的默认路径
+        const info = await window.api.getAppInfo()
+        const defaultPath = info.notesPath
+
+        // 如果当前路径就是默认路径，跳过验证（默认路径始终有效）
+        if (notesPath === defaultPath) {
+          return
+        }
+
+        const isValid = await window.api.file.validateNotesDirectory(notesPath)
+        if (!isValid) {
+          logger.warn('Invalid notes path detected, resetting to default', { path: notesPath })
+
+          // 重置为默认路径
+          updateNotesPath(defaultPath)
+
+          // 检查默认路径下是否有笔记文件
+          try {
+            const tree = await window.api.file.getDirectoryStructure(defaultPath)
+            if (!tree || tree.length === 0) {
+              // 默认目录为空，提示用户需要迁移文件
+              message.warning({
+                content: t('notes.crossPlatformRestoreWarning', { path: defaultPath }),
+                duration: 10
+              })
+            }
+          } catch (error) {
+            // 目录不存在或读取失败，会由 FileStorage 自动创建
+            logger.debug('Default notes directory will be created', { error })
+          }
+        }
+      } catch (error) {
+        logger.error('Failed to validate notes path:', error as Error)
+      }
     }
 
     initialize()
@@ -286,6 +329,16 @@ const NotesPage: FC = () => {
               const activePath = activeFilePathRef.current
               if (activePath && normalizePathValue(activePath) === normalizedEventPath) {
                 invalidateFileContentRef.current?.(normalizedEventPath)
+              }
+              break
+            }
+
+            case 'refresh': {
+              // 批量操作完成后的单次刷新
+              logger.debug('Received refresh event, triggering tree refresh')
+              const refresh = refreshTreeRef.current
+              if (refresh) {
+                await refresh()
               }
               break
             }
@@ -365,6 +418,32 @@ const NotesPage: FC = () => {
       editor.setMarkdown(currentContent)
     }
   }, [currentContent, activeFilePath])
+
+  // Execute pending scroll after file switch
+  useEffect(() => {
+    if (!pendingScrollRef.current || !currentContent) return
+
+    const { lineNumber, lineContent } = pendingScrollRef.current
+    pendingScrollRef.current = null
+
+    // Wait for DOM to update before scrolling
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const codeEditor = codeEditorRef.current
+        const richEditor = editorRef.current
+
+        try {
+          if (codeEditor?.scrollToLine) {
+            codeEditor.scrollToLine(lineNumber, { highlight: true })
+          } else if (richEditor?.scrollToLine) {
+            richEditor.scrollToLine(lineNumber, { highlight: true, lineContent })
+          }
+        } catch (error) {
+          logger.error('Failed to execute pending scroll:', error as Error)
+        }
+      })
+    })
+  }, [activeFilePath, currentContent])
 
   // 切换文件时的清理工作
   useEffect(() => {
@@ -590,7 +669,27 @@ const NotesPage: FC = () => {
           throw new Error('No folder path selected')
         }
 
-        const result = await uploadNotes(files, targetFolderPath)
+        // Validate uploadNotes function is available
+        if (typeof uploadNotes !== 'function') {
+          logger.error('uploadNotes function is not available', { uploadNotes })
+          window.toast.error(t('notes.upload_failed'))
+          return
+        }
+
+        let result: Awaited<ReturnType<typeof uploadNotes>>
+        try {
+          result = await uploadNotes(files, targetFolderPath)
+        } catch (uploadError) {
+          logger.error('Upload operation failed:', uploadError as Error)
+          throw uploadError
+        }
+
+        // Validate result object
+        if (!result || typeof result !== 'object') {
+          logger.error('Invalid upload result:', { result })
+          window.toast.error(t('notes.upload_failed'))
+          return
+        }
 
         // 检查上传结果
         if (result.fileCount === 0) {
@@ -686,10 +785,17 @@ const NotesPage: FC = () => {
         const normalizedActivePath = activeFilePath ? normalizePathValue(activeFilePath) : undefined
         if (normalizedActivePath) {
           if (normalizedActivePath === sourceNode.externalPath) {
+            // Cancel debounced save to prevent saving to old path
+            debouncedSaveRef.current?.cancel()
+            lastFilePathRef.current = destinationPath
             dispatch(setActiveFilePath(destinationPath))
           } else if (sourceNode.type === 'folder' && normalizedActivePath.startsWith(`${sourceNode.externalPath}/`)) {
             const suffix = normalizedActivePath.slice(sourceNode.externalPath.length)
-            dispatch(setActiveFilePath(`${destinationPath}${suffix}`))
+            const newActivePath = `${destinationPath}${suffix}`
+            // Cancel debounced save to prevent saving to old path
+            debouncedSaveRef.current?.cancel()
+            lastFilePathRef.current = newActivePath
+            dispatch(setActiveFilePath(newActivePath))
           }
         }
 
@@ -755,6 +861,53 @@ const NotesPage: FC = () => {
     }
   }, [currentContent, settings.defaultEditMode])
 
+  // Listen for external requests to locate a specific line in a note
+  useEffect(() => {
+    const handleLocateNoteLine = ({
+      noteId,
+      lineNumber,
+      lineContent
+    }: {
+      noteId: string
+      lineNumber: number
+      lineContent?: string
+    }) => {
+      const targetNode = findNode(notesTree, noteId)
+
+      if (!targetNode || targetNode.type !== 'file') {
+        logger.warn('Target note not found or not a file', { noteId })
+        return
+      }
+
+      const needsSwitchFile = targetNode.externalPath !== activeFilePath
+
+      if (needsSwitchFile) {
+        // switch to target note first then scroll to line
+        pendingScrollRef.current = { lineNumber, lineContent }
+        dispatch(setActiveFilePath(targetNode.externalPath))
+        invalidateFileContent(targetNode.externalPath)
+      } else {
+        const richEditor = editorRef.current
+        const codeEditor = codeEditorRef.current
+
+        try {
+          if (codeEditor?.scrollToLine) {
+            codeEditor.scrollToLine(lineNumber, { highlight: true })
+          } else if (richEditor?.scrollToLine) {
+            richEditor.scrollToLine(lineNumber, { highlight: true, lineContent })
+          }
+        } catch (error) {
+          logger.error('Failed to scroll to line:', error as Error)
+        }
+      }
+    }
+
+    const unsubscribe = EventEmitter.on(EVENT_NAMES.LOCATE_NOTE_LINE, handleLocateNoteLine)
+    return () => {
+      unsubscribe()
+    }
+  }, [activeNode?.id, activeFilePath, notesTree, dispatch, invalidateFileContent])
+
   return (
     <Container id="notes-page">
       <Navbar>
@@ -800,6 +953,7 @@ const NotesPage: FC = () => {
             tokenCount={tokenCount}
             onMarkdownChange={handleMarkdownChange}
             editorRef={editorRef}
+            codeEditorRef={codeEditorRef}
           />
         </EditorWrapper>
       </ContentContainer>

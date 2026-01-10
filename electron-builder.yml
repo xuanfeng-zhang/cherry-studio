@@ -9,6 +9,7 @@ electronLanguages:
   - zh_CN # for macOS
   - zh_TW # for macOS
   - en # for macOS
+  - de
 directories:
   buildResources: build
 
@@ -20,11 +21,19 @@ files:
   - "**/*"
   - "!**/{.vscode,.yarn,.yarn-lock,.github,.cursorrules,.prettierrc}"
   - "!electron.vite.config.{js,ts,mjs,cjs}}"
+  - "!.*"
+  - "!components.json"
   - "!**/{.eslintignore,.eslintrc.js,.eslintrc.json,.eslintcache,root.eslint.config.js,eslint.config.js,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,eslint.config.mjs,dev-app-update.yml,CHANGELOG.md,README.md,biome.jsonc}"
   - "!**/{.env,.env.*,.npmrc,pnpm-lock.yaml}"
   - "!**/{tsconfig.json,tsconfig.tsbuildinfo,tsconfig.node.json,tsconfig.web.json}"
   - "!**/{.editorconfig,.jekyll-metadata}"
   - "!src"
+  - "!config"
+  - "!patches"
+  - "!app-upgrade-config.json"
+  - "!**/node_modules/**/*.cpp"
+  - "!**/node_modules/node-addon-api/**"
+  - "!**/node_modules/prebuild-install/**"
   - "!scripts"
   - "!local"
   - "!docs"
@@ -63,6 +72,12 @@ asarUnpack:
   - resources/**
   - "**/*.{metal,exp,lib}"
   - "node_modules/@img/sharp-libvips-*/**"
+
+# copy from node_modules/claude-code-plugins/plugins to resources/data/claude-code-pluginso
+extraResources:
+  - from: "./node_modules/claude-code-plugins/plugins/"
+    to: "claude-code-plugins"
+
 win:
   executableName: Cherry Studio
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
@@ -81,6 +96,7 @@ nsis:
   oneClick: false
   include: build/nsis-installer.nsh
   buildUniversalInstaller: false
+  differentialPackage: false
 portable:
   artifactName: ${productName}-${version}-${arch}-portable.${ext}
   buildUniversalInstaller: false
@@ -88,7 +104,6 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
   notarize: false
   artifactName: ${productName}-${version}-${arch}.${ext}
-  minimumSystemVersion: "20.1.0" # 最低支持 macOS 11.0
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -97,6 +112,8 @@ mac:
   target:
     - target: dmg
     - target: zip
+dmg:
+  writeUpdateInfo: false
 linux:
   artifactName: ${productName}-${version}-${arch}.${ext}
   target:
@@ -125,18 +142,37 @@ afterSign: scripts/notarize.js
 artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
-    What's New in v1.6.4
+    <!--LANG:en-->
+    Cherry Studio 1.7.10 - New Features & Bug Fixes
 
-    Features:
-    - Providers: add CherryIN provider
-    - Notes: Add right-click context menu to create notes and folders
-    - Mini App: Add search functionality in mini app page
-    - Update Dialog: Add updating dialog in renderer process
-    - Mini App: Remove some mini apps
+    ✨ New Features
+    - [MCP] Add MCP Hub with Auto mode for intelligent multi-server tool orchestration
 
-    Bug Fixes:
-    - Fix reasoning block insertion order - now inserts before content block
-    - Fix knowledge base deletion and web search RAG errors
-    - Fix Qwen model URL configuration
-    - Fix topic tags dropdown menu overflow issue
+    🐛 Bug Fixes
+    - [Search] Fix Bing, Baidu, and Google search results not retrieving
+    - [Chat] Fix reasoning process not displaying correctly for some proxy models
+    - [Chat] Fix duplicate loading spinners on action buttons
+    - [Editor] Fix paragraph handle and plus button not clickable
+    - [Drawing] Fix TokenFlux models not showing in drawing panel
+    - [Translate] Fix translation stalling after initialization
+    - [Error] Fix app freeze when viewing error details with large images
+    - [Notes] Fix folder overlay blocking webview preview
+    - [Chat] Fix thinking time display when stopping generation
 
+    <!--LANG:zh-CN-->
+    Cherry Studio 1.7.10 - 新功能与问题修复
+
+    ✨ 新功能
+    - [MCP] 新增 MCP Hub 智能模式，可自动管理和调用多个 MCP 服务器工具
+
+    🐛 问题修复
+    - [搜索] 修复必应、百度、谷歌搜索无法获取结果的问题
+    - [对话] 修复部分代理模型的推理过程无法正确显示的问题
+    - [对话] 修复操作按钮重复显示加载状态的问题
+    - [编辑器] 修复段落手柄和加号按钮无法点击的问题
+    - [绘图] 修复 TokenFlux 模型在绘图面板不显示的问题
+    - [翻译] 修复翻译功能初始化后卡住的问题
+    - [错误] 修复查看包含大图片的错误详情时应用卡死的问题
+    - [笔记] 修复文件夹遮挡网页预览的问题
+    - [对话] 修复停止生成时思考时间显示问题
+    <!--LANG:END-->

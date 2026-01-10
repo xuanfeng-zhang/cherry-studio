@@ -4,10 +4,15 @@
  */
 
 import { loggerService } from '@logger'
-import { AISDKWebSearchResult, MCPTool, WebSearchResults, WebSearchSource } from '@renderer/types'
-import { Chunk, ChunkType } from '@renderer/types/chunk'
+import type { AISDKWebSearchResult, MCPTool, WebSearchResults } from '@renderer/types'
+import { WebSearchSource } from '@renderer/types'
+import type { Chunk } from '@renderer/types/chunk'
+import { ChunkType } from '@renderer/types/chunk'
+import { ProviderSpecificError } from '@renderer/types/provider-specific-error'
+import { formatErrorMessage } from '@renderer/utils/error'
 import { convertLinks, flushLinkConverterBuffer } from '@renderer/utils/linkConverter'
-import type { TextStreamPart, ToolSet } from 'ai'
+import type { ClaudeCodeRawValue } from '@shared/agents/claudecode/types'
+import { AISDKError, type TextStreamPart, type ToolSet } from 'ai'
 
 import { ToolCallChunkHandler } from './handleToolCallChunk'
 
@@ -22,18 +27,25 @@ export class AiSdkToChunkAdapter {
   private accumulate: boolean | undefined
   private isFirstChunk = true
   private enableWebSearch: boolean = false
+  private onSessionUpdate?: (sessionId: string) => void
   private responseStartTimestamp: number | null = null
   private firstTokenTimestamp: number | null = null
+  private hasTextContent = false
+  private getSessionWasCleared?: () => boolean
 
   constructor(
     private onChunk: (chunk: Chunk) => void,
     mcpTools: MCPTool[] = [],
     accumulate?: boolean,
-    enableWebSearch?: boolean
+    enableWebSearch?: boolean,
+    onSessionUpdate?: (sessionId: string) => void,
+    getSessionWasCleared?: () => boolean
   ) {
     this.toolCallHandler = new ToolCallChunkHandler(onChunk, mcpTools)
     this.accumulate = accumulate
     this.enableWebSearch = enableWebSearch || false
+    this.onSessionUpdate = onSessionUpdate
+    this.getSessionWasCleared = getSessionWasCleared
   }
 
   private markFirstTokenIfNeeded() {
@@ -76,8 +88,9 @@ export class AiSdkToChunkAdapter {
     }
     this.resetTimingState()
     this.responseStartTimestamp = Date.now()
-    // Reset link converter state at the start of stream
+    // Reset state at the start of stream
     this.isFirstChunk = true
+    this.hasTextContent = false
 
     try {
       while (true) {
@@ -108,6 +121,21 @@ export class AiSdkToChunkAdapter {
   }
 
   /**
+   * 如果有累积的思考内容，发送 THINKING_COMPLETE chunk 并清空
+   * @param final 包含 reasoningContent 的状态对象
+   * @returns 是否发送了 THINKING_COMPLETE chunk
+   */
+  private emitThinkingCompleteIfNeeded(final: { reasoningContent: string; [key: string]: any }) {
+    if (final.reasoningContent) {
+      this.onChunk({
+        type: ChunkType.THINKING_COMPLETE,
+        text: final.reasoningContent
+      })
+      final.reasoningContent = ''
+    }
+  }
+
+  /**
    * 转换 AI SDK chunk 为 Cherry Studio chunk 并调用回调
    * @param chunk AI SDK 的 chunk 数据
    */
@@ -117,13 +145,30 @@ export class AiSdkToChunkAdapter {
   ) {
     logger.silly(`AI SDK chunk type: ${chunk.type}`, chunk)
     switch (chunk.type) {
+      case 'raw': {
+        const agentRawMessage = chunk.rawValue as ClaudeCodeRawValue
+        if (agentRawMessage.type === 'init' && agentRawMessage.session_id) {
+          this.onSessionUpdate?.(agentRawMessage.session_id)
+        } else if (agentRawMessage.type === 'compact' && agentRawMessage.session_id) {
+          this.onSessionUpdate?.(agentRawMessage.session_id)
+        }
+        this.onChunk({
+          type: ChunkType.RAW,
+          content: agentRawMessage
+        })
+        break
+      }
       // === 文本相关事件 ===
       case 'text-start':
+        // 如果有未完成的思考内容，先生成 THINKING_COMPLETE
+        // 这处理了某些提供商不发送 reasoning-end 事件的情况
+        this.emitThinkingCompleteIfNeeded(final)
         this.onChunk({
           type: ChunkType.TEXT_START
         })
         break
       case 'text-delta': {
+        this.hasTextContent = true
         const processedText = chunk.text || ''
         let finalText: string
 
@@ -188,11 +233,7 @@ export class AiSdkToChunkAdapter {
         })
         break
       case 'reasoning-end':
-        this.onChunk({
-          type: ChunkType.THINKING_COMPLETE,
-          text: final.reasoningContent || ''
-        })
-        final.reasoningContent = ''
+        this.emitThinkingCompleteIfNeeded(final)
         break
 
       // === 工具调用相关事件（原始 AI SDK 事件，如果没有被中间件处理） ===
@@ -282,6 +323,25 @@ export class AiSdkToChunkAdapter {
       }
 
       case 'finish': {
+        // Check if session was cleared (e.g., /clear command) and no text was output
+        const sessionCleared = this.getSessionWasCleared?.() ?? false
+        if (sessionCleared && !this.hasTextContent) {
+          // Inject a "context cleared" message for the user
+          const clearMessage = '✨ Context cleared. Starting fresh conversation.'
+          this.onChunk({
+            type: ChunkType.TEXT_START
+          })
+          this.onChunk({
+            type: ChunkType.TEXT_DELTA,
+            text: clearMessage
+          })
+          this.onChunk({
+            type: ChunkType.TEXT_COMPLETE,
+            text: clearMessage
+          })
+          final.text = clearMessage
+        }
+
         const usage = {
           completion_tokens: chunk.totalUsage?.outputTokens || 0,
           prompt_tokens: chunk.totalUsage?.inputTokens || 0,
@@ -340,7 +400,13 @@ export class AiSdkToChunkAdapter {
       case 'error':
         this.onChunk({
           type: ChunkType.ERROR,
-          error: chunk.error as Record<string, any>
+          error: AISDKError.isInstance(chunk.error)
+            ? chunk.error
+            : new ProviderSpecificError({
+                message: formatErrorMessage(chunk.error),
+                provider: 'unknown',
+                cause: chunk.error
+              })
         })
         break
 

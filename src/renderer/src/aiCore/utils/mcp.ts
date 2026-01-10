@@ -1,10 +1,10 @@
 import { loggerService } from '@logger'
-import { MCPTool, MCPToolResponse } from '@renderer/types'
+import type { MCPTool, MCPToolResponse } from '@renderer/types'
 import { callMCPTool, getMcpServerByTool, isToolAutoApproved } from '@renderer/utils/mcp-tools'
 import { requestToolConfirmation } from '@renderer/utils/userConfirmation'
 import { type Tool, type ToolSet } from 'ai'
 import { jsonSchema, tool } from 'ai'
-import { JSONSchema7 } from 'json-schema'
+import type { JSONSchema7 } from 'json-schema'
 
 const logger = loggerService.withContext('MCP-utils')
 
@@ -28,7 +28,9 @@ export function convertMcpToolsToAiSdkTools(mcpTools: MCPTool[]): ToolSet {
   const tools: ToolSet = {}
 
   for (const mcpTool of mcpTools) {
-    tools[mcpTool.name] = tool({
+    // Use mcpTool.id (which includes serverId suffix) to ensure uniqueness
+    // when multiple instances of the same MCP server type are configured
+    tools[mcpTool.id] = tool({
       description: mcpTool.description || `Tool from ${mcpTool.serverName}`,
       inputSchema: jsonSchema(mcpTool.inputSchema as JSONSchema7),
       execute: async (params, { toolCallId }) => {

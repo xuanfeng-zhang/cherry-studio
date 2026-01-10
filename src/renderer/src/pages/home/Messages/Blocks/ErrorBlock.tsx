@@ -1,10 +1,11 @@
-import { Button } from '@heroui/button'
 import CodeViewer from '@renderer/components/CodeViewer'
+import { useCodeStyle } from '@renderer/context/CodeStyleProvider'
 import { useTimer } from '@renderer/hooks/useTimer'
 import { getHttpMessageLabel, getProviderLabel } from '@renderer/i18n/label'
 import { getProviderById } from '@renderer/services/ProviderService'
 import { useAppDispatch } from '@renderer/store'
 import { removeBlocksThunk } from '@renderer/store/thunk/messageThunk'
+import type { SerializedAiSdkError, SerializedAiSdkErrorUnion, SerializedError } from '@renderer/types/error'
 import {
   isSerializedAiSdkAPICallError,
   isSerializedAiSdkDownloadError,
@@ -27,20 +28,52 @@ import {
   isSerializedAiSdkTooManyEmbeddingValuesForCallError,
   isSerializedAiSdkTypeValidationError,
   isSerializedAiSdkUnsupportedFunctionalityError,
-  isSerializedError,
-  SerializedAiSdkError,
-  SerializedAiSdkErrorUnion,
-  SerializedError
+  isSerializedError
 } from '@renderer/types/error'
 import type { ErrorMessageBlock, Message } from '@renderer/types/newMessage'
 import { formatAiSdkError, formatError, safeToString } from '@renderer/utils/error'
+import { formatFileSize } from '@renderer/utils/file'
+import { KB } from '@shared/config/constant'
+import { Button } from 'antd'
 import { Alert as AntdAlert, Modal } from 'antd'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 const HTTP_ERROR_CODES = [400, 401, 403, 404, 429, 500, 502, 503, 504]
+
+const MAX_DISPLAY_SIZE = 100 * KB
+
+/**
+ * Truncate large data to prevent OOM when displaying error details.
+ * Uses simple string operations to avoid regex performance issues with large strings.
+ */
+const truncateLargeData = (
+  data: string,
+  t: (key: string) => string
+): { content: string; truncated: boolean; isLikelyBase64: boolean } => {
+  if (!data || data.length <= MAX_DISPLAY_SIZE) {
+    return { content: data, truncated: false, isLikelyBase64: false }
+  }
+
+  const isLikelyBase64 = data.includes('data:image/') && data.includes(';base64,')
+  const formattedSize = formatFileSize(data.length)
+
+  if (isLikelyBase64) {
+    return {
+      content: `[${t('error.base64DataTruncated')} ~${formattedSize}]`,
+      truncated: true,
+      isLikelyBase64: true
+    }
+  }
+
+  return {
+    content: data.slice(0, MAX_DISPLAY_SIZE) + `\n\n... [${t('error.truncated')} ${formattedSize}]`,
+    truncated: true,
+    isLikelyBase64: false
+  }
+}
 
 interface Props {
   block: ErrorMessageBlock
@@ -145,9 +178,11 @@ const MessageErrorInfo: React.FC<{ block: ErrorMessageBlock; message: Message }>
         onClick={showErrorDetail}
         style={{ cursor: 'pointer' }}
         action={
-          <Button size="sm" className="p-0" variant="light" onPress={showErrorDetail}>
-            {t('common.detail')}
-          </Button>
+          <>
+            <Button size="middle" color="default" variant="text" onClick={showErrorDetail}>
+              {t('common.detail')}
+            </Button>
+          </>
         }
       />
       <ErrorDetailModal open={showDetailModal} onClose={() => setShowDetailModal(false)} error={block.error} />
@@ -199,21 +234,22 @@ const ErrorDetailModal: React.FC<ErrorDetailModalProps> = ({ open, onClose, erro
       open={open}
       onCancel={onClose}
       footer={[
-        <Button key="copy" size="sm" variant="light" onPress={copyErrorDetails}>
+        <Button key="copy" variant="text" color="default" onClick={copyErrorDetails}>
           {t('common.copy')}
         </Button>,
-        <Button key="close" size="sm" variant="light" onPress={onClose}>
+        <Button key="close" variant="text" color={'default'} onClick={onClose}>
           {t('common.close')}
         </Button>
       ]}
-      width={600}>
+      width="80%"
+      style={{ maxWidth: '1200px', minWidth: '600px' }}>
       <ErrorDetailContainer>{renderErrorDetails(error)}</ErrorDetailContainer>
     </Modal>
   )
 }
 
 const ErrorDetailContainer = styled.div`
-  max-height: 400px;
+  max-height: 60vh;
   overflow-y: auto;
 `
 
@@ -273,6 +309,16 @@ const Alert = styled(AntdAlert)`
   }
 `
 
+const TruncatedBadge = styled.span`
+  margin-left: 8px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--color-warning);
+  background: var(--color-warning-bg, rgba(250, 173, 20, 0.1));
+  border-radius: 4px;
+`
+
 // 作为 base，渲染公共字段，应当在 ErrorDetailList 中渲染
 const BuiltinError = ({ error }: { error: SerializedError }) => {
   const { t } = useTranslation()
@@ -302,20 +348,86 @@ const BuiltinError = ({ error }: { error: SerializedError }) => {
   )
 }
 
-// 作为 base，渲染公共字段，应当在 ErrorDetailList 中渲染
+// Base component to render common fields, should be rendered inside ErrorDetailList
 const AiSdkErrorBase = ({ error }: { error: SerializedAiSdkError }) => {
   const { t } = useTranslation()
+  const { highlightCode } = useCodeStyle()
+  const [highlightedString, setHighlightedString] = useState('')
+  const [isTruncated, setIsTruncated] = useState(false)
   const cause = error.cause
+
+  useEffect(() => {
+    const highlight = async () => {
+      try {
+        // Truncate large data before processing to prevent OOM
+        const { content: truncatedCause, truncated, isLikelyBase64 } = truncateLargeData(cause || '', t)
+        setIsTruncated(truncated)
+
+        // Skip JSON parsing and syntax highlighting for base64 data
+        if (isLikelyBase64) {
+          setHighlightedString(truncatedCause)
+          return
+        }
+
+        // Try to parse and format JSON
+        try {
+          const parsed = JSON.parse(truncatedCause || '{}')
+          const formatted = JSON.stringify(parsed, null, 2)
+          const result = await highlightCode(formatted, 'json')
+          setHighlightedString(result)
+        } catch {
+          // If not valid JSON, use as-is
+          setHighlightedString(truncatedCause || '')
+        }
+      } catch {
+        setHighlightedString(cause || '')
+      }
+    }
+    const timer = setTimeout(highlight, 0)
+
+    return () => clearTimeout(timer)
+  }, [highlightCode, cause, t])
+
   return (
     <>
       <BuiltinError error={error} />
       {cause && (
         <ErrorDetailItem>
-          <ErrorDetailLabel>{t('error.cause')}:</ErrorDetailLabel>
-          <ErrorDetailValue>{error.cause}</ErrorDetailValue>
+          <ErrorDetailLabel>
+            {t('error.cause')}:{isTruncated && <TruncatedBadge>{t('error.truncatedBadge')}</TruncatedBadge>}
+          </ErrorDetailLabel>
+          <ErrorDetailValue>
+            <div
+              className="markdown [&_pre]:!bg-transparent [&_pre_span]:whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: highlightedString }}
+            />
+          </ErrorDetailValue>
         </ErrorDetailItem>
       )}
     </>
+  )
+}
+
+// Wrapper component to safely display potentially large data in CodeViewer
+const TruncatedCodeViewer: React.FC<{
+  value: string
+  label: string
+  language?: string
+}> = ({ value, label, language = 'json' }) => {
+  const { t } = useTranslation()
+  const { content, truncated, isLikelyBase64 } = truncateLargeData(value, t)
+
+  return (
+    <ErrorDetailItem>
+      <ErrorDetailLabel>
+        {label}:{truncated && <TruncatedBadge>{t('error.truncatedBadge')}</TruncatedBadge>}
+      </ErrorDetailLabel>
+      {isLikelyBase64 ? (
+        <ErrorDetailValue>{content}</ErrorDetailValue>
+      ) : (
+        <CodeViewer value={content} className="source-view" language={language} expanded />
+      )}
+    </ErrorDetailItem>
   )
 }
 
@@ -324,16 +436,8 @@ const AiSdkError = ({ error }: { error: SerializedAiSdkErrorUnion }) => {
 
   return (
     <ErrorDetailList>
-      <AiSdkErrorBase error={error} />
-
       {(isSerializedAiSdkAPICallError(error) || isSerializedAiSdkDownloadError(error)) && (
         <>
-          {error.statusCode && (
-            <ErrorDetailItem>
-              <ErrorDetailLabel>{t('error.statusCode')}:</ErrorDetailLabel>
-              <ErrorDetailValue>{error.statusCode}</ErrorDetailValue>
-            </ErrorDetailItem>
-          )}
           {error.url && (
             <ErrorDetailItem>
               <ErrorDetailLabel>{t('error.requestUrl')}:</ErrorDetailLabel>
@@ -344,19 +448,22 @@ const AiSdkError = ({ error }: { error: SerializedAiSdkErrorUnion }) => {
       )}
 
       {isSerializedAiSdkAPICallError(error) && (
+        <>{error.responseBody && <TruncatedCodeViewer value={error.responseBody} label={t('error.responseBody')} />}</>
+      )}
+
+      {(isSerializedAiSdkAPICallError(error) || isSerializedAiSdkDownloadError(error)) && (
         <>
-          {error.requestBodyValues && (
+          {error.statusCode && (
             <ErrorDetailItem>
-              <ErrorDetailLabel>{t('error.requestBodyValues')}:</ErrorDetailLabel>
-              <CodeViewer
-                value={safeToString(error.requestBodyValues)}
-                className="source-view"
-                language="json"
-                expanded
-              />
+              <ErrorDetailLabel>{t('error.statusCode')}:</ErrorDetailLabel>
+              <ErrorDetailValue>{error.statusCode}</ErrorDetailValue>
             </ErrorDetailItem>
           )}
+        </>
+      )}
 
+      {isSerializedAiSdkAPICallError(error) && (
+        <>
           {error.responseHeaders && (
             <ErrorDetailItem>
               <ErrorDetailLabel>{t('error.responseHeaders')}:</ErrorDetailLabel>
@@ -369,19 +476,11 @@ const AiSdkError = ({ error }: { error: SerializedAiSdkErrorUnion }) => {
             </ErrorDetailItem>
           )}
 
-          {error.responseBody && (
-            <ErrorDetailItem>
-              <ErrorDetailLabel>{t('error.responseBody')}:</ErrorDetailLabel>
-              <CodeViewer value={error.responseBody} className="source-view" language="json" expanded />
-            </ErrorDetailItem>
+          {error.requestBodyValues && (
+            <TruncatedCodeViewer value={safeToString(error.requestBodyValues)} label={t('error.requestBodyValues')} />
           )}
 
-          {error.data && (
-            <ErrorDetailItem>
-              <ErrorDetailLabel>{t('error.data')}:</ErrorDetailLabel>
-              <CodeViewer value={safeToString(error.data)} className="source-view" language="json" expanded />
-            </ErrorDetailItem>
-          )}
+          {error.data && <TruncatedCodeViewer value={safeToString(error.data)} label={t('error.data')} />}
         </>
       )}
 
@@ -604,6 +703,8 @@ const AiSdkError = ({ error }: { error: SerializedAiSdkErrorUnion }) => {
           <ErrorDetailValue>{error.functionality}</ErrorDetailValue>
         </ErrorDetailItem>
       )}
+
+      <AiSdkErrorBase error={error} />
     </ErrorDetailList>
   )
 }

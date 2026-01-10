@@ -1,8 +1,9 @@
-import { WebSearchProvider } from '@renderer/types'
+import type { WebSearchProvider } from '@renderer/types'
 
-import BaseWebSearchProvider from './BaseWebSearchProvider'
+import type BaseWebSearchProvider from './BaseWebSearchProvider'
 import BochaProvider from './BochaProvider'
 import DefaultProvider from './DefaultProvider'
+import ExaMcpProvider from './ExaMcpProvider'
 import ExaProvider from './ExaProvider'
 import LocalBaiduProvider from './LocalBaiduProvider'
 import LocalBingProvider from './LocalBingProvider'
@@ -24,6 +25,8 @@ export default class WebSearchProviderFactory {
         return new SearxngProvider(provider)
       case 'exa':
         return new ExaProvider(provider)
+      case 'exa-mcp':
+        return new ExaMcpProvider(provider)
       case 'local-google':
         return new LocalGoogleProvider(provider)
       case 'local-baidu':

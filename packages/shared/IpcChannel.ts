@@ -41,6 +41,7 @@ export enum IpcChannel {
   App_SetFullScreen = 'app:set-full-screen',
   App_IsFullScreen = 'app:is-full-screen',
   App_GetSystemFonts = 'app:get-system-fonts',
+  APP_CrashRenderProcess = 'app:crash-render-process',
 
   App_MacIsProcessTrusted = 'app:mac-is-process-trusted',
   App_MacRequestProcessTrust = 'app:mac-request-process-trust',
@@ -53,6 +54,9 @@ export enum IpcChannel {
 
   Webview_SetOpenLinkExternal = 'webview:set-open-link-external',
   Webview_SetSpellCheckEnabled = 'webview:set-spell-check-enabled',
+  Webview_SearchHotkey = 'webview:search-hotkey',
+  Webview_PrintToPDF = 'webview:print-to-pdf',
+  Webview_SaveAsHTML = 'webview:save-as-html',
 
   // Open
   Open_Path = 'open:path',
@@ -88,8 +92,18 @@ export enum IpcChannel {
   Mcp_AbortTool = 'mcp:abort-tool',
   Mcp_GetServerVersion = 'mcp:get-server-version',
   Mcp_Progress = 'mcp:progress',
+  Mcp_GetServerLogs = 'mcp:get-server-logs',
+  Mcp_ServerLog = 'mcp:server-log',
   // Python
   Python_Execute = 'python:execute',
+
+  // agent messages
+  AgentMessage_PersistExchange = 'agent-message:persist-exchange',
+  AgentMessage_GetHistory = 'agent-message:get-history',
+
+  AgentToolPermission_Request = 'agent-tool-permission:request',
+  AgentToolPermission_Response = 'agent-tool-permission:response',
+  AgentToolPermission_Result = 'agent-tool-permission:result',
 
   //copilot
   Copilot_GetAuthMessage = 'copilot:get-auth-message',
@@ -133,6 +147,7 @@ export enum IpcChannel {
   Windows_Close = 'window:close',
   Windows_IsMaximized = 'window:is-maximized',
   Windows_MaximizedChanged = 'window:maximized-changed',
+  Windows_NavigateToAbout = 'window:navigate-to-about',
 
   KnowledgeBase_Create = 'knowledge-base:create',
   KnowledgeBase_Reset = 'knowledge-base:reset',
@@ -179,11 +194,16 @@ export enum IpcChannel {
   Fs_ReadText = 'fs:readText',
   File_OpenWithRelativePath = 'file:openWithRelativePath',
   File_IsTextFile = 'file:isTextFile',
+  File_ListDirectory = 'file:listDirectory',
   File_GetDirectoryStructure = 'file:getDirectoryStructure',
   File_CheckFileName = 'file:checkFileName',
   File_ValidateNotesDirectory = 'file:validateNotesDirectory',
   File_StartWatcher = 'file:startWatcher',
   File_StopWatcher = 'file:stopWatcher',
+  File_PauseWatcher = 'file:pauseWatcher',
+  File_ResumeWatcher = 'file:resumeWatcher',
+  File_BatchUploadMarkdown = 'file:batchUploadMarkdown',
+  File_ShowInFolder = 'file:showInFolder',
 
   // file service
   FileService_Upload = 'file-service:upload',
@@ -213,6 +233,8 @@ export enum IpcChannel {
   Backup_ListS3Files = 'backup:listS3Files',
   Backup_DeleteS3File = 'backup:deleteS3File',
   Backup_CheckS3Connection = 'backup:checkS3Connection',
+  Backup_CreateLanTransferBackup = 'backup:createLanTransferBackup',
+  Backup_DeleteTempBackup = 'backup:deleteTempBackup',
 
   // zip
   Zip_Compress = 'zip:compress',
@@ -222,6 +244,10 @@ export enum IpcChannel {
   System_GetDeviceType = 'system:getDeviceType',
   System_GetHostname = 'system:getHostname',
   System_GetCpuName = 'system:getCpuName',
+  System_CheckGitBash = 'system:checkGitBash',
+  System_GetGitBashPath = 'system:getGitBashPath',
+  System_GetGitBashPathInfo = 'system:getGitBashPathInfo',
+  System_SetGitBashPath = 'system:setGitBashPath',
 
   // DevTools
   System_ToggleDevTools = 'system:toggleDevTools',
@@ -276,6 +302,8 @@ export enum IpcChannel {
   Selection_ActionWindowClose = 'selection:action-window-close',
   Selection_ActionWindowMinimize = 'selection:action-window-minimize',
   Selection_ActionWindowPin = 'selection:action-window-pin',
+  // [Windows only] Electron bug workaround - can be removed once https://github.com/electron/electron/issues/48554 is fixed
+  Selection_ActionWindowResize = 'selection:action-window-resize',
   Selection_ProcessAction = 'selection:process-action',
   Selection_UpdateActionData = 'selection:update-action-data',
 
@@ -290,6 +318,7 @@ export enum IpcChannel {
   Memory_DeleteUser = 'memory:delete-user',
   Memory_DeleteAllMemoriesForUser = 'memory:delete-all-memories-for-user',
   Memory_GetUsersList = 'memory:get-users-list',
+  Memory_MigrateMemoryDb = 'memory:migrate-memory-db',
 
   // TRACE
   TRACE_SAVE_DATA = 'trace:saveData',
@@ -311,6 +340,8 @@ export enum IpcChannel {
   ApiServer_Stop = 'api-server:stop',
   ApiServer_Restart = 'api-server:restart',
   ApiServer_GetStatus = 'api-server:get-status',
+  ApiServer_Ready = 'api-server:ready',
+  // NOTE: This api is not be used.
   ApiServer_GetConfig = 'api-server:get-config',
 
   // Anthropic OAuth
@@ -330,8 +361,10 @@ export enum IpcChannel {
 
   // OCR
   OCR_ocr = 'ocr:ocr',
+  OCR_ListProviders = 'ocr:list-providers',
 
   // OVMS
+  Ovms_IsSupported = 'ovms:is-supported',
   Ovms_AddModel = 'ovms:add-model',
   Ovms_StopAddModel = 'ovms:stop-addmodel',
   Ovms_GetModels = 'ovms:get-models',
@@ -341,5 +374,25 @@ export enum IpcChannel {
   Ovms_StopOVMS = 'ovms:stop-ovms',
 
   // CherryAI
-  Cherryai_GetSignature = 'cherryai:get-signature'
+  Cherryai_GetSignature = 'cherryai:get-signature',
+
+  // Claude Code Plugins
+  ClaudeCodePlugin_ListAvailable = 'claudeCodePlugin:list-available',
+  ClaudeCodePlugin_Install = 'claudeCodePlugin:install',
+  ClaudeCodePlugin_Uninstall = 'claudeCodePlugin:uninstall',
+  ClaudeCodePlugin_ListInstalled = 'claudeCodePlugin:list-installed',
+  ClaudeCodePlugin_InvalidateCache = 'claudeCodePlugin:invalidate-cache',
+  ClaudeCodePlugin_ReadContent = 'claudeCodePlugin:read-content',
+  ClaudeCodePlugin_WriteContent = 'claudeCodePlugin:write-content',
+
+  // Local Transfer
+  LocalTransfer_ListServices = 'local-transfer:list',
+  LocalTransfer_StartScan = 'local-transfer:start-scan',
+  LocalTransfer_StopScan = 'local-transfer:stop-scan',
+  LocalTransfer_ServicesUpdated = 'local-transfer:services-updated',
+  LocalTransfer_Connect = 'local-transfer:connect',
+  LocalTransfer_Disconnect = 'local-transfer:disconnect',
+  LocalTransfer_ClientEvent = 'local-transfer:client-event',
+  LocalTransfer_SendFile = 'local-transfer:send-file',
+  LocalTransfer_CancelTransfer = 'local-transfer:cancel-transfer'
 }

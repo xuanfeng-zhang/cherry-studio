@@ -1,37 +1,41 @@
 import { loggerService } from '@logger'
 import {
+  getModelSupportedVerbosity,
   isFunctionCallingModel,
-  isNotSupportTemperatureAndTopP,
   isOpenAIModel,
-  isSupportFlexServiceTierModel
+  isSupportFlexServiceTierModel,
+  isSupportTemperatureModel,
+  isSupportTopPModel
 } from '@renderer/config/models'
 import { REFERENCE_PROMPT } from '@renderer/config/prompts'
-import { isSupportServiceTierProvider } from '@renderer/config/providers'
 import { getLMStudioKeepAliveTime } from '@renderer/hooks/useLMStudio'
 import { getAssistantSettings } from '@renderer/services/AssistantService'
-import {
+import type { RootState } from '@renderer/store'
+import type {
   Assistant,
-  FileTypes,
   GenerateImageParams,
-  GroqServiceTiers,
-  isGroqServiceTier,
-  isOpenAIServiceTier,
   KnowledgeReference,
   MCPCallToolResponse,
   MCPTool,
   MCPToolResponse,
   MemoryItem,
   Model,
-  OpenAIServiceTiers,
-  OpenAIVerbosity,
   Provider,
-  SystemProviderIds,
   ToolCallResponse,
   WebSearchProviderResponse,
   WebSearchResponse
 } from '@renderer/types'
-import { Message } from '@renderer/types/newMessage'
 import {
+  FileTypes,
+  GroqServiceTiers,
+  isGroqServiceTier,
+  isOpenAIServiceTier,
+  OpenAIServiceTiers,
+  SystemProviderIds
+} from '@renderer/types'
+import type { OpenAIVerbosity } from '@renderer/types/aiCoreTypes'
+import type { Message } from '@renderer/types/newMessage'
+import type {
   RequestOptions,
   SdkInstance,
   SdkMessageParam,
@@ -45,12 +49,13 @@ import {
 import { isJSON, parseJSON } from '@renderer/utils'
 import { addAbortController, removeAbortController } from '@renderer/utils/abortController'
 import { findFileBlocks, getMainTextContent } from '@renderer/utils/messageUtils/find'
+import { isSupportServiceTierProvider } from '@renderer/utils/provider'
 import { defaultTimeout } from '@shared/config/constant'
 import { defaultAppHeaders } from '@shared/utils'
 import { isEmpty } from 'lodash'
 
-import { CompletionsContext } from '../middleware/types'
-import { ApiClient, RequestTransformer, ResponseChunkTransformer } from './types'
+import type { CompletionsContext } from '../middleware/types'
+import type { ApiClient, RequestTransformer, ResponseChunkTransformer } from './types'
 
 const logger = loggerService.withContext('BaseApiClient')
 
@@ -70,13 +75,19 @@ export abstract class BaseApiClient<
 {
   public provider: Provider
   protected host: string
-  protected apiKey: string
   protected sdkInstance?: TSdkInstance
 
   constructor(provider: Provider) {
     this.provider = provider
     this.host = this.getBaseURL()
-    this.apiKey = this.getApiKey()
+  }
+
+  /**
+   * Get the current API key with rotation support
+   * This getter ensures API keys rotate on each access when multiple keys are configured
+   */
+  protected get apiKey(): string {
+    return this.getApiKey()
   }
 
   /**
@@ -190,7 +201,7 @@ export abstract class BaseApiClient<
   }
 
   public getTemperature(assistant: Assistant, model: Model): number | undefined {
-    if (isNotSupportTemperatureAndTopP(model)) {
+    if (!isSupportTemperatureModel(model)) {
       return undefined
     }
     const assistantSettings = getAssistantSettings(assistant)
@@ -198,7 +209,7 @@ export abstract class BaseApiClient<
   }
 
   public getTopP(assistant: Assistant, model: Model): number | undefined {
-    if (isNotSupportTemperatureAndTopP(model)) {
+    if (!isSupportTopPModel(model)) {
       return undefined
     }
     const assistantSettings = getAssistantSettings(assistant)
@@ -234,19 +245,22 @@ export abstract class BaseApiClient<
     return serviceTierSetting
   }
 
-  protected getVerbosity(): OpenAIVerbosity {
+  protected getVerbosity(model?: Model): OpenAIVerbosity {
     try {
-      const state = window.store?.getState()
+      const state = window.store?.getState() as RootState
       const verbosity = state?.settings?.openAI?.verbosity
 
-      if (verbosity && ['low', 'medium', 'high'].includes(verbosity)) {
-        return verbosity
+      // If model is provided, check if the verbosity is supported by the model
+      if (model) {
+        const supportedVerbosity = getModelSupportedVerbosity(model)
+        // Use user's verbosity if supported, otherwise use the first supported option
+        return supportedVerbosity.includes(verbosity) ? verbosity : supportedVerbosity[0]
       }
+      return verbosity
     } catch (error) {
-      logger.warn('Failed to get verbosity from state:', error as Error)
+      logger.warn('Failed to get verbosity from state. Fallback to undefined.', error as Error)
+      return undefined
     }
-
-    return 'medium'
   }
 
   protected getTimeout(model: Model) {
@@ -390,6 +404,9 @@ export abstract class BaseApiClient<
         if (!param.name?.trim()) {
           return acc
         }
+        // Parse JSON type parameters (Legacy API clients)
+        // Related: src/renderer/src/pages/settings/AssistantSettings/AssistantModelSettings.tsx:133-148
+        // The UI stores JSON type params as strings, this function parses them before sending to API
         if (param.type === 'json') {
           const value = param.value as string
           if (value === 'undefined') {

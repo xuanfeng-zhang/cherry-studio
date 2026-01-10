@@ -28,7 +28,7 @@ import {
   Sparkle,
   Sun
 } from 'lucide-react'
-import { FC } from 'react'
+import type { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -89,10 +89,7 @@ const Sidebar: FC = () => {
         )}
       </MainMenusContainer>
       <Menus>
-        <Tooltip
-          title={t('settings.theme.title') + ': ' + getThemeModeLabel(settedTheme)}
-          mouseEnterDelay={0.8}
-          placement="right">
+        <Tooltip title={t('settings.theme.title') + ': ' + getThemeModeLabel(settedTheme)} placement="right">
           <Icon theme={theme} onClick={toggleTheme}>
             {settedTheme === ThemeMode.dark ? (
               <Moon size={20} className="icon" />
@@ -132,7 +129,7 @@ const MainMenus: FC = () => {
 
   const iconMap = {
     assistants: <MessageSquare size={18} className="icon" />,
-    agents: <Sparkle size={18} className="icon" />,
+    store: <Sparkle size={18} className="icon" />,
     paintings: <Palette size={18} className="icon" />,
     translate: <Languages size={18} className="icon" />,
     minapp: <LayoutGrid size={18} className="icon" />,
@@ -144,7 +141,7 @@ const MainMenus: FC = () => {
 
   const pathMap = {
     assistants: '/',
-    agents: '/agents',
+    store: '/store',
     paintings: `/paintings/${defaultPaintingProvider}`,
     translate: '/translate',
     minapp: '/apps',

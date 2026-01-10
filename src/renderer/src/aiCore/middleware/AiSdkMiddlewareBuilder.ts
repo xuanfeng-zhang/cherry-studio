@@ -1,8 +1,20 @@
-import { WebSearchPluginConfig } from '@cherrystudio/ai-core/built-in/plugins'
+import type { WebSearchPluginConfig } from '@cherrystudio/ai-core/built-in/plugins'
 import { loggerService } from '@logger'
-import type { MCPTool, Message, Model, Provider } from '@renderer/types'
+import { isGemini3Model, isSupportedThinkingTokenQwenModel } from '@renderer/config/models'
+import type { McpMode, MCPTool } from '@renderer/types'
+import { type Assistant, type Message, type Model, type Provider, SystemProviderIds } from '@renderer/types'
 import type { Chunk } from '@renderer/types/chunk'
-import { extractReasoningMiddleware, LanguageModelMiddleware, simulateStreamingMiddleware } from 'ai'
+import { isOllamaProvider, isSupportEnableThinkingProvider } from '@renderer/utils/provider'
+import type { LanguageModelMiddleware } from 'ai'
+import { extractReasoningMiddleware, simulateStreamingMiddleware } from 'ai'
+
+import { getAiSdkProviderId } from '../provider/factory'
+import { isOpenRouterGeminiGenerateImageModel } from '../utils/image'
+import { noThinkMiddleware } from './noThinkMiddleware'
+import { openrouterGenerateImageMiddleware } from './openrouterGenerateImageMiddleware'
+import { openrouterReasoningMiddleware } from './openrouterReasoningMiddleware'
+import { qwenThinkingMiddleware } from './qwenThinkingMiddleware'
+import { skipGeminiThoughtSignatureMiddleware } from './skipGeminiThoughtSignatureMiddleware'
 
 const logger = loggerService.withContext('AiSdkMiddlewareBuilder')
 
@@ -14,6 +26,7 @@ export interface AiSdkMiddlewareConfig {
   onChunk?: (chunk: Chunk) => void
   model?: Model
   provider?: Provider
+  assistant?: Assistant
   enableReasoning: boolean
   // 是否开启提示词工具调用
   isPromptToolUse: boolean
@@ -25,10 +38,13 @@ export interface AiSdkMiddlewareConfig {
   enableWebSearch: boolean
   enableGenerateImage: boolean
   enableUrlContext: boolean
+  mcpMode?: McpMode
   mcpTools?: MCPTool[]
   uiMessages?: Message[]
   // 内置搜索配置
   webSearchPluginConfig?: WebSearchPluginConfig
+  // 知识库识别开关，默认开启
+  knowledgeRecognition?: 'off' | 'on'
 }
 
 /**
@@ -167,13 +183,12 @@ function addProviderSpecificMiddlewares(builder: AiSdkMiddlewareBuilder, config:
       break
     case 'openai':
     case 'azure-openai': {
-      if (config.enableReasoning) {
-        const tagName = getReasoningTagName(config.model?.id.toLowerCase())
-        builder.add({
-          name: 'thinking-tag-extraction',
-          middleware: extractReasoningMiddleware({ tagName })
-        })
-      }
+      // 就算这里不传参数也有可能调用推理
+      const tagName = getReasoningTagName(config.model?.id.toLowerCase())
+      builder.add({
+        name: 'thinking-tag-extraction',
+        middleware: extractReasoningMiddleware({ tagName })
+      })
       break
     }
     case 'gemini':
@@ -186,20 +201,62 @@ function addProviderSpecificMiddlewares(builder: AiSdkMiddlewareBuilder, config:
       // 其他provider的通用处理
       break
   }
+
+  // OVMS+MCP's specific middleware
+  if (config.provider.id === 'ovms' && config.mcpTools && config.mcpTools.length > 0) {
+    builder.add({
+      name: 'no-think',
+      middleware: noThinkMiddleware()
+    })
+  }
+
+  if (config.provider.id === SystemProviderIds.openrouter && config.enableReasoning) {
+    builder.add({
+      name: 'openrouter-reasoning-redaction',
+      middleware: openrouterReasoningMiddleware()
+    })
+    logger.debug('Added OpenRouter reasoning redaction middleware')
+  }
 }
 
 /**
  * 添加模型特定的中间件
  */
-function addModelSpecificMiddlewares(_: AiSdkMiddlewareBuilder, config: AiSdkMiddlewareConfig): void {
-  if (!config.model) return
+function addModelSpecificMiddlewares(builder: AiSdkMiddlewareBuilder, config: AiSdkMiddlewareConfig): void {
+  if (!config.model || !config.provider) return
+
+  // Qwen models on providers that don't support enable_thinking parameter (like Ollama, LM Studio, NVIDIA)
+  // Use /think or /no_think suffix to control thinking mode
+  if (
+    config.provider &&
+    !isOllamaProvider(config.provider) &&
+    isSupportedThinkingTokenQwenModel(config.model) &&
+    !isSupportEnableThinkingProvider(config.provider)
+  ) {
+    const enableThinking = config.assistant?.settings?.reasoning_effort !== undefined
+    builder.add({
+      name: 'qwen-thinking-control',
+      middleware: qwenThinkingMiddleware(enableThinking)
+    })
+    logger.debug(`Added Qwen thinking middleware with thinking ${enableThinking ? 'enabled' : 'disabled'}`)
+  }
 
   // 可以根据模型ID或特性添加特定中间件
   // 例如：图像生成模型、多模态模型等
+  if (isOpenRouterGeminiGenerateImageModel(config.model, config.provider)) {
+    builder.add({
+      name: 'openrouter-gemini-image-generation',
+      middleware: openrouterGenerateImageMiddleware()
+    })
+  }
 
-  // 示例：某些模型需要特殊处理
-  if (config.model.id.includes('dalle') || config.model.id.includes('midjourney')) {
-    // 图像生成相关中间件
+  if (isGemini3Model(config.model)) {
+    const aiSdkId = getAiSdkProviderId(config.provider)
+    builder.add({
+      name: 'skip-gemini3-thought-signature',
+      middleware: skipGeminiThoughtSignatureMiddleware(aiSdkId)
+    })
+    logger.debug('Added skip Gemini3 thought signature middleware')
   }
 }
 

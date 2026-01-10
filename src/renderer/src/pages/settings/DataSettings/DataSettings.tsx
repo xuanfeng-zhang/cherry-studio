@@ -1,28 +1,25 @@
-import {
-  CloudServerOutlined,
-  CloudSyncOutlined,
-  FileSearchOutlined,
-  LoadingOutlined,
-  YuqueOutlined
-} from '@ant-design/icons'
+import { CloudServerOutlined, CloudSyncOutlined, LoadingOutlined, WifiOutlined, YuqueOutlined } from '@ant-design/icons'
 import DividerWithText from '@renderer/components/DividerWithText'
 import { NutstoreIcon } from '@renderer/components/Icons/NutstoreIcons'
 import { HStack } from '@renderer/components/Layout'
 import ListItem from '@renderer/components/ListItem'
 import BackupPopup from '@renderer/components/Popups/BackupPopup'
+import LanTransferPopup from '@renderer/components/Popups/LanTransferPopup'
 import RestorePopup from '@renderer/components/Popups/RestorePopup'
 import { useTheme } from '@renderer/context/ThemeProvider'
 import { useKnowledgeFiles } from '@renderer/hooks/useKnowledgeFiles'
 import { useTimer } from '@renderer/hooks/useTimer'
+import ImportMenuOptions from '@renderer/pages/settings/DataSettings/ImportMenuSettings'
 import { reset } from '@renderer/services/BackupService'
 import store, { useAppDispatch } from '@renderer/store'
 import { setSkipBackupFile as _setSkipBackupFile } from '@renderer/store/settings'
-import { AppInfo } from '@renderer/types'
+import type { AppInfo } from '@renderer/types'
 import { formatFileSize } from '@renderer/utils'
 import { occupiedDirs } from '@shared/config/constant'
-import { Button, Progress, Switch, Typography } from 'antd'
-import { FileText, FolderCog, FolderInput, FolderOpen, SaveIcon, Sparkle } from 'lucide-react'
-import { FC, useEffect, useState } from 'react'
+import { Button, Progress, Switch, Tooltip, Typography } from 'antd'
+import { FileText, FolderCog, FolderInput, FolderOpen, FolderOutput, SaveIcon } from 'lucide-react'
+import type { FC } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -35,7 +32,6 @@ import {
   SettingRowTitle,
   SettingTitle
 } from '..'
-import AgentsSubscribeUrlSettings from './AgentsSubscribeUrlSettings'
 import ExportMenuOptions from './ExportMenuSettings'
 import JoplinSettings from './JoplinSettings'
 import LocalBackupSettings from './LocalBackupSettings'
@@ -93,7 +89,13 @@ const DataSettings: FC = () => {
     { key: 'webdav', title: t('settings.data.webdav.title'), icon: <CloudSyncOutlined style={{ fontSize: 16 }} /> },
     { key: 'nutstore', title: t('settings.data.nutstore.title'), icon: <NutstoreIcon /> },
     { key: 's3', title: t('settings.data.s3.title.label'), icon: <CloudServerOutlined style={{ fontSize: 16 }} /> },
-    { key: 'divider_2', isDivider: true, text: t('settings.data.divider.export_settings') },
+    { key: 'divider_2', isDivider: true, text: t('settings.data.divider.import_settings') },
+    {
+      key: 'import_settings',
+      title: t('settings.data.import_settings.title'),
+      icon: <FolderOpen size={16} />
+    },
+    { key: 'divider_3', isDivider: true, text: t('settings.data.divider.export_settings') },
     {
       key: 'export_menu',
       title: t('settings.data.export_menu.title'),
@@ -105,7 +107,7 @@ const DataSettings: FC = () => {
       icon: <FileText size={16} />
     },
 
-    { key: 'divider_3', isDivider: true, text: t('settings.data.divider.third_party') },
+    { key: 'divider_4', isDivider: true, text: t('settings.data.divider.third_party') },
     { key: 'notion', title: t('settings.data.notion.title'), icon: <i className="iconfont icon-notion" /> },
     {
       key: 'yuque',
@@ -126,11 +128,6 @@ const DataSettings: FC = () => {
       key: 'siyuan',
       title: t('settings.data.siyuan.title'),
       icon: <SiyuanIcon />
-    },
-    {
-      key: 'agentssubscribe_url',
-      title: t('agents.settings.title'),
-      icon: <Sparkle size={16} className="icon" />
     }
   ]
 
@@ -291,10 +288,9 @@ const DataSettings: FC = () => {
         <MigrationPathRow style={{ marginTop: '20px', flexDirection: 'row', alignItems: 'center' }}>
           <Switch
             defaultChecked={shouldCopyData}
-            onChange={(checked) => {
-              shouldCopyData = checked
-            }}
+            onChange={(checked) => (shouldCopyData = checked)}
             style={{ marginRight: '8px' }}
+            title={t('settings.data.app_data.copy_data_option')}
           />
           <MigrationPathLabel style={{ fontWeight: 'normal', fontSize: '14px' }}>
             {t('settings.data.app_data.copy_data_option')}
@@ -621,6 +617,16 @@ const DataSettings: FC = () => {
               <SettingRow>
                 <SettingHelpText>{t('settings.data.backup.skip_file_data_help')}</SettingHelpText>
               </SettingRow>
+              <SettingDivider />
+              <SettingRow>
+                <SettingRowTitle>{t('settings.data.export_to_phone.title')}</SettingRowTitle>
+                <HStack gap="5px" justifyContent="space-between">
+                  <Button onClick={LanTransferPopup.show} icon={<WifiOutlined size={14} />}>
+                    {t('settings.data.export_to_phone.lan.title')}
+                  </Button>
+                </HStack>
+              </SettingRow>
+              <SettingDivider />
             </SettingGroup>
             <SettingGroup theme={theme}>
               <SettingTitle>{t('settings.data.data.title')}</SettingTitle>
@@ -633,9 +639,13 @@ const DataSettings: FC = () => {
                     onClick={() => handleOpenPath(appInfo?.appDataPath)}>
                     {appInfo?.appDataPath}
                   </PathText>
-                  <StyledIcon onClick={() => handleOpenPath(appInfo?.appDataPath)} style={{ flexShrink: 0 }} />
+                  <Tooltip title={t('settings.data.app_data.select')}>
+                    <FolderOutput onClick={handleSelectAppDataPath} style={{ cursor: 'pointer' }} size={16} />
+                  </Tooltip>
                   <HStack gap="5px" style={{ marginLeft: '8px' }}>
-                    <Button onClick={handleSelectAppDataPath}>{t('settings.data.app_data.select')}</Button>
+                    <Button onClick={() => handleOpenPath(appInfo?.appDataPath)}>
+                      {t('settings.data.app_data.open')}
+                    </Button>
                   </HStack>
                 </PathRow>
               </SettingRow>
@@ -646,7 +656,6 @@ const DataSettings: FC = () => {
                   <PathText style={{ color: 'var(--color-text-3)' }} onClick={() => handleOpenPath(appInfo?.logsPath)}>
                     {appInfo?.logsPath}
                   </PathText>
-                  <StyledIcon onClick={() => handleOpenPath(appInfo?.logsPath)} style={{ flexShrink: 0 }} />
                   <HStack gap="5px" style={{ marginLeft: '8px' }}>
                     <Button onClick={() => handleOpenPath(appInfo?.logsPath)}>
                       {t('settings.data.app_logs.button')}
@@ -686,6 +695,7 @@ const DataSettings: FC = () => {
         {menu === 'webdav' && <WebDavSettings />}
         {menu === 'nutstore' && <NutstoreSettings />}
         {menu === 's3' && <S3Settings />}
+        {menu === 'import_settings' && <ImportMenuOptions />}
         {menu === 'export_menu' && <ExportMenuOptions />}
         {menu === 'markdown_export' && <MarkdownExportSettings />}
         {menu === 'notion' && <NotionSettings />}
@@ -693,7 +703,6 @@ const DataSettings: FC = () => {
         {menu === 'joplin' && <JoplinSettings />}
         {menu === 'obsidian' && <ObsidianSettings />}
         {menu === 'siyuan' && <SiyuanSettings />}
-        {menu === 'agentssubscribe_url' && <AgentsSubscribeUrlSettings />}
         {menu === 'local_backup' && <LocalBackupSettings />}
       </SettingContainer>
     </Container>
@@ -702,16 +711,6 @@ const DataSettings: FC = () => {
 
 const Container = styled(HStack)`
   flex: 1;
-`
-
-const StyledIcon = styled(FileSearchOutlined)`
-  color: var(--color-text-2);
-  cursor: pointer;
-  transition: color 0.3s;
-
-  &:hover {
-    color: var(--color-text-1);
-  }
 `
 
 const MenuList = styled.div`

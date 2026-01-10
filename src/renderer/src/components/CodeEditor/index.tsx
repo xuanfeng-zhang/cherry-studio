@@ -1,17 +1,19 @@
 import { useCodeStyle } from '@renderer/context/CodeStyleProvider'
 import { useSettings } from '@renderer/hooks/useSettings'
-import CodeMirror, { Annotation, BasicSetupOptions, EditorView, Extension } from '@uiw/react-codemirror'
+import type { BasicSetupOptions, Extension } from '@uiw/react-codemirror'
+import CodeMirror, { Annotation, EditorView } from '@uiw/react-codemirror'
 import diff from 'fast-diff'
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { memo } from 'react'
 
-import { useBlurHandler, useHeightListener, useLanguageExtensions, useSaveKeymap } from './hooks'
+import { useBlurHandler, useHeightListener, useLanguageExtensions, useSaveKeymap, useScrollToLine } from './hooks'
 
 // 标记非用户编辑的变更
 const External = Annotation.define<boolean>()
 
 export interface CodeEditorHandles {
   save?: () => void
+  scrollToLine?: (lineNumber: number, options?: { highlight?: boolean }) => void
 }
 
 export interface CodeEditorProps {
@@ -181,8 +183,11 @@ const CodeEditor = ({
     ].flat()
   }, [extensions, langExtensions, wrapped, saveKeymapExtension, blurExtension, heightListenerExtension])
 
+  const scrollToLine = useScrollToLine(editorViewRef)
+
   useImperativeHandle(ref, () => ({
-    save: handleSave
+    save: handleSave,
+    scrollToLine
   }))
 
   return (

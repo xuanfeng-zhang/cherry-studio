@@ -1,4 +1,4 @@
-import { Express } from 'express'
+import type { Express } from 'express'
 import swaggerJSDoc from 'swagger-jsdoc'
 import swaggerUi from 'swagger-ui-express'
 
@@ -20,8 +20,8 @@ const swaggerOptions: swaggerJSDoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:23333',
-        description: 'Local development server'
+        url: '/',
+        description: 'Current server'
       }
     ],
     components: {
@@ -171,7 +171,7 @@ const swaggerOptions: swaggerJSDoc.Options = {
       }
     ]
   },
-  apis: ['./src/main/apiServer/routes/*.ts', './src/main/apiServer/app.ts']
+  apis: ['./src/main/apiServer/routes/**/*.ts', './src/main/apiServer/app.ts']
 }
 
 export function setupOpenAPIDocumentation(app: Express) {
@@ -197,10 +197,11 @@ export function setupOpenAPIDocumentation(app: Express) {
       })
     )
 
-    logger.info('OpenAPI documentation setup complete')
-    logger.info('Documentation available at /api-docs')
-    logger.info('OpenAPI spec available at /api-docs.json')
+    logger.info('OpenAPI documentation ready', {
+      docsPath: '/api-docs',
+      specPath: '/api-docs.json'
+    })
   } catch (error) {
-    logger.error('Failed to setup OpenAPI documentation:', error as Error)
+    logger.error('Failed to setup OpenAPI documentation', { error })
   }
 }

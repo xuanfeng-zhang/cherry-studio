@@ -1,18 +1,19 @@
-import { BreadcrumbItem, Breadcrumbs } from '@heroui/react'
 import { loggerService } from '@logger'
 import { NavbarCenter, NavbarHeader, NavbarRight } from '@renderer/components/app/Navbar'
 import { HStack } from '@renderer/components/Layout'
+import GeneralPopup from '@renderer/components/Popups/GeneralPopup'
 import { useActiveNode } from '@renderer/hooks/useNotesQuery'
 import { useNotesSettings } from '@renderer/hooks/useNotesSettings'
 import { useShowWorkspace } from '@renderer/hooks/useShowWorkspace'
 import { findNode } from '@renderer/services/NotesTreeService'
-import { Dropdown, Input, Tooltip } from 'antd'
+import { Breadcrumb, Dropdown, Input, Tooltip } from 'antd'
 import { t } from 'i18next'
 import { MoreHorizontal, PanelLeftClose, PanelRightClose, Star } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import { menuItems } from './MenuConfig'
+import NotesSettings from './NotesSettings'
 
 const logger = loggerService.withContext('HeaderNavbar')
 
@@ -51,6 +52,16 @@ const HeaderNavbar = ({ notesTree, getCurrentNoteContent, onToggleStar, onExpand
       window.toast.error(t('common.copy_failed'))
     }
   }, [getCurrentNoteContent])
+
+  const handleShowSettings = useCallback(() => {
+    GeneralPopup.show({
+      title: t('notes.settings.title'),
+      content: <NotesSettings />,
+      footer: null,
+      width: 600,
+      styles: { body: { padding: 0 } }
+    })
+  }, [])
 
   const handleBreadcrumbClick = useCallback(
     (item: { treePath: string; isFolder: boolean }) => {
@@ -131,6 +142,8 @@ const HeaderNavbar = ({ notesTree, getCurrentNoteContent, onToggleStar, onExpand
       onClick: () => {
         if (item.copyAction) {
           handleCopyContent()
+        } else if (item.showSettingsPopup) {
+          handleShowSettings()
         } else if (item.action) {
           item.action(settings, updateSettings)
         }
@@ -182,7 +195,7 @@ const HeaderNavbar = ({ notesTree, getCurrentNoteContent, onToggleStar, onExpand
           </Tooltip>
         )}
         {!showWorkspace && (
-          <Tooltip title={t('navbar.show_sidebar')} mouseEnterDelay={0.8}>
+          <Tooltip title={t('navbar.show_sidebar')} mouseEnterDelay={0.8} placement="right">
             <NavbarIcon onClick={handleToggleShowWorkspace}>
               <PanelRightClose size={18} />
             </NavbarIcon>
@@ -191,42 +204,43 @@ const HeaderNavbar = ({ notesTree, getCurrentNoteContent, onToggleStar, onExpand
       </HStack>
       <NavbarCenter style={{ flex: 1, minWidth: 0 }}>
         <BreadcrumbsContainer>
-          <Breadcrumbs style={{ borderRadius: 0 }}>
-            {breadcrumbItems.map((item, index) => {
+          <Breadcrumb
+            separator={'>'}
+            items={breadcrumbItems.map((item, index) => {
               const isLastItem = index === breadcrumbItems.length - 1
               const isCurrentNote = isLastItem && !item.isFolder
-
-              return (
-                <BreadcrumbItem key={item.key} isCurrent={isLastItem}>
-                  {isCurrentNote ? (
-                    <TitleInputWrapper>
-                      <TitleInput
-                        ref={titleInputRef}
-                        value={titleValue}
-                        onChange={handleTitleChange}
-                        onBlur={handleTitleBlur}
-                        onKeyDown={handleTitleKeyDown}
-                        size="small"
-                        variant="borderless"
-                        style={{
-                          fontSize: 'inherit',
-                          padding: 0,
-                          height: 'auto',
-                          lineHeight: 'inherit'
-                        }}
-                      />
-                    </TitleInputWrapper>
-                  ) : (
-                    <BreadcrumbTitle
-                      onClick={() => handleBreadcrumbClick(item)}
-                      $clickable={item.isFolder && !isLastItem}>
-                      {item.title}
-                    </BreadcrumbTitle>
-                  )}
-                </BreadcrumbItem>
-              )
-            })}
-          </Breadcrumbs>
+              return {
+                title: (
+                  <div key={item.key} className="flex">
+                    {isCurrentNote ? (
+                      <TitleInputWrapper>
+                        <TitleInput
+                          ref={titleInputRef}
+                          value={titleValue}
+                          onChange={handleTitleChange}
+                          onBlur={handleTitleBlur}
+                          onKeyDown={handleTitleKeyDown}
+                          size="small"
+                          variant="borderless"
+                          style={{
+                            fontSize: 'inherit',
+                            padding: 0,
+                            height: 'auto',
+                            lineHeight: 'inherit'
+                          }}
+                        />
+                      </TitleInputWrapper>
+                    ) : (
+                      <BreadcrumbTitle
+                        onClick={() => handleBreadcrumbClick(item)}
+                        $clickable={item.isFolder && !isLastItem}>
+                        {item.title}
+                      </BreadcrumbTitle>
+                    )}
+                  </div>
+                )
+              }
+            })}></Breadcrumb>
         </BreadcrumbsContainer>
       </NavbarCenter>
       <NavbarRight style={{ paddingRight: 0 }}>
@@ -308,7 +322,7 @@ export const StarButton = styled.div`
   transition: all 0.2s ease-in-out;
   cursor: pointer;
   svg {
-    color: inherit;
+    color: var(--color-icon);
   }
 
   &:hover {
@@ -344,13 +358,6 @@ export const BreadcrumbsContainer = styled.div`
   & li:last-child {
     flex: 1 !important;
     min-width: 0 !important;
-    max-width: none !important;
-  }
-
-  /* 覆盖 HeroUI BreadcrumbItem 的样式 */
-  & li:last-child [data-slot="item"] {
-    flex: 1 !important;
-    width: 100% !important;
     max-width: none !important;
   }
 

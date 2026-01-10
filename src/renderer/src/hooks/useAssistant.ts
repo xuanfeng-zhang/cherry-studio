@@ -25,7 +25,7 @@ import {
   updateTopics
 } from '@renderer/store/assistants'
 import { setDefaultModel, setQuickModel, setTranslateModel } from '@renderer/store/llm'
-import { Assistant, AssistantSettings, Model, ThinkingOption, Topic } from '@renderer/types'
+import type { Assistant, AssistantSettings, Model, ThinkingOption, Topic } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -123,9 +123,9 @@ export function useAssistant(id: string) {
           }
 
           updateAssistantSettings({
-            reasoning_effort: fallbackOption === 'off' ? undefined : fallbackOption,
-            reasoning_effort_cache: fallbackOption === 'off' ? undefined : fallbackOption,
-            qwenThinkMode: fallbackOption === 'off' ? undefined : true
+            reasoning_effort: fallbackOption === 'none' ? undefined : fallbackOption,
+            reasoning_effort_cache: fallbackOption === 'none' ? undefined : fallbackOption,
+            qwenThinkMode: fallbackOption === 'none' ? undefined : true
           })
         } else {
           // 对于支持的选项, 不再更新 cache.

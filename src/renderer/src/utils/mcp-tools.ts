@@ -1,14 +1,21 @@
-import { ContentBlockParam, MessageParam, ToolUnion, ToolUseBlock } from '@anthropic-ai/sdk/resources'
-import { Content, FunctionCall, Part, Tool, Type as GeminiSchemaType } from '@google/genai'
+import type { ContentBlockParam, MessageParam, ToolUnion, ToolUseBlock } from '@anthropic-ai/sdk/resources'
+import type OpenAI from '@cherrystudio/openai'
+import type {
+  ChatCompletionContentPart,
+  ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
+  ChatCompletionTool
+} from '@cherrystudio/openai/resources'
+import type { Content, FunctionCall, Part, Tool } from '@google/genai'
+import { Type as GeminiSchemaType } from '@google/genai'
 import { loggerService } from '@logger'
 import { isFunctionCallingModel, isVisionModel } from '@renderer/config/models'
 import i18n from '@renderer/i18n'
 import { currentSpan } from '@renderer/services/SpanManagerService'
 import store from '@renderer/store'
-import { addMCPServer } from '@renderer/store/mcp'
-import {
+import { addMCPServer, hubMCPServer } from '@renderer/store/mcp'
+import type {
   Assistant,
-  BuiltinMCPServerNames,
   MCPCallToolResponse,
   MCPServer,
   MCPTool,
@@ -16,18 +23,12 @@ import {
   Model,
   ToolUseResponse
 } from '@renderer/types'
+import { BuiltinMCPServerNames } from '@renderer/types'
 import type { MCPToolCompleteChunk, MCPToolInProgressChunk, MCPToolPendingChunk } from '@renderer/types/chunk'
 import { ChunkType } from '@renderer/types/chunk'
-import { AwsBedrockSdkMessageParam, AwsBedrockSdkTool, AwsBedrockSdkToolCall } from '@renderer/types/sdk'
+import type { AwsBedrockSdkMessageParam, AwsBedrockSdkTool, AwsBedrockSdkToolCall } from '@renderer/types/sdk'
 import { t } from 'i18next'
 import { nanoid } from 'nanoid'
-import OpenAI from 'openai'
-import {
-  ChatCompletionContentPart,
-  ChatCompletionMessageParam,
-  ChatCompletionMessageToolCall,
-  ChatCompletionTool
-} from 'openai/resources'
 
 import { isToolUseModeFunction } from './assistant'
 import { convertBase64ImageToAwsBedrockFormat } from './aws-bedrock-utils'
@@ -89,7 +90,8 @@ export function openAIToolsToMcpTool(
     return undefined
   }
   const tools = mcpTools.filter((mcpTool) => {
-    return mcpTool.id === toolName || mcpTool.name === toolName
+    // toolName is mcpTool.id (registered with id as function name)
+    return mcpTool.id === toolName
   })
   if (tools.length > 1) {
     logger.warn(`Multiple MCP Tools found for tool call: ${toolName}`)
@@ -108,7 +110,12 @@ export function openAIToolsToMcpTool(
 export async function callBuiltInTool(toolResponse: MCPToolResponse): Promise<MCPCallToolResponse | undefined> {
   logger.info(`[BuiltIn] Calling Built-in Tool: ${toolResponse.tool.name}`, toolResponse.tool)
 
-  if (toolResponse.tool.name === 'think') {
+  if (
+    toolResponse.tool.name === 'think' &&
+    typeof toolResponse.arguments === 'object' &&
+    toolResponse.arguments !== null &&
+    !Array.isArray(toolResponse.arguments)
+  ) {
     const thought = toolResponse.arguments?.thought
     return {
       isError: false,
@@ -129,7 +136,10 @@ export async function callMCPTool(
   topicId?: string,
   modelName?: string
 ): Promise<MCPCallToolResponse> {
-  logger.info(`Calling Tool: ${toolResponse.tool.serverName} ${toolResponse.tool.name}`, toolResponse.tool)
+  logger.info(
+    `Calling Tool: ${toolResponse.id} ${toolResponse.tool.serverName} ${toolResponse.tool.name}`,
+    toolResponse.tool
+  )
   try {
     const server = getMcpServerByTool(toolResponse.tool)
 
@@ -315,7 +325,16 @@ export function filterMCPTools(
 
 export function getMcpServerByTool(tool: MCPTool) {
   const servers = store.getState().mcp.servers
-  return servers.find((s) => s.id === tool.serverId)
+  const server = servers.find((s) => s.id === tool.serverId)
+  if (server) {
+    return server
+  }
+  // For hub server (auto mode), the server isn't in the store
+  // Return the hub server constant if the tool's serverId matches
+  if (tool.serverId === 'hub') {
+    return hubMCPServer
+  }
+  return undefined
 }
 
 export function isToolAutoApproved(tool: MCPTool, server?: MCPServer): boolean {

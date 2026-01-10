@@ -255,6 +255,12 @@ export class WindowService {
   }
 
   private setupWebContentsHandlers(mainWindow: BrowserWindow) {
+    // Fix for Electron bug where zoom resets during in-page navigation (route changes)
+    // This complements the resize-based workaround by catching navigation events
+    mainWindow.webContents.on('did-navigate-in-page', () => {
+      mainWindow.webContents.setZoomFactor(configManager.getZoomFactor())
+    })
+
     mainWindow.webContents.on('will-navigate', (event, url) => {
       if (url.includes('localhost:517')) {
         return
@@ -271,9 +277,9 @@ export class WindowService {
         'https://account.siliconflow.cn/oauth',
         'https://cloud.siliconflow.cn/bills',
         'https://cloud.siliconflow.cn/expensebill',
-        'https://aihubmix.com/token',
-        'https://aihubmix.com/topup',
-        'https://aihubmix.com/statistics',
+        'https://console.aihubmix.com/token',
+        'https://console.aihubmix.com/topup',
+        'https://console.aihubmix.com/statistics',
         'https://dash.302.ai/sso/login',
         'https://dash.302.ai/charge',
         'https://www.aiionly.com/login'
@@ -375,13 +381,16 @@ export class WindowService {
 
       mainWindow.hide()
 
-      // TODO: don't hide dock icon when close to tray
-      // will cause the cmd+h behavior not working
-      // after the electron fix the bug, we can restore this code
-      // //for mac users, should hide dock icon if close to tray
-      // if (isMac && isTrayOnClose) {
-      //   app.dock?.hide()
-      // }
+      //for mac users, should hide dock icon if close to tray
+      if (isMac && isTrayOnClose) {
+        app.dock?.hide()
+
+        mainWindow.once('show', () => {
+          //restore the window can hide by cmd+h when the window is shown again
+          // https://github.com/electron/electron/pull/47970
+          app.dock?.show()
+        })
+      }
     })
 
     mainWindow.on('closed', () => {
@@ -513,7 +522,9 @@ export class WindowService {
     miniWindowState.manage(this.miniWindow)
 
     //miniWindow should show in current desktop
-    this.miniWindow?.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+    this.miniWindow?.setVisibleOnAllWorkspaces(true, {
+      visibleOnFullScreen: true
+    })
     //make miniWindow always on top of fullscreen apps with level set
     //[mac] level higher than 'floating' will cover the pinyin input method
     this.miniWindow.setAlwaysOnTop(true, 'floating')
@@ -632,6 +643,11 @@ export class WindowService {
       return
     } else if (isMac) {
       this.miniWindow.hide()
+      const majorVersion = parseInt(process.getSystemVersion().split('.')[0], 10)
+      if (majorVersion >= 26) {
+        // on macOS 26+, the popup of the mimiWindow would not change the focus to previous application.
+        return
+      }
       if (!this.wasMainWindowFocused) {
         app.hide()
       }

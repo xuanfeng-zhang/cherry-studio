@@ -1,23 +1,37 @@
-import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
+/**
+ * @deprecated Scheduled for removal in v2.0.0
+ * --------------------------------------------------------------------------
+ * ⚠️ NOTICE: V2 DATA&UI REFACTORING (by 0xfullex)
+ * --------------------------------------------------------------------------
+ * STOP: Feature PRs affecting this file are currently BLOCKED.
+ * Only critical bug fixes are accepted during this migration phase.
+ *
+ * This file is being refactored to v2 standards.
+ * Any non-critical changes will conflict with the ongoing work.
+ *
+ * 🔗 Context & Status:
+ * - Contribution Hold: https://github.com/CherryHQ/cherry-studio/issues/10954
+ * - v2 Refactor PR   : https://github.com/CherryHQ/cherry-studio/pull/10162
+ * --------------------------------------------------------------------------
+ */
+// @ts-nocheck
+import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSelector, createSlice } from '@reduxjs/toolkit'
 import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/constant'
 import { TopicManager } from '@renderer/hooks/useTopic'
-import { getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
-import { Assistant, AssistantSettings, CategorizedTag, Model, TagCategory, Topic } from '@renderer/types'
+import { DEFAULT_ASSISTANT_SETTINGS, getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
+import type { Assistant, AssistantPreset, AssistantSettings, Model, Topic } from '@renderer/types'
 import { isEmpty, uniqBy } from 'lodash'
 
-import { RootState } from '.'
+import type { RootState } from '.'
 
 export interface AssistantsState {
   defaultAssistant: Assistant
   assistants: Assistant[]
   tagsOrder: string[]
   collapsedTags: Record<string, boolean>
-  topicTagFilter: {
-    selectedTags: string[]
-    assistantId?: string // 记录当前筛选的助手ID
-  }
-  tagCategories: TagCategory[] // 标签分类
-  categorizedTags: Record<string, CategorizedTag> // 分类标签映射 key: tagName, value: CategorizedTag
+  presets: AssistantPreset[]
+  unifiedListOrder: Array<{ type: 'agent' | 'assistant'; id: string }>
 }
 
 const initialState: AssistantsState = {
@@ -25,12 +39,8 @@ const initialState: AssistantsState = {
   assistants: [getDefaultAssistant()],
   tagsOrder: [],
   collapsedTags: {},
-  topicTagFilter: {
-    selectedTags: [],
-    assistantId: undefined
-  },
-  tagCategories: [],
-  categorizedTags: {}
+  presets: [],
+  unifiedListOrder: []
 }
 
 const assistantsSlice = createSlice({
@@ -38,13 +48,14 @@ const assistantsSlice = createSlice({
   initialState,
   reducers: {
     updateDefaultAssistant: (state, action: PayloadAction<{ assistant: Assistant }>) => {
+      // @ts-ignore ts2589
       state.defaultAssistant = action.payload.assistant
     },
     updateAssistants: (state, action: PayloadAction<Assistant[]>) => {
       state.assistants = action.payload
     },
     addAssistant: (state, action: PayloadAction<Assistant>) => {
-      state.assistants.push(action.payload)
+      state.assistants.unshift(action.payload)
     },
     insertAssistant: (state, action: PayloadAction<{ index: number; assistant: Assistant }>) => {
       const { index, assistant } = action.payload
@@ -60,6 +71,7 @@ const assistantsSlice = createSlice({
     },
     updateAssistant: (state, action: PayloadAction<Partial<Assistant> & { id: string }>) => {
       const { id, ...update } = action.payload
+      // @ts-ignore ts2589
       state.assistants = state.assistants.map((c) => (c.id === id ? { ...c, ...update } : c))
     },
     updateAssistantSettings: (
@@ -104,40 +116,8 @@ const assistantsSlice = createSlice({
         [tag]: !prev[tag]
       }
     },
-    setTopicTagFilter: (state, action: PayloadAction<{ selectedTags: string[]; assistantId: string }>) => {
-      state.topicTagFilter = {
-        selectedTags: action.payload.selectedTags,
-        assistantId: action.payload.assistantId
-      }
-    },
-    toggleTopicTagFilter: (state, action: PayloadAction<{ tag: string; assistantId: string }>) => {
-      const { tag, assistantId } = action.payload
-      const currentFilter = state.topicTagFilter
-
-      // 如果currentFilter不存在或切换到不同的助手，重置筛选
-      if (!currentFilter || currentFilter.assistantId !== assistantId) {
-        state.topicTagFilter = {
-          selectedTags: [tag],
-          assistantId
-        }
-        return
-      }
-
-      // 切换标签选中状态
-      const selectedTags = (currentFilter.selectedTags || []).includes(tag)
-        ? (currentFilter.selectedTags || []).filter((t) => t !== tag)
-        : [...(currentFilter.selectedTags || []), tag]
-
-      state.topicTagFilter = {
-        selectedTags,
-        assistantId
-      }
-    },
-    clearTopicTagFilter: (state) => {
-      state.topicTagFilter = {
-        selectedTags: [],
-        assistantId: undefined
-      }
+    setUnifiedListOrder: (state, action: PayloadAction<Array<{ type: 'agent' | 'assistant'; id: string }>>) => {
+      state.unifiedListOrder = action.payload
     },
     addTopic: (state, action: PayloadAction<{ assistantId: string; topic: Topic }>) => {
       const topic = action.payload.topic
@@ -212,73 +192,6 @@ const assistantsSlice = createSlice({
         }
       }
     },
-    // 标签分类管理
-    addTagCategory: (state, action: PayloadAction<TagCategory>) => {
-      // 确保 tagCategories 已初始化
-      if (!state.tagCategories) {
-        state.tagCategories = []
-      }
-
-      state.tagCategories.push(action.payload)
-      state.tagCategories.sort((a, b) => a.order - b.order)
-    },
-    updateTagCategory: (state, action: PayloadAction<TagCategory>) => {
-      // 确保 tagCategories 已初始化
-      if (!state.tagCategories) {
-        state.tagCategories = []
-      }
-      const index = state.tagCategories.findIndex((cat) => cat.id === action.payload.id)
-      if (index !== -1) {
-        state.tagCategories[index] = action.payload
-        state.tagCategories.sort((a, b) => a.order - b.order)
-      }
-    },
-    removeTagCategory: (state, action: PayloadAction<{ id: string }>) => {
-      // 确保 tagCategories 已初始化
-      if (!state.tagCategories) {
-        state.tagCategories = []
-      }
-      state.tagCategories = state.tagCategories.filter((cat) => cat.id !== action.payload.id)
-      // 移除分类时，将该分类下的标签设为未分类
-      if (state.categorizedTags) {
-        Object.values(state.categorizedTags).forEach((tag) => {
-          if (tag.categoryId === action.payload.id) {
-            tag.categoryId = undefined
-          }
-        })
-      }
-    },
-    updateCategorizedTag: (state, action: PayloadAction<CategorizedTag>) => {
-      // 确保 categorizedTags 已初始化
-      if (!state.categorizedTags) {
-        state.categorizedTags = {}
-      }
-      state.categorizedTags[action.payload.name] = action.payload
-    },
-    removeCategorizedTag: (state, action: PayloadAction<{ tagName: string }>) => {
-      // 确保 categorizedTags 已初始化
-      if (!state.categorizedTags) {
-        state.categorizedTags = {}
-      }
-      delete state.categorizedTags[action.payload.tagName]
-    },
-    bulkUpdateCategorizedTags: (state, action: PayloadAction<{ tags: string[]; categoryId?: string }>) => {
-      // 确保 categorizedTags 已初始化
-      if (!state.categorizedTags) {
-        state.categorizedTags = {}
-      }
-      action.payload.tags.forEach((tagName) => {
-        if (state.categorizedTags[tagName]) {
-          state.categorizedTags[tagName].categoryId = action.payload.categoryId
-        } else {
-          state.categorizedTags[tagName] = {
-            name: tagName,
-            categoryId: action.payload.categoryId,
-            usage: 0
-          }
-        }
-      })
-    },
     setModel: (state, action: PayloadAction<{ assistantId: string; model: Model }>) => {
       state.assistants = state.assistants.map((assistant) =>
         assistant.id === action.payload.assistantId
@@ -288,6 +201,43 @@ const assistantsSlice = createSlice({
             }
           : assistant
       )
+    },
+    // Assistant Presets
+    setAssistantPresets: (state, action: PayloadAction<AssistantPreset[]>) => {
+      const presets = action.payload
+      state.presets = []
+      presets.forEach((p) => {
+        state.presets.push(p)
+      })
+    },
+    addAssistantPreset: (state, action: PayloadAction<AssistantPreset>) => {
+      state.presets.push(action.payload)
+    },
+    removeAssistantPreset: (state, action: PayloadAction<{ id: string }>) => {
+      state.presets = state.presets.filter((c) => c.id !== action.payload.id)
+    },
+    updateAssistantPreset: (state, action: PayloadAction<AssistantPreset>) => {
+      const preset = action.payload
+      const index = state.presets.findIndex((a) => a.id === preset.id)
+      if (index !== -1) {
+        state.presets[index] = preset
+      }
+    },
+    updateAssistantPresetSettings: (
+      state,
+      action: PayloadAction<{ assistantId: string; settings: Partial<AssistantSettings> }>
+    ) => {
+      for (const agent of state.presets) {
+        const settings = action.payload.settings
+        if (agent.id === action.payload.assistantId) {
+          for (const key in settings) {
+            if (!agent.settings) {
+              agent.settings = { ...DEFAULT_ASSISTANT_SETTINGS }
+            }
+            agent.settings[key] = settings[key]
+          }
+        }
+      }
     }
   }
 })
@@ -309,16 +259,12 @@ export const {
   setTagsOrder,
   updateAssistantSettings,
   updateTagCollapse,
-  setTopicTagFilter,
-  toggleTopicTagFilter,
-  clearTopicTagFilter,
-  // 标签分类管理 actions
-  addTagCategory,
-  updateTagCategory,
-  removeTagCategory,
-  updateCategorizedTag,
-  removeCategorizedTag,
-  bulkUpdateCategorizedTags
+  setUnifiedListOrder,
+  setAssistantPresets,
+  addAssistantPreset,
+  removeAssistantPreset,
+  updateAssistantPreset,
+  updateAssistantPresetSettings
 } = assistantsSlice.actions
 
 export const selectAllTopics = createSelector([(state: RootState) => state.assistants.assistants], (assistants) =>

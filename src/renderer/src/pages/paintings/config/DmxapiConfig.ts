@@ -1,7 +1,8 @@
 import { uuid } from '@renderer/utils'
 import { t } from 'i18next'
 
-import { DmxapiPainting, generationModeType } from '../../../types'
+import type { DmxapiPainting } from '../../../types'
+import { generationModeType } from '../../../types'
 
 // 模型数据类型
 export type DMXApiModelData = {
@@ -83,7 +84,7 @@ export const MODEOPTIONS = [
 // 获取模型分组数据
 export const GetModelGroup = async (): Promise<DMXApiModelGroups> => {
   try {
-    const response = await fetch('https://dmxapi.cn/cherry_painting_models_v2.json')
+    const response = await fetch('https://dmxapi.cn/cherry_painting_models_v3.json')
 
     if (response.ok) {
       const data = await response.json()

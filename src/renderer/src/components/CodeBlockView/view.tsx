@@ -1,6 +1,7 @@
 import { loggerService } from '@logger'
-import { ActionTool } from '@renderer/components/ActionTools'
-import CodeEditor, { CodeEditorHandles } from '@renderer/components/CodeEditor'
+import type { ActionTool } from '@renderer/components/ActionTools'
+import type { CodeEditorHandles } from '@renderer/components/CodeEditor'
+import CodeEditor from '@renderer/components/CodeEditor'
 import {
   CodeToolbar,
   useCopyTool,
@@ -14,7 +15,7 @@ import {
 } from '@renderer/components/CodeToolbar'
 import CodeViewer from '@renderer/components/CodeViewer'
 import ImageViewer from '@renderer/components/ImageViewer'
-import { BasicPreviewHandles } from '@renderer/components/Preview'
+import type { BasicPreviewHandles } from '@renderer/components/Preview'
 import { MAX_COLLAPSED_CODE_HEIGHT } from '@renderer/config/constant'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { pyodideService } from '@renderer/services/PyodideService'
@@ -27,7 +28,7 @@ import styled, { css } from 'styled-components'
 
 import { SPECIAL_VIEW_COMPONENTS, SPECIAL_VIEWS } from './constants'
 import StatusBar from './StatusBar'
-import { ViewMode } from './types'
+import type { ViewMode } from './types'
 
 const logger = loggerService.withContext('CodeBlockView')
 
@@ -263,9 +264,10 @@ export const CodeBlockView: React.FC<Props> = memo(({ children, language, onSave
           expanded={shouldExpand}
           wrapped={shouldWrap}
           maxHeight={`${MAX_COLLAPSED_CODE_HEIGHT}px`}
+          onRequestExpand={codeCollapsible ? () => setExpandOverride(true) : undefined}
         />
       ),
-    [children, codeEditor.enabled, handleHeightChange, language, onSave, shouldExpand, shouldWrap]
+    [children, codeCollapsible, codeEditor.enabled, handleHeightChange, language, onSave, shouldExpand, shouldWrap]
   )
 
   // 特殊视图组件映射
@@ -326,7 +328,7 @@ const CodeBlockWrapper = styled.div<{ $isInSpecialView: boolean }>`
    * 一是 CodeViewer 在气泡样式下的用户消息中无法撑开气泡，
    * 二是 代码块内容过少时 toolbar 会和 title 重叠。
    */
-  min-width: 45ch;
+  min-width: 35ch;
 
   .code-toolbar {
     background-color: ${(props) => (props.$isInSpecialView ? 'transparent' : 'var(--color-background-mute)')};
