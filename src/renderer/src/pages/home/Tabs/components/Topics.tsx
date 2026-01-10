@@ -679,7 +679,19 @@ export const Topics: React.FC<Props> = ({ assistant: _assistant, activeTopic, se
                   </TopicPromptText>
                 )}
                 {showTopicTime && (
-                  <TopicTime className="time">{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>
+                  <TopicTimeContainer className="time">
+                    <TopicTime>{dayjs(topic.createdAt).format('MM/DD HH:mm')}</TopicTime>
+                    {topic.tags && topic.tags.length > 0 && (
+                      <>
+                        <TopicTimeSeparator>·</TopicTimeSeparator>
+                        <TopicTagsInline>
+                          {topic.tags.map((tag, index) => (
+                            <TopicTagItem key={index}>{tag}</TopicTagItem>
+                          ))}
+                        </TopicTagsInline>
+                      </>
+                    )}
+                  </TopicTimeContainer>
                 )}
               </TopicListItem>
             </Dropdown>
@@ -885,7 +897,32 @@ const TopicPromptText = styled.div`
   }
 `
 
+const TopicTimeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+`
+
 const TopicTime = styled.div`
+  color: var(--color-text-3);
+  font-size: 11px;
+`
+
+const TopicTimeSeparator = styled.span`
+  color: var(--color-text-3);
+  font-size: 11px;
+  margin: 0 4px;
+`
+
+const TopicTagsInline = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+`
+
+const TopicTagItem = styled.span`
   color: var(--color-text-3);
   font-size: 11px;
 `

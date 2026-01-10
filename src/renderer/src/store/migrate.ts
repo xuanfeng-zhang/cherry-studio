@@ -3170,19 +3170,6 @@ const migrateConfig = {
       logger.error('migrate 192 error', error as Error)
       return state
     }
-  },
-  '161': (state: RootState) => {
-    try {
-      removeMiniAppFromState(state, 'nm-search')
-      removeMiniAppFromState(state, 'hika')
-      removeMiniAppFromState(state, 'hugging-chat')
-      addProvider(state, 'cherryin')
-      state.llm.providers = moveProvider(state.llm.providers, 'cherryin', 1)
-      return state
-    } catch (error) {
-      logger.error('migrate 161 error', error as Error)
-      return state
-    }
   }
 }
 
