@@ -1,8 +1,9 @@
 import { loggerService } from '@logger'
-import { PendingMemoryItem, UserSelectOption } from '@renderer/components/MemoryConfirmModal'
-import { AssistantMessage } from '@renderer/types'
+import type { PendingMemoryItem, UserSelectOption } from '@renderer/components/MemoryConfirmModal'
+import type { AssistantMessage } from '@renderer/types'
 
-import { MemoryProcessor, MemoryProcessorConfig } from './MemoryProcessor'
+import type { MemoryProcessorConfig } from './MemoryProcessor'
+import { MemoryProcessor } from './MemoryProcessor'
 import MemoryService from './MemoryService'
 
 const logger = loggerService.withContext('MemoryConfirmService')

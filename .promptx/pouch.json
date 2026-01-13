@@ -16,9 +16,7 @@
       "from": "initialized",
       "command": "action",
       "timestamp": "2025-09-14T05:39:18.001Z",
-      "args": [
-        "product-manager"
-      ]
+      "args": ["product-manager"]
     },
     {
       "from": "role_activated_with_memory",
@@ -30,9 +28,7 @@
       "from": "service_discovery",
       "command": "action",
       "timestamp": "2025-09-14T05:39:24.483Z",
-      "args": [
-        "sean"
-      ]
+      "args": ["sean"]
     },
     {
       "from": "role_activated_with_memory",

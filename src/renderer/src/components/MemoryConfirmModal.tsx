@@ -1,6 +1,6 @@
 import { loggerService } from '@logger'
 import { Badge, Button, Card, Checkbox, Flex, Form, Input, Modal, Space, Typography } from 'antd'
-import { CheckboxChangeEvent } from 'antd/es/checkbox'
+import type { CheckboxChangeEvent } from 'antd/es/checkbox'
 import { Brain, MessageSquare, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'

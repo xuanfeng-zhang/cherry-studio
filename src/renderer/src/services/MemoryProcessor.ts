@@ -1,5 +1,5 @@
 import { loggerService } from '@logger'
-import { PendingMemoryItem } from '@renderer/components/MemoryConfirmModal'
+import type { PendingMemoryItem } from '@renderer/components/MemoryConfirmModal'
 import { getModel } from '@renderer/hooks/useModel'
 import type { AssistantMessage } from '@renderer/types'
 import {

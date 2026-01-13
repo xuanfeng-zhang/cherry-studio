@@ -4,7 +4,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
-import { Topic } from '../../types'
+import type { Topic } from '../../types'
 
 interface TagManagementPopupProps {
   topic: Topic

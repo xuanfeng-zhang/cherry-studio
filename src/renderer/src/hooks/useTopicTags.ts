@@ -1,5 +1,5 @@
-import { RootState } from '@renderer/store'
-import { Topic } from '@renderer/types'
+import type { RootState } from '@renderer/store'
+import type { Topic } from '@renderer/types'
 import { useCallback, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 

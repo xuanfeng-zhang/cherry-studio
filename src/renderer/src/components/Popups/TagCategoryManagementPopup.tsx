@@ -1,8 +1,8 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useTagCategories } from '@renderer/hooks/useTagCategories'
-import { TagCategory } from '@renderer/types'
+import type { TagCategory } from '@renderer/types'
 import { Button, Dropdown, Empty, Form, Input, Modal, Tag, Tooltip } from 'antd'
-import { useCallback, useMemo, useState } from 'react'
+import { Fragment, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 
@@ -211,79 +211,79 @@ const TagCategoryManagementPopup: React.FC<TagCategoryManagementPopupProps> = ({
         {/* 标签分类列表 - 卡片式设计 */}
         <CategoriesSection>
           {filteredCategoriesWithTags.map((category, index) => (
-            <>
+            <Fragment key={category.id}>
               {index > 0 && <CategoryDivider />}
-              <CategoryCard key={category.id}>
-              <CategoryCardHeader>
-                <CategoryCardTitle>
-                  <CategoryName>{category.name}</CategoryName>
-                  <TagCount>({category.tags.length})</TagCount>
-                </CategoryCardTitle>
-                {category.id !== 'uncategorized' && (
-                  <CategoryActions>
-                    <Tooltip title={t('common.edit')}>
-                      <Button
-                        type="text"
-                        size="small"
-                        icon={<EditOutlined />}
-                        onClick={() => handleEditCategory(category)}
-                      />
-                    </Tooltip>
-                    <Tooltip title={t('common.delete')}>
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        icon={<DeleteOutlined />}
-                        onClick={() => handleDeleteCategory(category.id)}
-                      />
-                    </Tooltip>
-                  </CategoryActions>
-                )}
-              </CategoryCardHeader>
+              <CategoryCard>
+                <CategoryCardHeader>
+                  <CategoryCardTitle>
+                    <CategoryName>{category.name}</CategoryName>
+                    <TagCount>({category.tags.length})</TagCount>
+                  </CategoryCardTitle>
+                  {category.id !== 'uncategorized' && (
+                    <CategoryActions>
+                      <Tooltip title={t('common.edit')}>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<EditOutlined />}
+                          onClick={() => handleEditCategory(category)}
+                        />
+                      </Tooltip>
+                      <Tooltip title={t('common.delete')}>
+                        <Button
+                          type="text"
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => handleDeleteCategory(category.id)}
+                        />
+                      </Tooltip>
+                    </CategoryActions>
+                  )}
+                </CategoryCardHeader>
 
-              <TagsGrid>
-                {category.tags.map((tag: any) => {
-                  const moveToMenuItems =
-                    category.id === 'uncategorized'
-                      ? filteredCategoriesWithTags
-                          .filter((cat) => cat.id !== 'uncategorized')
-                          .map((cat) => ({
-                            key: cat.id,
-                            label: cat.name,
-                            onClick: () => handleMoveTag(tag.name, category.id, cat.id)
-                          }))
-                      : []
+                <TagsGrid>
+                  {category.tags.map((tag: any) => {
+                    const moveToMenuItems =
+                      category.id === 'uncategorized'
+                        ? filteredCategoriesWithTags
+                            .filter((cat) => cat.id !== 'uncategorized')
+                            .map((cat) => ({
+                              key: cat.id,
+                              label: cat.name,
+                              onClick: () => handleMoveTag(tag.name, category.id, cat.id)
+                            }))
+                        : []
 
-                  return (
-                    <TagItem key={tag.name}>
-                      <StyledTag color={tag.color}>
-                        {tag.name}
-                        <TagUsage>({tag.usage})</TagUsage>
-                      </StyledTag>
-                      {category.id === 'uncategorized' && moveToMenuItems.length > 0 && (
-                        <Dropdown menu={{ items: moveToMenuItems }} placement="bottomRight" trigger={['click']}>
-                          <Tooltip title={t('chat.topics.tags.move_to_category')}>
-                            <MoveButton>移入</MoveButton>
+                    return (
+                      <TagItem key={tag.name}>
+                        <StyledTag color={tag.color}>
+                          {tag.name}
+                          <TagUsage>({tag.usage})</TagUsage>
+                        </StyledTag>
+                        {category.id === 'uncategorized' && moveToMenuItems.length > 0 && (
+                          <Dropdown menu={{ items: moveToMenuItems }} placement="bottomRight" trigger={['click']}>
+                            <Tooltip title={t('chat.topics.tags.move_to_category')}>
+                              <MoveButton>移入</MoveButton>
+                            </Tooltip>
+                          </Dropdown>
+                        )}
+                        {category.id !== 'uncategorized' && (
+                          <Tooltip title={t('chat.topics.tags.move_to_uncategorized')}>
+                            <MoveButton onClick={() => handleMoveTag(tag.name, category.id, undefined)}>×</MoveButton>
                           </Tooltip>
-                        </Dropdown>
-                      )}
-                      {category.id !== 'uncategorized' && (
-                        <Tooltip title={t('chat.topics.tags.move_to_uncategorized')}>
-                          <MoveButton onClick={() => handleMoveTag(tag.name, category.id, undefined)}>×</MoveButton>
-                        </Tooltip>
-                      )}
-                    </TagItem>
-                  )
-                })}
-                {category.tags.length === 0 && (
-                  <EmptyTagsContainer>
-                    <EmptyMessage>{t('chat.topics.tags.no_tags_in_category')}</EmptyMessage>
-                  </EmptyTagsContainer>
-                )}
-              </TagsGrid>
+                        )}
+                      </TagItem>
+                    )
+                  })}
+                  {category.tags.length === 0 && (
+                    <EmptyTagsContainer>
+                      <EmptyMessage>{t('chat.topics.tags.no_tags_in_category')}</EmptyMessage>
+                    </EmptyTagsContainer>
+                  )}
+                </TagsGrid>
               </CategoryCard>
-            </>
+            </Fragment>
           ))}
 
           {filteredCategoriesWithTags.length === 0 && (

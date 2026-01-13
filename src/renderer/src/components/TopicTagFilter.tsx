@@ -1,11 +1,12 @@
 import { useTagCategories } from '@renderer/hooks/useTagCategories'
 import { useTopicTags } from '@renderer/hooks/useTopicTags'
-import { RootState } from '@renderer/store'
+import type { RootState } from '@renderer/store'
 import { clearTopicTagFilter, toggleTopicTagFilter } from '@renderer/store/assistants'
 import { setTopicTagFilterCollapsed } from '@renderer/store/settings'
 import { Button, Collapse, Tag, Tooltip } from 'antd'
 import { ChevronDown, ChevronRight, Folder, Settings, X } from 'lucide-react'
-import { FC, useCallback, useEffect, useMemo, useState } from 'react'
+import type { FC } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -46,7 +47,7 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
       })
     })
     return stats
-  }, [assistant?.id, assistant?.topics?.length])
+  }, [assistant])
 
   // 过滤当前助手的标签分类
   const assistantCategoriesWithTags = useMemo(() => {
@@ -77,7 +78,7 @@ const TopicTagFilter: FC<TopicTagFilterProps> = ({ assistantId, className }) => 
       }
       return prev
     })
-  }, [assistantCategoriesWithTags.length])
+  }, [assistantCategoriesWithTags])
 
   // 只显示当前助手有的标签（fallback到旧版本显示）
   const availableTags = useMemo(() => {

@@ -1,11 +1,11 @@
-import { RootState } from '@renderer/store'
+import type { RootState } from '@renderer/store'
 import {
   addTagCategory,
   bulkUpdateCategorizedTags,
   removeTagCategory,
   updateTagCategory
 } from '@renderer/store/assistants'
-import { TagCategory, TagCategoryWithTags } from '@renderer/types'
+import type { TagCategory, TagCategoryWithTags } from '@renderer/types'
 import { uuid } from '@renderer/utils'
 import { useCallback, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
