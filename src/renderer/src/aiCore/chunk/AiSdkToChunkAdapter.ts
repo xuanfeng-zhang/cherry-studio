@@ -4,8 +4,8 @@
  */
 
 import { loggerService } from '@logger'
-import type { AISDKWebSearchResult, MCPTool, WebSearchResults } from '@renderer/types'
-import { WebSearchSource } from '@renderer/types'
+import type { AISDKWebSearchResult, MCPTool, WebSearchResults, WebSearchSource } from '@renderer/types'
+import { WEB_SEARCH_SOURCE } from '@renderer/types'
 import type { Chunk } from '@renderer/types/chunk'
 import { ChunkType } from '@renderer/types/chunk'
 import { ProviderSpecificError } from '@renderer/types/provider-specific-error'
@@ -238,15 +238,16 @@ export class AiSdkToChunkAdapter {
 
       // === 工具调用相关事件（原始 AI SDK 事件，如果没有被中间件处理） ===
 
-      // case 'tool-input-start':
-      // case 'tool-input-delta':
-      // case 'tool-input-end':
-      //   this.toolCallHandler.handleToolCallCreated(chunk)
-      //   break
+      case 'tool-input-start':
+        this.toolCallHandler.handleToolInputStart(chunk)
+        break
+      case 'tool-input-delta':
+        this.toolCallHandler.handleToolInputDelta(chunk)
+        break
+      case 'tool-input-end':
+        this.toolCallHandler.handleToolInputEnd(chunk)
+        break
 
-      // case 'tool-input-delta':
-      //   this.toolCallHandler.handleToolCallCreated(chunk)
-      //   break
       case 'tool-call':
         this.toolCallHandler.handleToolCall(chunk)
         break
@@ -286,24 +287,24 @@ export class AiSdkToChunkAdapter {
             type: ChunkType.LLM_WEB_SEARCH_COMPLETE,
             llm_web_search: {
               results: providerMetadata.google?.groundingMetadata as WebSearchResults,
-              source: WebSearchSource.GEMINI
+              source: WEB_SEARCH_SOURCE.GEMINI
             }
           })
         } else if (final.webSearchResults.length) {
           const providerName = Object.keys(providerMetadata || {})[0]
           const sourceMap: Record<string, WebSearchSource> = {
-            [WebSearchSource.OPENAI]: WebSearchSource.OPENAI_RESPONSE,
-            [WebSearchSource.ANTHROPIC]: WebSearchSource.ANTHROPIC,
-            [WebSearchSource.OPENROUTER]: WebSearchSource.OPENROUTER,
-            [WebSearchSource.GEMINI]: WebSearchSource.GEMINI,
+            [WEB_SEARCH_SOURCE.OPENAI]: WEB_SEARCH_SOURCE.OPENAI_RESPONSE,
+            [WEB_SEARCH_SOURCE.ANTHROPIC]: WEB_SEARCH_SOURCE.ANTHROPIC,
+            [WEB_SEARCH_SOURCE.OPENROUTER]: WEB_SEARCH_SOURCE.OPENROUTER,
+            [WEB_SEARCH_SOURCE.GEMINI]: WEB_SEARCH_SOURCE.GEMINI,
             // [WebSearchSource.PERPLEXITY]: WebSearchSource.PERPLEXITY,
-            [WebSearchSource.QWEN]: WebSearchSource.QWEN,
-            [WebSearchSource.HUNYUAN]: WebSearchSource.HUNYUAN,
-            [WebSearchSource.ZHIPU]: WebSearchSource.ZHIPU,
-            [WebSearchSource.GROK]: WebSearchSource.GROK,
-            [WebSearchSource.WEBSEARCH]: WebSearchSource.WEBSEARCH
+            [WEB_SEARCH_SOURCE.QWEN]: WEB_SEARCH_SOURCE.QWEN,
+            [WEB_SEARCH_SOURCE.HUNYUAN]: WEB_SEARCH_SOURCE.HUNYUAN,
+            [WEB_SEARCH_SOURCE.ZHIPU]: WEB_SEARCH_SOURCE.ZHIPU,
+            [WEB_SEARCH_SOURCE.GROK]: WEB_SEARCH_SOURCE.GROK,
+            [WEB_SEARCH_SOURCE.WEBSEARCH]: WEB_SEARCH_SOURCE.WEBSEARCH
           }
-          const source = sourceMap[providerName] || WebSearchSource.AISDK
+          const source = sourceMap[providerName] || WEB_SEARCH_SOURCE.AISDK
 
           this.onChunk({
             type: ChunkType.LLM_WEB_SEARCH_COMPLETE,
